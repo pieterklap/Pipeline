@@ -1,0 +1,19 @@
+
+# sets the location of peptideprophet into variable VALprog
+VALprog=$(grep PeptideProphet $LOC../install_locations | awk '{print $2}')
+#changes PIDoutput to the outputfile(s)
+if [[ $0 != *"tandem"* ]]; then
+	PIDoutput=$(echo $PIDoutput/*pep.xml)
+fi
+#splits the output (needed for comet)
+PIDoutput1=$(echo $PIDoutput | awk '{print $1}')
+PIDoutput2=$(echo $PIDoutput | awk '{print $2}')
+
+# runs peptideprophet (twice if needed)
+$VALprog $PIDoutput1 | tee -a "$datelog"
+if [[ $PIDoutput2 != "" ]]; then
+    $VALprog $PIDoutput2 |tee -a "$datelog"
+fi
+
+
+

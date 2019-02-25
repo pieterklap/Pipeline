@@ -1,0 +1,103 @@
+#!/bin/bash
+
+
+# notes the location of the pipeline
+LOC=$(echo "$0" |awk -F/ '{$NF="";print $0}' | tr " " "/")
+
+# notes the name of the program
+NAME=$(echo "$0" |awk -F/ '{print $NF}' | tr " " "/")
+NAME=$(echo "$NAME" |awk -F. '{print $1}')
+
+# Shows the help files of the programs in the particular pipeline if no options are given
+# The files are located in scripts/info/
+if [[ $1 == "" ]]; then
+	PIDhelp=$(echo $NAME | awk -F_ '{print $1}')
+	VALhelp=$(echo $NAME | awk -F_ '{print $2}')
+
+	cat "$LOC""info/""$PIDhelp"
+	cat "$LOC""info/""$VALhelp"
+	exit
+fi
+
+# If the working directory of the user is the directory of the script LOC is $PWD/
+if [[ $LOC == "./" ]]; then
+	LOC=$PWD/
+fi
+
+
+while [ "$1" != "" ]; do
+	Help="0"
+	case $1 in
+		-o | --output )			shift				# Enter -o to specify the output location
+								PIDoutput=$1		# Enter -o to specify the output location
+								;;
+		-i | --input )			shift				# Enter -i to specify the input location
+								PIDinput=$1			# Enter -i to specify the input location
+								;;
+		-p | --parameter )		shift					# Enter -p to specify the paramater locatio
+								PIDparam=$1
+								;;
+		-l | --logfile )		shift
+								logfile=$1
+								;;
+		-h | --help )			PIDhelp=$(echo $NAME | awk -F_ '{print $1}')
+								VALhelp=$(echo $NAME | awk -F_ '{print $2}')
+
+								cat "$LOC""info/""$PIDhelp"
+								cat "$LOC""info/""$VALhelp"
+								exit
+								;;
+		-I | --installer )		shift
+								./installer.sh $@
+								exit 1				# Exit after the installer han ran
+								;;
+		* )						echo " "			# Requires you to anounce input with a - option
+								echo "Error invalid paramater $1"
+								exit
+								;;
+	esac
+	shift
+done
+
+# checks if a parameter file and/or an input file were passed to the script
+if [[ $PIDparam == "" ]]; then
+	echo -e "No parameter file given, please enter a parameter file"
+	EXITstatus="1"
+fi
+if [[ $PIDinput == "" ]]; then
+	echo -e  "No input file given, please enter an input file"
+	EXITstatus="1"
+fi
+# if eiter a parameter file or an input file weren't passed to the script it exits
+if [[ $EXITstatus == "1" ]]; then
+	echo -e "$0 \n"
+	exit
+fi
+
+# Generates an output if none was given
+if [[ $PIDoutput == "" ]]; then
+	STout=$(echo "$PIDinput" |awk -F/ '{$NF="";print $0}' | tr " " "/")
+
+	mkdir "$STout""$NAME"						# Will create a directory for the output in the input directory
+	PIDoutput="$STout""$NAME"					# Default output location for the PID
+	VALoutput="$STout""$NAME"					# Default output location for the validator
+
+fi
+
+# Create a log file with the date and time
+datelog=$(date -I'seconds')
+datelog=${datelog//":"/"_"}		#changes the ":" to "_" for easier file management
+dateout="$datelog"
+datelog="$logfile"logfile_"$datelog"	#sets the name of the logfile, default is logfile_(start time)
+
+# adds the start time to the log file
+echo "Start time: " > "$datelog"
+date -I'seconds' >> "$datelog"
+echo " " >> "$datelog"
+
+# Tells the user where the logfile is located
+if [[ $logfile == "" ]]; then
+	echo -e "\nlogfile is located at $PWD/$datelog\n"
+else
+	echo -e "\nlogfile is located at $datelog\n"
+fi

@@ -1,0 +1,11 @@
+if [ -f $@ ] && [[ $@ != "" ]]; then
+    EX@=$(grep "@ " install_locations)
+
+    sed@=${@//\//\\/}               # sets backslashes in front of forward slashes for use with sed
+    sedEX@=${EX@//\//\\/}
+
+    sed "s/$sedEX@/@ $sed@/" install_locations > .install_locations
+    cat .install_locations > install_locations
+    rm .install_locations
+fi
+

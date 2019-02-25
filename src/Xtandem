@@ -1,0 +1,51 @@
+
+# Stes the location of tandem into a variable
+XTloc=$(grep "Tandem " $LOC../install_locations | awk '{print $2}')
+# if the given location isn't a file try to find tandem.
+if [ ! -f $XTloc ]; then
+	XTloc=$(locate -n1 tandem.exe | head -c-15)
+	if [ ! -f $XTloc ]; then
+		echo $XTloc is not a file
+		exit
+	fi
+fi
+
+# sets the program location to XTloc
+XTprog=$XTloc
+# changes XTloc to the directory of tandem.exe
+XTloc=$(echo "$XTloc" |awk -F/ '{$NF="";print $0}' | tr " " "/")
+
+XTfasta=$(echo "$XTloc""fasta/" )
+
+
+# input.xml
+# creates varable to be able t be used in sed
+mkdir "$LOC".tandemtemp
+inputXT=${PIDinput//\//\\/}        # sets backslashes in fromt of forward slashes for use with sed
+outputXT=${PIDoutput//\//\\/}      # sets backslashes in fromt of forward slashes for use with sed
+
+XTbin=$(echo "$PIDparam" |awk -F/ '{$NF="";print $0}' | tr " " "/")
+
+sedXTbin=${XTbin//\//\\/}
+#  set default_input to -p
+sedXTbindi=${PIDparam//\//\\/}				# sets backslashes in front of forward slashes for use with sed
+sedXTbintx="$sedXTbin""taxonomy.xml"        # puts the location of the taxonomy.xml file in sedXTbintx for use in sed
+
+# Changes the paths in the input.xml file
+
+sed "s/\"list path, default parameters\".*/\"list path, default parameters\">$sedXTbindi<\/note>/" "$XTbin"input.xml > "$LOC".tandemtemp/input.xml
+sed "s/\"list path, taxonomy information\".*/\"list path, taxonomy information\">$sedXTbintx<\/note>/" "$LOC".tandemtemp/input.xml > "$XTbin"input.xml
+
+sed "s/\"spectrum, path\".*/\"spectrum, path\">$inputXT<\/note>/" "$XTbin"input.xml > "$LOC".tandemtemp/input.xml # Changes the input path to the reque$
+
+sed "s/\"output, path\".*/\"output, path\">$outputXT\/output.xml<\/note>/" "$LOC".tandemtemp/input.xml > "$XTbin"input.xml  # Changes the output path to$
+
+# run Xtandem
+"$XTprog" "$XTbin"input.xml |tee -a "$datelog"
+
+# remove the temporary directory
+rm -fr "$LOC".tandemtemp/
+
+#PIDrun=$((PIDrun+ 1 ))	#check the amout of PID's have ran
+#PIDused+="Xtandem "		#check which PID's have ran
+
