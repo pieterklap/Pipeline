@@ -12,8 +12,6 @@ if [[ $LOC == "./" ]]; then
 	LOC="$PWD/"
 fi
 
-RUNscripts="y"
-
 # allows the options to work
 while [ "$1" != "" ]; do
 
@@ -46,6 +44,8 @@ while [ "$1" != "" ]; do
 							shift
 							;;
 		-r | --norun )		RUNscripts="n"
+							;;
+		-s | --shark )		SHARK="1"
 							;;
 		* )					echo "Unknown parameter ""$1"
 							exit
@@ -181,16 +181,19 @@ done
 # tells the user the scripts are generated
 echo "All the scripts are generated"
 
-if [[ $input == "" ]]; then
-	echo "Error no input file given"
+if [[ $input == "" ]] || [[ $PIDparam == "" ]]; then
+	echo "Error no input and/or parameter file given"
+	exit
 fi
-
-echo "$paramcomet $input $output $logfile"
-echo "$paramtandem" "$input" "$output" "$logfile"
 
 
 # runs the scripts with the correct parameter files for the PIDs
-if [[ "$RUNscripts" == [yY] ]]; then
+if [[ "$RUNscripts" == "" ]] && [[ "$SHARK" != "1" ]]; then
 	"$LOC"scripts/comet* $paramcomet $input $output $logfile
 	"$LOC"scripts/Xtandem* $paramtandem $input $output $logfile
+fi
+
+if [[ "$RUNscripts" == "" ]] && [[ "$SHARK" == "1" ]]; then
+	qsub "$LOC"scripts/comet* $paramcomet $input $output $logfile
+	qsub "$LOC"scripts/Xtandem* $paramtandem $input $output $logfile
 fi
