@@ -46,6 +46,3 @@ sed "s/\"output, path\".*/\"output, path\">$outputXT\/output.xml<\/note>/" "$LOC
 # remove the temporary directory
 rm -fr "$LOC".tandemtemp/
 
-#PIDrun=$((PIDrun+ 1 ))	#check the amout of PID's have ran
-#PIDused+="Xtandem "		#check which PID's have ran
-
