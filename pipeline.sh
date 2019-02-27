@@ -31,9 +31,9 @@ while [ "$1" != "" ]; do
                             VALprog1=$(echo "$VALprog" | awk '{print $1}')	# Not used will allow parameter files to be used for validators
                             VALprog2=$(echo "$VALprog" | awk '{print $2}')
                             ;;
-		-i | --input )		input="$1 $2" 
+		-i | --input )		input="$1 $2"
 							shift	;;
-		-o | --output )		output="$1 $2" 
+		-o | --output )		output="$1 $2"
 							shift	;;
 		-p | -parameters )	while [[ ${2:0:1} != "-" ]] && [[ "$1" != "" ]]; do
 								shift
@@ -46,6 +46,10 @@ while [ "$1" != "" ]; do
 		-r | --norun )		RUNscripts="n"
 							;;
 		-s | --shark )		SHARK="1"
+							while [[ ${2:0:1} != "-" ]] && [[ "$1" != "" ]]; do
+                                shift                  		 # Allows Shark options to be entered
+                                SHARKoptions+=$1" " 	     # Allows Shark options to be entered
+                            done
 							;;
 		* )					echo "Unknown parameter ""$1"
 							exit
@@ -59,21 +63,42 @@ if [[ "$PIDprog1" == "comet" ]]; then
 	paramcomet=$(echo "$PIDparam" | awk '{print $1}')
 	paramcomet="-p $paramcomet"
 fi
-
 if [[ "$PIDprog2" == "comet" ]]; then
 	paramcomet=$(echo "$PIDparam" | awk '{print $2}')
 	paramcomet="-p $paramcomet"
 fi
+if [[ "$PIDprog3" == "comet" ]]; then
+    paramcomet=$(echo "$PIDparam" | awk '{print $3}')
+    paramcomet="-p $paramcomet"
+fi
+
 
 if [[ "$PIDprog1" == "tandem" ]]; then
 	paramtandem=$(echo "$PIDparam" | awk '{print $1}')
 	paramtandem="-p $paramtandem"
 fi
-
 if [[ "$PIDprog2" == "tandem" ]]; then
 	paramtandem=$(echo "$PIDparam" | awk '{print $2}')
 	paramtandem="-p $paramtandem"
 fi
+if [[ "$PIDprog3" == "tandem" ]]; then
+    paramtandem=$(echo "$PIDparam" | awk '{print $3}')
+    paramtandem="-p $paramtandem"
+fi
+
+if [[ "$PIDprog1" == "msgfplus" ]]; then
+    paramMSGFPlus=$(echo "$PIDparam" | awk '{print $1}')
+    paramMSGFPlus="-p $paramMSGFPlus"
+fi
+if [[ "$PIDprog2" == "msgfplus" ]]; then
+    paramMSGFPlus=$(echo "$PIDparam" | awk '{print $2}')
+    paramMSGFPlus="-p $paramMSGFPlus"
+fi
+if [[ "$PIDprog3" == "msgfplus" ]]; then
+    paramMSGFPlus=$(echo "$PIDparam" | awk '{print $3}')
+    paramMSGFPlus="-p $paramMSGFPlus"
+fi
+
 
 # Creates the files for the PIDs
 if [[ $PIDprog != "" ]]; then
@@ -87,6 +112,10 @@ if [[ $PIDprog != "" ]]; then
 	if [[ $PIDprog == *"tandem"* ]]; then
 		touch "$LOC".PIDs/Xtandem
 	fi
+	# Creates the files that will use MSGFPlus
+	if [[ $PIDprog == *"msgfplus"* ]]; then
+        touch "$LOC".PIDs/MSGFPlus
+    fi
 fi
 # done creating files for the PIDs
 
@@ -127,7 +156,7 @@ rm -vf "$LOC".PIDs/* "$LOC".VALs/*
 
 # Adds the options fille to all the scripts
 # this should always be first
-for file in  "$LOC"scripts/*
+for file in  "$LOC"scripts/*.sh
 do
 	cat "$LOC"src/options > ${file}
 done
@@ -143,6 +172,11 @@ for file in "$LOC"scripts/*Xtandem*
 do
 	cat "$LOC"src/Xtandem >> ${file}
 done
+# adds the MSGFPlus file to all the scripts containing MSGFPlus
+for file in "$LOC"scripts/*MSGFPlus*
+do
+    cat "$LOC"src/MSGFPlus >> ${file}
+done
 
 # done with adding PIDs to the scripts
 
@@ -151,6 +185,10 @@ done
 for file in "$LOC"scripts/*Xtandem_peptideprophet*
 do
 	cat "$LOC"src/Tandem2XML >> ${file}
+done
+for file in "$LOC"scripts/*MSGFPlus_peptideprophet*
+do
+    cat "$LOC"src/idconvert >> ${file}
 done
 
 #done adding converters to the scripts
@@ -191,9 +229,13 @@ fi
 if [[ "$RUNscripts" == "" ]] && [[ "$SHARK" != "1" ]]; then
 	"$LOC"scripts/comet* $paramcomet $input $output $logfile
 	"$LOC"scripts/Xtandem* $paramtandem $input $output $logfile
+	"$LOC"scripts/MSGFPlus* $paramMSGFPlus $input $output $logfile
+
 fi
 
 if [[ "$RUNscripts" == "" ]] && [[ "$SHARK" == "1" ]]; then
-	qsub "$LOC"scripts/comet* $paramcomet $input $output $logfile
-	qsub "$LOC"scripts/Xtandem* $paramtandem $input $output $logfile
+	qsub $SHARKoptions "$LOC"scripts/comet* $paramcomet $input $output $logfile
+	qsub $SHARKoptions "$LOC"scripts/Xtandem* $paramtandem $input $output $logfile
+	qsub $SHARKoptions "$LOC"scripts/MSGFPlus* $paramtandem $input $output $logfile
+
 fi

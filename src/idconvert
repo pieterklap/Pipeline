@@ -1,0 +1,6 @@
+
+idconvert=$(grep idconvert $LOC../install_locations | awk '{print $2}')
+
+$idconvert $IDCONVinput --pepXML -o $PIDoutput |tee -a "$datelog"
+
+PIDoutput=$PIDoutput/*pepXML

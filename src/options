@@ -59,13 +59,31 @@ while [ "$1" != "" ]; do
 	shift
 done
 
+# Create a log file with the date and time
+datelog=$(date -I'seconds')
+datelog=${datelog//":"/"_"}     #changes the ":" to "_" for easier file management
+dateout="$datelog"
+datelog="$logfile"logfile_"$NAME"_"$datelog"    #sets the name of the logfile, default is logfile_(start time)
+
+# adds the start time to the log file
+echo "Start time: " > "$datelog"
+date -I'seconds' >> "$datelog"
+echo " " >> "$datelog"
+
+# Tells the user where the logfile is located
+if [[ $logfile == "" ]]; then
+    echo -e "\nlogfile is located at $PWD/$datelog\n"
+else
+    echo -e "\nlogfile is located at $datelog\n"
+fi
+
 # checks if a parameter file and/or an input file were passed to the script
 if [[ $PIDparam == "" ]]; then
-	echo -e "No parameter file given, please enter a parameter file"
+	echo -e "No parameter file given, please enter a parameter file" | tee -a "$datelog"
 	EXITstatus="1"
 fi
 if [[ $PIDinput == "" ]]; then
-	echo -e  "No input file given, please enter an input file"
+	echo -e  "No input file given, please enter an input file" | tee -a "$datelog"
 	EXITstatus="1"
 fi
 # if eiter a parameter file or an input file weren't passed to the script it exits
@@ -78,26 +96,9 @@ fi
 if [[ $PIDoutput == "" ]]; then
 	STout=$(echo "$PIDinput" |awk -F/ '{$NF="";print $0}' | tr " " "/")
 
-	mkdir "$STout""$NAME"						# Will create a directory for the output in the input directory
+	mkdir "$STout""$NAME" | tee -a "$datelog"	# Will create a directory for the output in the input directory
 	PIDoutput="$STout""$NAME"					# Default output location for the PID
 	VALoutput="$STout""$NAME"					# Default output location for the validator
 
 fi
 
-# Create a log file with the date and time
-datelog=$(date -I'seconds')
-datelog=${datelog//":"/"_"}		#changes the ":" to "_" for easier file management
-dateout="$datelog"
-datelog="$logfile"logfile_"$datelog"	#sets the name of the logfile, default is logfile_(start time)
-
-# adds the start time to the log file
-echo "Start time: " > "$datelog"
-date -I'seconds' >> "$datelog"
-echo " " >> "$datelog"
-
-# Tells the user where the logfile is located
-if [[ $logfile == "" ]]; then
-	echo -e "\nlogfile is located at $PWD/$datelog\n"
-else
-	echo -e "\nlogfile is located at $datelog\n"
-fi
