@@ -1,0 +1,33 @@
+# Example of specifying all parameters - usually not necessary
+parameters <- msgfPar(
+	database='/home/pieter/pipeline/fasta/up000005640.fasta',
+		tolerance='20 ppm',
+		isotopeError=c(0, 2),
+		tda=TRUE,
+		fragmentation='CID',
+		instrument='TOF',
+		enzyme='Trypsin',
+		protocol='No protocol',
+		ntt=2,
+		modification=list(
+			nMod=2,
+			modifications=list(
+				list(name='Carbamidomethyl',
+					composition='C2H3N1O1',
+					residues='C',
+					type='fix',
+					position='any'
+				),
+				list(name='Oxidation',
+					mass=15.994915,
+					residues='M',
+					type='opt',
+					position='any'
+				)
+			)
+		),
+	lengthRange=c(6,40),
+	chargeRange=c(2,7),
+	matches=1
+	)
+parameters

@@ -1,7 +1,7 @@
-Comet 
-Tandem 
-PeptideProphet
-tandem2XML 
-Triqler 
-MSGFPlus 
-idconvert 
+Comet /home/pieter/server_test/programs/comet/comet.exe
+Tandem /home/pieter/server_test/programs/tandem-linux-17-02-01-4/bin/tandem.exe
+PeptideProphet /usr/local/tpp/bin/PeptideProphetParser
+tandem2XML /usr/local/tpp/bin/Tandem2XML
+Triqler /home/pieter/.local/bin/triqler
+MSGFPlus /usr/share/OpenMS/THIRDPARTY/MSGFPlus/MSGFPlus.jar
+idconvert /usr/bin/idconvert

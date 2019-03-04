@@ -1,10 +1,7 @@
 
 # sets the location of peptideprophet into variable VALprog
 VALprog=$(grep PeptideProphet $LOC../install_locations | awk '{print $2}')
-#changes PIDoutput to the outputfile(s)
-if [[ $0 == *"comet"* ]]; then
-	PIDoutput=$(echo $PIDoutput/*pep.xml)
-fi
+
 #splits the output (needed for comet)
 PIDoutput1=$(echo $PIDoutput | awk '{print $1}')
 PIDoutput2=$(echo $PIDoutput | awk '{print $2}')

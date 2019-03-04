@@ -12,7 +12,9 @@ fi
 # run comet 
 "$PIDcomet" -P"$PIDparam" "$PIDinput" |tee -a "$datelog"
 
+COMEToutput=$(echo $STout*.xml | awk -F/ '{print $NF}')
 
 mv "$STout"*.xml "$PIDoutput"
 
+PIDoutput=$(echo $PIDoutput/$COMEToutput)
 # end of running comet

@@ -1,0 +1,13 @@
+#	comet
+#		1. pep.xml to mzid with id convert
+#		2. mzid to pin.xml with mgf2pin
+
+#	tandem
+#		1. t.xml to pin.xml with tandem2pin
+
+#	MSGFPlus
+#		1. .mzid to pin.xml with mgf2pin
+
+#	run Percolator
+
+#	convert pin.xml to pep.xml with psmconvert

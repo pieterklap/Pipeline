@@ -1,7 +1,7 @@
 MSGFoutput=$(echo "$PIDinput" |awk -F/ '{print $NF}' | tr " " "/")
 EXTENTION=$(echo "$MSGFoutput" |awk -F. '{print $NF}')
 
-MSGFoutput=$(echo "$MSGFoutput" | sed "s/$EXTENTION/mzid/")
+MSGFoutput=$(echo "$MSGFoutput" | sed "s/.$EXTENTION/.mzid/")
 
 
 PIDMSGF=$(grep MSGFPlus $LOC../install_locations | awk '{print $2}')

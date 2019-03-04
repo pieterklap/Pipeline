@@ -72,7 +72,6 @@ if [[ "$PIDprog3" == "comet" ]]; then
     paramcomet="-p $paramcomet"
 fi
 
-
 if [[ "$PIDprog1" == "tandem" ]]; then
 	paramtandem=$(echo "$PIDparam" | awk '{print $1}')
 	paramtandem="-p $paramtandem"
@@ -97,6 +96,29 @@ fi
 if [[ "$PIDprog3" == "msgfplus" ]]; then
     paramMSGFPlus=$(echo "$PIDparam" | awk '{print $3}')
     paramMSGFPlus="-p $paramMSGFPlus"
+fi
+
+# adds all file locations to a variable to test if they are direct references i.e. start with /
+Test=$(cat $LOC/install_locations | awk '{print $2" "}')
+Test+=$(echo $input | awk '{print $2" "}')
+Test+=$(echo $output | awk '{print $2" "}')
+Test+=$(echo $logfile | awk '{print $2" "}')
+Test+=$PIDparam
+
+# Tests if each file is a direct referance
+for file in $Test
+do
+    Direct=$(echo ${file} | cut -c 1-1)
+    if [[ $Direct != "/" ]] && [[ $Direct != "" ]]; then
+        echo "ERROR: ${file} is no a direct reference"
+        Exitcode=2
+    fi
+done
+
+# Exits if a indirect reference has been used
+if [[ $Exitcode = 2 ]]; then
+    echo "Please use direct references"
+    exit
 fi
 
 
@@ -156,7 +178,7 @@ rm -vf "$LOC".PIDs/* "$LOC".VALs/*
 
 # Adds the options fille to all the scripts
 # this should always be first
-for file in  "$LOC"scripts/*.sh
+for file in "$LOC"scripts/*.sh
 do
 	cat "$LOC"src/options > ${file}
 done
@@ -227,6 +249,13 @@ fi
 
 # runs the scripts with the correct parameter files for the PIDs
 if [[ "$RUNscripts" == "" ]] && [[ "$SHARK" != "1" ]]; then
+	while [[ $RUN != [yY] ]]; do
+		read -p "Are you sure you want to run the pipeline localy?(y/n): " RUN
+		if [[ $RUN == [nN] ]]; then
+			exit
+		fi
+	done
+
 	"$LOC"scripts/comet* $paramcomet $input $output $logfile
 	"$LOC"scripts/Xtandem* $paramtandem $input $output $logfile
 	"$LOC"scripts/MSGFPlus* $paramMSGFPlus $input $output $logfile

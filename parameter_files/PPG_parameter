@@ -1,0 +1,85 @@
+#	Parameter file to be used with the Proteomic Pipeline Generator.
+#	Everything following a "#" is a comment
+#	Some options may not be avalible in this file 
+
+
+fasta_file = /PATH/to/fasta.fasta
+#	Used by: comet, tandem, MSGFPlus
+#	Sets teh path to the fasta file that all the programs use
+
+Decoy_Database = 0 
+#   (0: don't search decoy database (Default), 1: search decoy database)
+
+NumThreads = 0
+#   Used by: comet, MSGFPlus
+#   (Number of concurrent threads to be executed, Default: Number of available cores (0))
+
+#
+#	Masses
+#
+
+PrecursorMassTolerance = 20ppm
+#   Used by: comet, tandem, MSGFPlus 
+#   (e.g. 2.5Da, 20ppm or 0.5Da,2.5Da, Default: 20ppm)
+
+IsotopeErrorRange = 0.1
+#	Used by: MSGFPlus
+#	(Range of allowed isotope peak errors, Default:0,1)
+#	Takes into account of the error introduced by chooosing a non-monoisotopic peak for fragmentation.
+#	The combination of PrecursorMassTolerance and IsotopeErrorRange determines the precursor mass tolerance.
+#	E.g. "PrecursorMassTolerance 20ppm IsotopeErrorRange -1,2" tests abs(exp-calc-n*1.00335Da)<20ppm for n=-1, 0, 1, 2.
+
+NumTasks =  
+#	Used by: MSGFPlus
+#	(Override the number of tasks to use on the threads, Default: (internally calculated based on inputs))
+#	   More tasks than threads will reduce the memory requirements of the search, but will be slower (how much depends on the inputs).
+#	   1<=tasks<=numThreads: will create one task per thread, which is the original behavior.
+#	   tasks=0: use default calculation - minimum of: (threads*3) and (numSpectra/250).
+#	   tasks<0: multiply number of threads by abs(tasks) to determine number of tasks (i.e., -2 => "2 * numThreads" tasks).
+#	   One task per thread will use the most memory, but will usually finish the fastest.
+#	   2-3 tasks per thread will use comparably less memory, but may cause the search to take 1.5 to 2 times as long.
+
+verbose = 0 
+#	Used by: MSGFPlus
+#	(0: report total progress only (Default), 1: report total and per-thread progress/status)
+
+FragmentMethodID = 0
+#	(0: As written in the spectrum or CID if no info (Default), 1: CID, 2: ETD, 3: HCD, 4: UVPD)
+
+MS2DetectorID = 0
+#	(0: Low-res LCQ/LTQ (Default), 1: Orbitrap/FTICR, 2: TOF, 3: Q-Exactive)
+
+EnzymeID = 1 
+#	(0: unspecific cleavage, 1: Trypsin (Default), 2: Chymotrypsin, 3: Lys-C, 4: Lys-N, 5: glutamyl endopeptidase, 6: Arg-C, 7: Asp-N, 8: alphaLP, 9: no cleavage)
+
+ProtocolID = 0
+#	0: Automatic (Default), 1: Phosphorylation, 2: iTRAQ, 3: iTRAQPhospho, 4: TMT, 5: Standard)
+
+Tolerable_Termini = 2 
+#	(Number of Tolerable Termini, Default: 2)
+#	E.g. For trypsin, 0: non-tryptic, 1: semi-tryptic, 2: fully-tryptic peptides only.
+
+ModificationFileName = 
+#	(Modification file, Default: standard amino acids with fixed C+57)
+
+MinPepLength = 6
+#	(Minimum peptide length to consider, Default: 6)
+
+MaxPepLength = 40
+#	(Maximum peptide length to consider, Default: 40)
+
+MinCharge = 2
+#	(Minimum precursor charge to consider if charges are not specified in the spectrum file, Default: 2)
+	
+MaxCharge = 3
+#	(Maximum precursor charge to consider if charges are not specified in the spectrum file, Default: 3)
+
+NumMatchesPerSpec = 1
+#	(Number of matches per spectrum to be reported, Default: 1)
+	
+addFeatures = 0
+#	(0: output basic scores only (Default), 1: output additional features)
+
+ChargeCarrierMass = 1,00727649
+#	(Mass of charge carrier, Default: mass of proton (1.00727649))
+
