@@ -1,8 +1,7 @@
 # every line that starts with a "#" is treated as a comment
 # some options are commented out by default to use them remove the "#" in front of them 
-# use ',' as a decimal point
 
-DatabaseFile -d /home/pieter/pipeline/fasta/up000005640.fasta
+DatabaseFile -d /PATH/to/file.fasta
 #	(*.fasta or *.fa)
 
 PrecursorMassTolerance -t 10ppm
