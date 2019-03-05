@@ -99,12 +99,13 @@ if [[ "$PIDprog3" == "msgfplus" ]]; then
 fi
 
 # adds all file locations to a variable to test if they are direct references i.e. start with /
-Test=$(cat $LOC/install_locations | awk '{print $2" "}')
-Test+=$(echo $input | awk '{print $2" "}')
-Test+=$(echo $output | awk '{print $2" "}')
-Test+=$(echo $logfile | awk '{print $2" "}')
-Test+=$PIDparam
-
+if [[ $RUNscripts == "" ]]; then
+	Test=$(cat $LOC/install_locations | awk '{print $2" "}')
+	Test+=$(echo $input | awk '{print $2" "}')
+	Test+=$(echo $output | awk '{print $2" "}')
+	Test+=$(echo $logfile | awk '{print $2" "}')
+	Test+=$PIDparam
+fi
 # Tests if each file is a direct referance
 for file in $Test
 do
@@ -240,17 +241,17 @@ done
 
 # tells the user the scripts are generated
 echo "All the scripts are generated"
-
-if [[ $input == "" ]] || [[ $PIDparam == "" ]]; then
-	echo "Error no input and/or parameter file given"
-	exit
+if [[ $RUNscripts == "" ]]; then
+	if [[ $input == "" ]] || [[ $PIDparam == "" ]]; then
+		echo "Error no input and/or parameter file given"
+		exit
+	fi
 fi
-
 
 # runs the scripts with the correct parameter files for the PIDs
 if [[ "$RUNscripts" == "" ]] && [[ "$SHARK" != "1" ]]; then
 	while [[ $RUN != [yY] ]]; do
-		read -p "Are you sure you want to run the pipeline localy?(y/n): " RUN
+		read -p "Are you sure you want to run the pipeline locally?(y/n): " RUN
 		if [[ $RUN == [nN] ]]; then
 			exit
 		fi
