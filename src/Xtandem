@@ -15,8 +15,8 @@ XTprog=$XTloc
 # changes XTloc to the directory of tandem.exe
 XTloc=$(echo "$XTloc" |awk -F/ '{$NF="";print $0}' | tr " " "/")
 
-XTfasta=$(echo "$XTloc""fasta/" )
-TAXON=$(head -n1 $XTfasta |awk '{print $1}'| awk -F_ '{print $2}')
+#XTfasta=$(echo "$XTloc""fasta/" )
+#TAXON=$(head -n1 $XTfasta |awk '{print $1}'| awk -F_ '{print $2}')
 
 # input.xml
 # creates varable to be able t be used in sed
@@ -26,23 +26,15 @@ outputXT=${PIDoutput//\//\\/}      # sets backslashes in front of forward slashe
 
 XTbin=$(echo "$PIDparam" |awk -F/ '{$NF="";print $0}' | tr " " "/")
 
-sedXTbin=${XTbin//\//\\/}
-#  set default_input to -p
-sedXTbindi=${PIDparam//\//\\/}				# sets backslashes in front of forward slashes for use with sed
-sedXTbintx="$sedXTbin""taxonomy.xml"        # puts the location of the taxonomy.xml file in sedXTbintx for use in sed
 
 # Changes the paths in the input.xml file
 
-sed "s/\"list path, default parameters\".*/\"list path, default parameters\">$sedXTbindi<\/note>/" "$XTbin"input.xml > "$LOC".tandemtemp/input.xml
-sed "s/\"list path, taxonomy information\".*/\"list path, taxonomy information\">$sedXTbintx<\/note>/" "$LOC".tandemtemp/input.xml > "$XTbin"input.xml
+sed "s/\"spectrum, path\".*/\"spectrum, path\">$inputXT<\/note>/" "$PIDparam" > "$LOC".tandemtemp/input.xml # Changes the input path to the reque$
 
-sed "s/\"spectrum, path\".*/\"spectrum, path\">$inputXT<\/note>/" "$XTbin"input.xml > "$LOC".tandemtemp/input.xml # Changes the input path to the reque$
-
-sed "s/\"output, path\".*/\"output, path\">$outputXT\/output.xml<\/note>/" "$LOC".tandemtemp/input.xml > "$XTbin"input.xml  # Changes the output path to$
+sed "s/\"output, path\".*/\"output, path\">$outputXT\/output.xml<\/note>/" "$LOC".tandemtemp/input.xml > "$PIDparam"  # Changes the output path to$
 
 # run Xtandem
-"$XTprog" "$XTbin"input.xml |tee -a "$datelog"
+$XTprog $PIDparam |tee -a "$datelog"
 
 # remove the temporary directory
 rm -fr "$LOC".tandemtemp/
-
