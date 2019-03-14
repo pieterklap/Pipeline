@@ -1,9 +1,0 @@
-##Start## "Tandem2percolator"
-
-#       1. create an extra parameter file with the decoy fasta
-PIDparam_decoy=$PIDparam".decoy"
-
-sed 's/taxon">human/taxon">human_decoy/' $PIDparam > $PIDparam_decoy
-
-
-##End## "Tandem2percolator"
