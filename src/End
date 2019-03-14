@@ -1,0 +1,8 @@
+##Start## "End"
+
+echo "$0 is done runnig"
+
+echo -e "\nEnd time: " >> "$datelog"
+date -I'seconds' >> "$datelog"
+
+##End## "End"

@@ -1,5 +1,4 @@
-
-
+##Start## "comet"
 
 # check where comet is installed
 PIDcomet=$(grep Comet $LOC../install_locations | awk '{print $2}')
@@ -12,9 +11,13 @@ fi
 # run comet 
 "$PIDcomet" -P"$PIDparam" "$PIDinput" |tee -a "$datelog"
 
-COMEToutput=$(echo $STout*.xml | awk -F/ '{print $NF}')
+if [[ $COMEToutput == "" ]]; then
+    COMEToutput=$(echo $STout*.xml)
+    VALinput=$(echo $STout*.xml | awk -F/ '{print $NF}')
+fi
 
-mv "$STout"*.xml "$PIDoutput"
+mv "$COMEToutput" "$PIDoutput"
 
-PIDoutput=$(echo $PIDoutput/$COMEToutput)
-# end of running comet
+PIDoutput=$(echo $PIDoutput/$VALinput)
+
+##End## "comet"

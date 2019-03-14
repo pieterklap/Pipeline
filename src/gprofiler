@@ -1,0 +1,23 @@
+extention=$(echo $VALoutput | awk -F\. '{print $(NF-1)"."$NF}'
+
+NAMEfile=$(echo $VALoutput".prot")
+
+if [[ $extention == pep.xml ]]; then 
+    # takes the protein name out of the pep.xml file
+
+    PROTEIN=$(cat $VALoutput | grep "hit_rank=\"1\"" | awk -F\| '{print $2}')
+
+    echo $PROTEIN > $NAMEfile
+fi
+
+if [[ $extention == put.xml ]]; then 
+
+    PROTEIN=$(cat $VALoutput | grep "<protein_id>" | awk -F"|" '{print $2}')
+    echo $PROTEIN > $NAMEfile
+fi
+
+
+
+curl -o $NAMEfile -X 'POST' -H 'Content-Type: application/json' \
+ -d '{"organism": "hsapiens", "query": ["[prot1]", "[prot2]"]}' 'https://biit.cs.ut.ee/gprofiler_beta/api/gost/profile/' 
+

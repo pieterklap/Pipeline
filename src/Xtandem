@@ -1,3 +1,4 @@
+##Start## "Xtandem"
 
 # Stes the location of tandem into a variable
 XTloc=$(grep "Tandem " $LOC../install_locations | awk '{print $2}')
@@ -38,3 +39,6 @@ $XTprog $PIDparam |tee -a "$datelog"
 
 # remove the temporary directory
 rm -fr "$LOC".tandemtemp/
+
+PIDoutput=$(ls $PIDoutput/* |tail -n1)
+##End## "Xtandem"

@@ -1,0 +1,24 @@
+##Start## "msgf2pin"
+
+
+EXTENTION=$(echo "$PIDoutput" |awk -F. '{print $NF}')
+
+MSGFoutput_decoy=$(echo "$PIDoutput" | sed "s/.$EXTENTION/.decoy.mzid/")
+
+
+MSGFparam=$(grep -v "^#" $PIDparam_decoy |awk '{print $2,$3}' |tr "\n" " ")
+
+java -Xmx3500M -jar $PIDMSGF -s $PIDinput -o $MSGFoutput_decoy $MSGFparam |tee -a "$datelog"
+
+PIDoutput_decoy="$MSGFoutput_decoy"
+
+
+msgf2pin=$(grep msgf2pin $LOC../install_locations | awk '{print $2}')
+EXTENTION=$(echo "$PIDoutput" |awk -F. '{print $NF}')
+VALinput=$(echo "$PIDoutput" | sed "s/.$EXTENTION/.tsv/")
+
+
+$msgf2pin -o $VALinput $PIDoutput $PIDoutput_decoy 
+
+PIDoutput=$VALinput
+##End## "msgf2pin"

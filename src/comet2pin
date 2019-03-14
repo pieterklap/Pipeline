@@ -1,0 +1,12 @@
+##Start## "comet2pin"
+
+sed 's/output_pepxmlfile = 1/output_pepxmlfile = 0/' "$PIDparam" > "$PIDparam"".temp"
+sed 's/output_percolatorfile = 0/output_percolatorfile = 1/' "$PIDparam"".temp" > "$PIDparam"".percolator"
+
+rm "$PIDparam"".temp"
+PIDparam="$PIDparam"".percolator"
+
+COMEToutput=$(echo $STout*.pin)
+VALinput=$(echo $STout*.pin | awk -F/ '{print $NF}')
+
+##End## "comet2pin"

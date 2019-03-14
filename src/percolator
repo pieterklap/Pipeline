@@ -1,13 +1,15 @@
-#	comet
-#		1. pep.xml to mzid with id convert
-#		2. mzid to pin.xml with mgf2pin
+##Start## "percolator"
 
-#	tandem
-#		1. t.xml to pin.xml with tandem2pin
-
-#	MSGFPlus
-#		1. .mzid to pin.xml with mgf2pin
 
 #	run Percolator
 
+PIDpercolator=$(grep percolator $LOC../install_locations | awk '{print $2}')
+
+VALoutput=$(echo $PIDoutput | awk -F. '{print $1".put.xml"}')
+
+$PIDpercolator -X  $VALoutput $PIDoutput >> $datelog
+
 #	convert pin.xml to pep.xml with psmconvert
+
+# psmconvert $VALoutput
+##End## "percolator"

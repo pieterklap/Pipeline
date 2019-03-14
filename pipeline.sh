@@ -175,8 +175,17 @@ if [[ $VALprog != "" ]]; then
         done
     fi
 
+    if [[ $VALprog == *"percolator"* ]];then
+        for file in "$LOC".PIDs/*
+        do
+            cp -v ${file} ${file}_percolator.sh
+            cp "$LOC".PIDs/*_percolator.sh "$LOC".VALs/
+            rm -f "$LOC".PIDs/*_percolator.sh
+        done
+    fi
 fi
 # done adding validators to the name of the scripts
+NUM=$(ls "$LOC".VALs/ | grep ".sh" | wc -l)
 
 
 # Creates the directory scripts and copies the scripts to it and makes them executable and removes the files in the temp folders
@@ -192,6 +201,19 @@ for file in "$LOC"scripts/*.sh
 do
     cat "$LOC"src/options > ${file}
 done
+
+# Makes changes to the parameter files
+# Changes the comet output file from pep.xml to PIN
+for file in "$LOC"scripts/*comet_percolator*
+do
+    cat "$LOC"src/comet2pin >> ${file}
+done
+for file in "$LOC"scripts/*MSGFPlus_percolator*
+do
+    cat "$LOC"src/MSGF2percolator >> ${file}
+done
+
+
 
 # starts adding PIDs to the scripts
 # Adds the comet file to all the scripts containing comet
@@ -222,6 +244,14 @@ for file in "$LOC"scripts/*MSGFPlus_peptideprophet*
 do
     cat "$LOC"src/idconvert >> ${file}
 done
+for file in "$LOC"scripts/*Xtandem_percolator*
+do
+    cat "$LOC"src/tandem2pin >> ${file}
+done
+for file in "$LOC"scripts/*MSGFPlus_percolator*
+do
+    cat "$LOC"src/msgf2pin >> ${file}
+done
 
 #done adding converters to the scripts
 
@@ -236,9 +266,17 @@ for file in "$LOC"scripts/*Triqler*
 do
     cat "$LOC"src/Triqler >> ${file}
 done
-
+# Adds the percolator file to all the scripts containing percolator
+for file in "$LOC"scripts/*percolator*
+do
+    cat "$LOC"src/percolator >> ${file}
+done
 # done adding validators to the scripts
 
+for file in "$LOC"scripts/*
+do
+    cat "$LOC"src/End >> ${file}
+done
 
 # The pipeline generates a file named *[program]* if the program was not selected
 # the following code removes the files that were created when a program was not selected
@@ -249,7 +287,7 @@ do
 done
 
 # tells the user the scripts are generated
-echo "All the scripts are generated"
+echo "$NUM scripts have been generated"
 if [[ $RUNscripts == "" ]]; then
     if [[ $input == "" ]] || [[ $PIDparam == "" ]]; then
         echo "Error no input and/or parameter file given"
@@ -266,10 +304,18 @@ if [[ "$RUNscripts" == "" ]] && [[ "$SHARK" != "1" ]]; then
         fi
     done
 
-    "$LOC"scripts/comet* $paramcomet $input $output $logfile $location
-    "$LOC"scripts/Xtandem* $paramtandem $input $output $logfile $location
-    "$LOC"scripts/MSGFPlus* $paramMSGFPlus $input $output $logfile $location
-
+    for file in "$LOC"scripts/comet*
+    do
+        ${file} $paramcomet $input $output $logfile $location
+    done
+    for file in "$LOC"scripts/Xtandem*
+    do
+        ${file} $paramtandem $input $output $logfile $location
+    done
+    for file in "$LOC"scripts/MSGFPlus**
+    do
+        ${file} $paramMSGFPlus $input $output $logfile $location
+    done
 fi
 
 if [[ "$RUNscripts" == "" ]] && [[ "$SHARK" == "1" ]]; then

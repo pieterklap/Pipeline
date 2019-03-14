@@ -1,3 +1,4 @@
+##Start## "PeptideProphet"
 
 # sets the location of peptideprophet into variable VALprog
 VALprog=$(grep PeptideProphet $LOC../install_locations | awk '{print $2}')
@@ -12,5 +13,6 @@ if [[ $PIDoutput2 != "" ]]; then
     $VALprog $PIDoutput2 |tee -a "$datelog"
 fi
 
+VALoutput=$PIDoutput1
 
-
+##End## "PeptideProphet"

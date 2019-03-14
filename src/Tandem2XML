@@ -1,7 +1,7 @@
+##Start## "Tandem2XML"
 
 # sets T2XMlinput to the most recently generated .xml from tandem
-T2XMLinput=$(ls $PIDoutput |grep -v pep | tail -n1)
-T2XMLinput="$PIDoutput""/""$T2XMLinput"
+T2XMLinput=$PIDoutput
 # Sets the name of the output file to {file}.pep.xml
 VALinput=${T2XMLinput//.xml/.pep.xml}
 
@@ -14,3 +14,4 @@ $T2XML $T2XMLinput $VALinput | tee -a "$datelog"
 # sets PIDoutput to be used in peptideprophet
 PIDoutput="$VALinput"
 
+##End## "Tandem2XML"

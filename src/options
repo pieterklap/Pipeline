@@ -1,3 +1,4 @@
+##Start## "options"
 #!/bin/bash
 
 
@@ -56,6 +57,7 @@ while [ "$1" != "" ]; do
                                 ;;
         * )                     echo " "            # Requires you to anounce input with a - option
                                 echo "Error invalid paramater $1"
+                                echo "$@"
                                 exit
                                 ;;
     esac
@@ -104,3 +106,4 @@ if [[ $PIDoutput == "" ]]; then
     VALoutput="$STout""$NAME"                   # Default output location for the validator
 
 fi
+##End## "options"

@@ -1,0 +1,15 @@
+##Start## "MSGF2percolator"
+
+#   Change decoy search to 0
+cat $PIDparam | sed 's/\-tda 1/\-tda 0/' > $LOC.MSGFparam.temp
+PIDparam=$PIDparam".per"
+cat $LOC.MSGFparam.temp > $PIDparam
+
+#   make a separate parameter file with a decoy fasta file named [name].decoy.fasta
+cat $PIDparam | sed 's/\.fasta/\.decoy\.fasta/' > $LOC.MSGFparam.temp
+cat $LOC.MSGFparam.temp > $PIDparam".decoy"
+
+PIDparam_decoy=$PIDparam".decoy"
+
+rm $LOC.MSGFparam.temp
+##End## "MSGF2percolator"
