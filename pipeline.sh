@@ -20,17 +20,13 @@ while [ "$1" != "" ]; do
         -P | --PeptideID )  while [[ ${2:0:1} != "-" ]] && [[ "$1" != "" ]]; do
                                 shift                   # Allows for multiple PeptideIDentifiers (PIDs) to be entered
                                 PIDprog+=${1,,}" "      # Allows for multiple PeptideIDentifiers (PIDs) to be entered
+                                NUMprog=$[$NUMprog+1]
                             done
-                            PIDprog1=$(echo "$PIDprog" | awk '{print $1}')    # Allows the parameter files to be used
-                            PIDprog2=$(echo "$PIDprog" | awk '{print $2}')
-                            PIDprog3=$(echo "$PIDprog" | awk '{print $3}')
                             ;;
         -V | --Validator )  while [[ ${2:0:1} != "-" ]] && [[ "$1" != "" ]]; do
                                 shift                   # Allows for multiple validators to be entered
                                 VALprog+=${1,,}" "      # Allows for multiple validators to be entered
                             done
-                            VALprog1=$(echo "$VALprog" | awk '{print $1}')    # Not used will allow parameter files to be used for validators
-                            VALprog2=$(echo "$VALprog" | awk '{print $2}')
                             ;;
         -L | --location )   location="$1 $2"                        # If the script isn't ran where it was created (for use on the shark cluster)
                             shift
@@ -44,6 +40,7 @@ while [ "$1" != "" ]; do
         -p | -parameters )  while [[ ${2:0:1} != "-" ]] && [[ "$1" != "" ]]; do
                                 shift
                                 PIDparam+=$1" "
+                                NUMparam=$[$NUMparam+1]
                             done
                             ;;
         -L | --location )   shift
@@ -68,55 +65,32 @@ while [ "$1" != "" ]; do
 done
 
 # sets the parameter files to be used for each peptide identifier
-if [[ "$PIDprog1" == "comet" ]]; then
-    paramcomet=$(echo "$PIDparam" | awk '{print $1}')
-    paramcomet="-p $paramcomet"
-fi
-if [[ "$PIDprog2" == "comet" ]]; then
-    paramcomet=$(echo "$PIDparam" | awk '{print $2}')
-    paramcomet="-p $paramcomet"
-fi
-if [[ "$PIDprog3" == "comet" ]]; then
-    paramcomet=$(echo "$PIDparam" | awk '{print $3}')
-    paramcomet="-p $paramcomet"
-fi
-
-if [[ "$PIDprog1" == "tandem" ]]; then
-    paramtandem=$(echo "$PIDparam" | awk '{print $1}')
-    paramtandem="-p $paramtandem"
-fi
-if [[ "$PIDprog2" == "tandem" ]]; then
-    paramtandem=$(echo "$PIDparam" | awk '{print $2}')
-    paramtandem="-p $paramtandem"
-fi
-if [[ "$PIDprog3" == "tandem" ]]; then
-    paramtandem=$(echo "$PIDparam" | awk '{print $3}')
-    paramtandem="-p $paramtandem"
-fi
-
-if [[ "$PIDprog1" == "msgfplus" ]]; then
-    paramMSGFPlus=$(echo "$PIDparam" | awk '{print $1}')
-    paramMSGFPlus="-p $paramMSGFPlus"
-fi
-if [[ "$PIDprog2" == "msgfplus" ]]; then
-    paramMSGFPlus=$(echo "$PIDparam" | awk '{print $2}')
-    paramMSGFPlus="-p $paramMSGFPlus"
-fi
-if [[ "$PIDprog3" == "msgfplus" ]]; then
-    paramMSGFPlus=$(echo "$PIDparam" | awk '{print $3}')
-    paramMSGFPlus="-p $paramMSGFPlus"
-fi
+for prog in $PIDprog
+do
+    if [[ ${prog} == comet ]]; then
+        paramcomet=$(echo $PIDparam | awk '{print $1}')
+        PIDparam=$(echo $PIDparam | awk '{$1="";print}')
+    fi
+    if [[ ${prog} == tandem ]]; then
+        paramtandem=$(echo $PIDparam | awk '{print $1}')
+        PIDparam=$(echo $PIDparam | awk '{$1="";print}')
+    fi
+    if [[ ${prog} == msgfplus ]]; then
+        paramMSGFPlus=$(echo $PIDparam | awk '{print $1}')
+        PIDparam=$(echo $PIDparam | awk '{$1="";print}')
+    fi
+done
 
 # adds all file locations to a variable to test if they are direct references i.e. start with /
 if [[ $RUNscripts == "" ]]; then
-    Test=$(cat $LOC/install_locations | awk '{print $2" "}')
-    Test+=$(echo $input | awk '{print $2" "}')
-    Test+=$(echo $output | awk '{print $2" "}')
-    Test+=$(echo $logfile | awk '{print $2" "}')
-    Test+=$PIDparam
+    DirectTest=$(cat $LOC/install_locations | awk '{print $2" "}')
+    DirectTest+=$(echo $input | awk '{print $2" "}')
+    DirectTest+=$(echo $output | awk '{print $2" "}')
+    DirectTest+=$(echo $logfile | awk '{print $2" "}')
+    DirectTest+=$PIDparam
 fi
-# Tests if each file is a direct referance
-for file in $Test
+# Tests if each file is a direct reference
+for file in $DirectTest
 do
     Direct=$(echo ${file} | cut -c 1-1)
     if [[ $Direct != "/" ]] && [[ $Direct != "" ]]; then
@@ -289,8 +263,16 @@ done
 # tells the user the scripts are generated
 echo "$NUM scripts have been generated"
 if [[ $RUNscripts == "" ]]; then
-    if [[ $input == "" ]] || [[ $PIDparam == "" ]]; then
-        echo "Error no input and/or parameter file given"
+    if [[ $input == "" ]]; then
+        echo "Error no input file given"
+        exit
+    fi
+    if [[ $NUMprog > $NUMparam ]]; then
+        echo "too few parameter files given"
+        exit
+    fi
+    if [[ $NUMprog < $NUMparam ]]; then
+        echo "too many parameter files given"
         exit
     fi
 fi
