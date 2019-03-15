@@ -303,24 +303,39 @@ if [[ "$RUNscripts" == "" ]] && [[ "$SHARK" != "1" ]]; then
             exit
         fi
     done
+    for file in "$LOC"scripts/*.sh
+    do
+        PID=$(echo ${file} | awk -F_ '{print $1}' | awk -F/ '{print $NF}')
 
-    for file in "$LOC"scripts/comet*
-    do
-        ${file} $paramcomet $input $output $logfile $location
-    done
-    for file in "$LOC"scripts/Xtandem*
-    do
-        ${file} $paramtandem $input $output $logfile $location
-    done
-    for file in "$LOC"scripts/MSGFPlus**
-    do
-        ${file} $paramMSGFPlus $input $output $logfile $location
+        if [[ $PID == "comet" ]]; then
+            PIDparam=$paramcomet
+        fi
+        if [[ $PID == "Xtandem" ]]; then
+            PIDparam=$paramtandem
+        fi
+        if [[ $PID == "MSGFPlus" ]]; then
+            PIDparam=$paramMSGFPlus
+        fi
+        ${file} $PIDparam $input $output $logfile $location
     done
 fi
 
 if [[ "$RUNscripts" == "" ]] && [[ "$SHARK" == "1" ]]; then
-    qsub $SHARKoptions "$LOC"scripts/comet* $paramcomet $input $output $logfile $location
-    qsub $SHARKoptions "$LOC"scripts/Xtandem* $paramtandem $input $output $logfile $location
-    qsub $SHARKoptions "$LOC"scripts/MSGFPlus* $paramtandem $input $output $logfile $location
+    for file in "$LOC"scripts/*.sh
+    do
+        PID=$(echo ${file} | awk -F_ '{print $1}' | awk -F/ '{print $NF}')
 
+        if [[ $PID == "comet" ]]; then
+            PIDparam=$paramcomet
+        fi
+        if [[ $PID == "Xtandem" ]]; then
+            PIDparam=$paramtandem
+        fi
+        if [[ $PID == "MSGFPlus" ]]; then
+            PIDparam=$paramMSGFPlus
+        fi
+        qsub $SHARKoptions ${file} $PIDparam $input $output $logfile $location
+    done
 fi
+
+
