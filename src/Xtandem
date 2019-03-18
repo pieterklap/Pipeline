@@ -40,5 +40,5 @@ $XTprog $PIDparam |tee -a "$datelog"
 # remove the temporary directory
 rm -fr "$LOC".tandemtemp/
 
-PIDoutput=$(ls $PIDoutput/* |tail -n1)
+PIDoutput=$(ls -t $PIDoutput/* |head -n1)
 ##End## "Xtandem"

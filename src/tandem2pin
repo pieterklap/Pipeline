@@ -1,6 +1,5 @@
 ##Start## "tandem2pin"
 
-
 # create an extra parameter file with the decoy fasta
 PIDparam_decoy=$PIDparam".decoy"
 
@@ -10,7 +9,7 @@ sed 's/taxon">human/taxon">human_decoy/' $PIDparam > $PIDparam_decoy
 
 $XTprog $PIDparam_decoy | tee -a $datelog
 
-PIDoutput_decoy=$(ls "$STout""$NAME"/* |tail -n1)
+PIDoutput_decoy=$(ls -t "$STout""$NAME"/* |head -n1)
 
 
 # t.xml to tab delimited file with tandem2pin
@@ -22,4 +21,5 @@ VALinput=$(echo $PIDoutput | sed "s/$EXTENTION/tsv/")
 $tandem2pin -o $VALinput $PIDoutput $PIDoutput_decoy
 
 PIDoutput=$VALinput
+
 ##End## "tandem2pin"

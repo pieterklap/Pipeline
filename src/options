@@ -100,10 +100,12 @@ fi
 # Generates an output if none was given
 if [[ $PIDoutput == "" ]]; then
     STout=$(echo "$PIDinput" |awk -F/ '{$NF="";print $0}' | tr " " "/")
-
-    mkdir "$STout""$NAME" | tee -a "$datelog"   # Will create a directory for the output in the input directory
-    PIDoutput="$STout""$NAME"                   # Default output location for the PID
-    VALoutput="$STout""$NAME"                   # Default output location for the validator
-
+else
+    STout=$PIDoutput
 fi
+
+mkdir "$STout""$NAME" | tee -a "$datelog"   # Will create a directory for the output in the input directory
+PIDoutput="$STout""$NAME"                   # Default output location for the PID
+VALoutput="$STout""$NAME"                   # Default output location for the validator
+
 ##End## "options"

@@ -20,7 +20,7 @@ while [ "$1" != "" ]; do
         -P | --PeptideID )  while [[ ${2:0:1} != "-" ]] && [[ "$1" != "" ]]; do
                                 shift                   # Allows for multiple PeptideIDentifiers (PIDs) to be entered
                                 PIDprog+=${1,,}" "      # Allows for multiple PeptideIDentifiers (PIDs) to be entered
-                                NUMprog=$[$NUMprog+1]
+                                NUMprog=$[$NUMprog+1]   # Counts the amount of programs entered
                             done
                             ;;
         -V | --Validator )  while [[ ${2:0:1} != "-" ]] && [[ "$1" != "" ]]; do
@@ -40,7 +40,7 @@ while [ "$1" != "" ]; do
         -p | -parameters )  while [[ ${2:0:1} != "-" ]] && [[ "$1" != "" ]]; do
                                 shift
                                 PIDparam+=$1" "
-                                NUMparam=$[$NUMparam+1]
+                                NUMparam=$[$NUMparam+1] # Counts the amount of parameter files entered
                             done
                             ;;
         -L | --location )   shift
@@ -68,15 +68,15 @@ done
 for prog in $PIDprog
 do
     if [[ ${prog} == comet ]]; then
-        paramcomet=$(echo $PIDparam | awk '{print $1}')
+        paramcomet=$(echo $PIDparam | awk '{print "-p "$1}')
         PIDparam=$(echo $PIDparam | awk '{$1="";print}')
     fi
     if [[ ${prog} == tandem ]]; then
-        paramtandem=$(echo $PIDparam | awk '{print $1}')
+        paramtandem=$(echo $PIDparam | awk '{print "-p "$1}')
         PIDparam=$(echo $PIDparam | awk '{$1="";print}')
     fi
     if [[ ${prog} == msgfplus ]]; then
-        paramMSGFPlus=$(echo $PIDparam | awk '{print $1}')
+        paramMSGFPlus=$(echo $PIDparam | awk '{print "-p "$1}')
         PIDparam=$(echo $PIDparam | awk '{$1="";print}')
     fi
 done
@@ -249,6 +249,11 @@ done
 
 for file in "$LOC"scripts/*
 do
+    cat "$LOC"src/gprofiler >> ${file}
+done
+
+for file in "$LOC"scripts/*
+do
     cat "$LOC"src/End >> ${file}
 done
 
@@ -273,6 +278,10 @@ if [[ $RUNscripts == "" ]]; then
     fi
     if [[ $NUMprog < $NUMparam ]]; then
         echo "too many parameter files given"
+        exit
+    fi
+    if [[ $NUMparam == 0 ]]; then
+        echo "No parameter files given"
         exit
     fi
 fi

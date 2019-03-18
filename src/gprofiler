@@ -1,23 +1,30 @@
-extention=$(echo $VALoutput | awk -F\. '{print $(NF-1)"."$NF}'
+##Start## "gprofiler"
 
-NAMEfile=$(echo $VALoutput".prot")
+EXTENTION=$(echo $VALoutput | awk -F\. '{print $(NF-1)"."$NF}')
+NAMEfile=$(echo $VALoutput | sed "s/$EXTENTION/json/")
+#NAMEfile=$(echo "$VALoutput"".json")
 
-if [[ $extention == pep.xml ]]; then 
-    # takes the protein name out of the pep.xml file
-
-    PROTEIN=$(cat $VALoutput | grep "hit_rank=\"1\"" | awk -F\| '{print $2}')
-
-    echo $PROTEIN > $NAMEfile
+if [[ $EXTENTION == pep.xml ]]; then
+    # takes the protein names out of the pep.xml file (peptideprophet)
+    PROTEIN=$(cat $VALoutput | grep "<search_hit" | awk -F\| '{print "\"" $2 "\"""\,"}')
+fi
+if [[ $EXTENTION == put.xml ]]; then
+    #takes the protein names out of the put.xml file (percolator)
+    PROTEIN=$(cat $VALoutput | grep "<protein_id>" | awk -F"|" '{print "\"" $2 "\"""\,"}')
 fi
 
-if [[ $extention == put.xml ]]; then 
+#removes the last "," from $PROTEIN
+PROTEIN=$(echo $PROTEIN | head -c-2)
+#saves the protein list
+echo $PROTEIN > $NAMEfile.prot
 
-    PROTEIN=$(cat $VALoutput | grep "<protein_id>" | awk -F"|" '{print $2}')
-    echo $PROTEIN > $NAMEfile
-fi
+PROTEIN=$(echo "{\"organism\": \"hsapiens\", \"query\": [$PROTEIN]}")
 
+# calls the gost API
+curl -v \
+-o "$NAMEfile" \
+-X 'POST' \
+-H 'Content-Type: application/json' \
+-d  "$PROTEIN" 'https://biit.cs.ut.ee/gprofiler_beta/api/gost/profile/' |tee -a $datelog
 
-
-curl -o $NAMEfile -X 'POST' -H 'Content-Type: application/json' \
- -d '{"organism": "hsapiens", "query": ["[prot1]", "[prot2]"]}' 'https://biit.cs.ut.ee/gprofiler_beta/api/gost/profile/' 
-
+##End## "gprofiler"
