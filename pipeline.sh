@@ -37,11 +37,14 @@ while [ "$1" != "" ]; do
         -o | --output )     output="$1 $2"
                             shift
                             ;;
-        -p | -parameters )  while [[ ${2:0:1} != "-" ]] && [[ "$1" != "" ]]; do
+        -p | --parameters ) while [[ ${2:0:1} != "-" ]] && [[ "$1" != "" ]]; do
                                 shift
                                 PIDparam+=$1" "
                                 NUMparam=$[$NUMparam+1] # Counts the amount of parameter files entered
                             done
+                            ;;
+        -g | --gprofiler )  GPparams="$1 $2"
+                            shift
                             ;;
         -L | --location )   shift
                             LOC="$1"
@@ -307,7 +310,7 @@ if [[ "$RUNscripts" == "" ]] && [[ "$SHARK" != "1" ]]; then
         if [[ $PID == "MSGFPlus" ]]; then
             PIDparam=$paramMSGFPlus
         fi
-        ${file} $PIDparam $input $output $logfile $location
+        ${file} $PIDparam $input $output $logfile $location $GPparams
     done
 fi
 
@@ -325,7 +328,7 @@ if [[ "$RUNscripts" == "" ]] && [[ "$SHARK" == "1" ]]; then
         if [[ $PID == "MSGFPlus" ]]; then
             PIDparam=$paramMSGFPlus
         fi
-        qsub $SHARKoptions ${file} $PIDparam $input $output $logfile $location
+        qsub $SHARKoptions ${file} $PIDparam $input $output $logfile $location $GPparams
     done
 fi
 

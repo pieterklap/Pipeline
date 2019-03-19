@@ -35,8 +35,11 @@ while [ "$1" != "" ]; do
         -i | --input )          shift               # Enter -i to specify the input location
                                 PIDinput=$1         # Enter -i to specify the input location
                                 ;;
-        -p | --parameter )      shift                   # Enter -p to specify the paramater locatio
+        -p | --parameter )      shift               # Enter -p to specify the paramater locatio
                                 PIDparam=$1
+                                ;;
+        -g | --gprofiler )      shift
+                                GPparams=$1
                                 ;;
         -l | --logfile )        shift
                                 logfile=$1

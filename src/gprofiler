@@ -17,14 +17,20 @@ fi
 PROTEIN=$(echo $PROTEIN | head -c-2)
 #saves the protein list
 echo $PROTEIN > $NAMEfile.prot
+if [[ $GPparams == "" ]]; then
+    GPparams="X"
+fi
 
-PROTEIN=$(echo "{\"organism\": \"hsapiens\", \"query\": [$PROTEIN]}")
+GPparams=$(grep -v "^#" $GPparams |grep -v "^ " | awk '{print $1":",$2","}' | grep -v "^:")
+
+GPparams=$(echo "{$GPparams \"query\": [$PROTEIN]}")
+
 
 # calls the gost API
 curl -v \
 -o "$NAMEfile" \
 -X 'POST' \
 -H 'Content-Type: application/json' \
--d  "$PROTEIN" 'https://biit.cs.ut.ee/gprofiler_beta/api/gost/profile/' |tee -a $datelog
+-d  "$GPparams" 'https://biit.cs.ut.ee/gprofiler_beta/api/gost/profile/' |tee -a $datelog
 
 ##End## "gprofiler"
