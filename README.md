@@ -3,7 +3,7 @@ Proteomic Pipeline Generator
 
 Proteomic Pipeline generator is a program that generates multiple pipelines for use with proteomics data.
 
-##instalation
+## instalation
 Add the programs that you have installed to the install_locations file
 
 
