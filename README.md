@@ -5,12 +5,12 @@ Proteomic Pipeline generator is a program that generates multiple pipelines for 
 
 ## Programs
 The current programs that are compatible with the PPG are:
-  *Comet
-  *X!tandem
-  *MSGFPlus
+  * Comet
+  * X!tandem
+  * MSGFPlus
   
-  *PeptideProphet
-  *Percolator
+  * PeptideProphet
+  * Percolator
 
 ## Instalation
 Add the programs that you have installed to second collumn of the install_locations file
