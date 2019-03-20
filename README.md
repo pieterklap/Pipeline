@@ -22,7 +22,7 @@ Analysis
  * [gprofiler](https://biit.cs.ut.ee/gprofiler/page/docs)
 
 ## Instalation
-Add the programs that you have installed to second collumn of the install_locations file
+Add the location of the programs that you have installed to second collumn of the install_locations file
 
 
 This is a README file which we can use to document and discuss the project.
