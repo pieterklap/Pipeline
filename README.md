@@ -30,7 +30,7 @@ The PPG is issued with multiple variables some are optional.
 
 **options requiered to automaticaly run the pipelines**
 
-`-p [parameterfiles (in the same order as the programs)]` 
+`-p [parameterfiles (in the same order as the programs)]`  
 `-i [input file]`  
 `-g [g:profiler parameter file]`  
 
