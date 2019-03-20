@@ -22,6 +22,6 @@ The PPG currently uses two types of software: database search software, and stat
 Add the location of the programs that you have installed to second collumn of the install_locations file
 
 ## Usage
-'./pipeline -P \[Database Search programs\]'
+`./pipeline -P [Database Search programs]`
 
 This is a README file which we can use to document and discuss the project.
