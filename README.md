@@ -26,7 +26,7 @@ The PPG is issued with multiple variables some are optional.
 **options requiered to generate the pipelines**
 
 [`-P [database search programs]`](https://github.com/pieterklap/Pipeline#database-search)  
-`-V [Statistical validation programs]`  
+[`-V [Statistical validation programs]`](https://github.com/pieterklap/Pipeline#statistical-validation)  
 
 **options requiered to automaticaly run the pipelines**
 
