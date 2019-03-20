@@ -22,7 +22,7 @@ The PPG currently uses two types of software: database search software, and stat
 Add the location of the programs that you have installed to second collumn of the install_locations file
 
 ## Options
-The PPG is issued with multiple variables some are optional.
+The PPG is issued with multiple variables some are optional.  
 **options requiered to generate the pipelines**
 
 `-P [database search programs]`  
@@ -33,5 +33,11 @@ The PPG is issued with multiple variables some are optional.
 `-p [parameterfiles (in the same order as the programs)]`  
 `-i [input file]`  
 `-g [g:profiler parameter file]`  
+
+**optional variables**
+`-l [logfile location]`  
+`-o [output directory]`
+`-L [locations of the generated scripts (only needed if the scripts aren't ran where they are generated)]`
+
 
 This is a README file which we can use to document and discuss the project.
