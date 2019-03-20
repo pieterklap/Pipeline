@@ -34,10 +34,10 @@ The PPG is issued with multiple variables some are optional.
 `-i [input file]`  
 `-g [g:profiler parameter file]`  
 
-**optional variables**
-`-l [logfile location]`  
-`-o [output directory]`
-`-L [locations of the generated scripts (only needed if the scripts aren't ran where they are generated)]`
+**optional variables**  
+`-l [logfile location]`   
+`-o [output directory]`  
+`-L [locations of the generated scripts (only needed if the scripts aren't ran where they are generated)]`  
 
 
 This is a README file which we can use to document and discuss the project.
