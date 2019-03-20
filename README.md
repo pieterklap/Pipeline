@@ -17,6 +17,10 @@ Statistical validation
   * [PeptideProphet](https://sourceforge.net/projects/sashimi/files/Trans-Proteomic%20Pipeline%20%28TPP%29/) (not avalible outside of the TPP)
   * [Percolator](https://github.com/percolator/percolator/wiki)
 
+Analysis
+---
+ * [gprofiler](https://biit.cs.ut.ee/gprofiler/page/docs)
+
 ## Instalation
 Add the programs that you have installed to second collumn of the install_locations file
 
