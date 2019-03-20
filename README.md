@@ -25,7 +25,7 @@ Add the location of the programs that you have installed to second collumn of th
 The PPG is issued with multiple variables some are optional.  
 **options requiered to generate the pipelines**
 
-`-P `[database search programs](https://github.com/pieterklap/Pipeline#database-search)  
+`-P `[[database search programs]](https://github.com/pieterklap/Pipeline#database-search)  
 `-V [Statistical validation programs]`  
 
 **options requiered to automaticaly run the pipelines**
