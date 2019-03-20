@@ -24,11 +24,14 @@ Add the location of the programs that you have installed to second collumn of th
 ## Options
 The PPG is issued with multiple variables some are optional.
 **options requiered to generate the pipelines**
-`-P [database search programs]`
-`-V [Statistical validation programs]`
+
+`-P [database search programs]`  
+`-V [Statistical validation programs]`  
+
 **options requiered to automaticaly run the pipelines**
+
 `-p [parameterfiles (in the same order as the programs)]` 
-`-i [input file]`
-`-g [g:profiler parameter file]`
+`-i [input file]`  
+`-g [g:profiler parameter file]`  
 
 This is a README file which we can use to document and discuss the project.
