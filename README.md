@@ -22,13 +22,13 @@ The PPG currently uses two types of software: database search software, and stat
 Add the location of the programs that you have installed to second collumn of the install_locations file
 
 ## Options
-The PPG is issued with multiple variables some are optional.  
-**Options requiered to generate the pipelines**
+The PPG is issued with multiple variables some are required.  
+**Options required to generate the pipelines**
 
 [`-P [database search programs]`](https://github.com/pieterklap/Pipeline#database-search)  
 [`-V [Statistical validation programs]`](https://github.com/pieterklap/Pipeline#statistical-validation)  
 
-**Options requiered to automaticaly run the pipelines**
+**Options required to automaticaly run the pipelines**
 
 `-p [parameterfiles (in the same order as the programs)]`  
 `-i [input file]`  
