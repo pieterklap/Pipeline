@@ -23,18 +23,18 @@ Add the location of the programs that you have installed to second collumn of th
 
 ## Options
 The PPG is issued with multiple variables some are optional.  
-**options requiered to generate the pipelines**
+**Options requiered to generate the pipelines**
 
 [`-P [database search programs]`](https://github.com/pieterklap/Pipeline#database-search)  
 [`-V [Statistical validation programs]`](https://github.com/pieterklap/Pipeline#statistical-validation)  
 
-**options requiered to automaticaly run the pipelines**
+**Options requiered to automaticaly run the pipelines**
 
 `-p [parameterfiles (in the same order as the programs)]`  
 `-i [input file]`  
 `-g [g:profiler parameter file]`  
 
-**optional variables**  
+**Optional variables**  
 `-l [logfile location]`   
 `-o [output directory]`  
 `-L [locations of the generated scripts (only needed if the scripts aren't ran where they are generated)]`  
