@@ -4,7 +4,8 @@ Proteomic Pipeline Generator
 Proteomic Pipeline generator is a program that generates multiple pipelines for use with proteomics data.
 
 ## Programs
-The current programs that are compatible with the PPG are:
+The current programs that are compatible with the PPG are:  
+
 Database search software
 ---
   * [Comet](http://comet-ms.sourceforge.net/)
