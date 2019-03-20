@@ -9,7 +9,7 @@ The current programs that are compatible with the PPG are:
   * [X!tandem](https://www.thegpm.org/tandem/)
   * [MSGFPlus](https://omics.pnl.gov/software/ms-gf)
   
-  * [PeptideProphet](https://sourceforge.net/projects/sashimi/files/Trans-Proteomic%20Pipeline%20%28TPP%29/) (Not avalible outside of the tpp)
+  * [PeptideProphet](https://sourceforge.net/projects/sashimi/files/Trans-Proteomic%20Pipeline%20%28TPP%29/) (not avalible outside of the TPP)
   * [Percolator](https://github.com/percolator/percolator/wiki)
 
 ## Instalation
