@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [[ $1 == "" ]]; then
-    cat info.pipeline
+    cat README.md
     exit
 fi
 
