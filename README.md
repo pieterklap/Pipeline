@@ -30,14 +30,14 @@ The PPG is issued with multiple variables some are required.
 
 **Options required to automaticaly run the pipelines**
 
-`-p [parameterfiles]` (in the same order as the programs)  
+`-p [parameterfiles]` `(in the same order as the programs)`  
 `-i [input file]`  
 `-g [g:profiler parameter file]`  
 
 **Optional variables**  
 `-l [logfile location]`   
 `-o [output directory]`  
-`-L [locations of the generated scripts]` (only needed if the scripts aren't ran where they are generated)]  
-`-s [options]` (for use on the LUMC sharkcluster (calls the scripts with qsub and any parameters added after the -s))
+`-L [locations of the generated scripts]` `(only needed if the scripts aren't ran where they are generated)`  
+`-s [options]` `(for use on the LUMC sharkcluster (calls the scripts with qsub and any parameters added after the -s))`
 
 This is a README file which we can use to document and discuss the project.
