@@ -39,6 +39,6 @@ The PPG is issued with multiple variables some are required.
 `-o [output directory]`  
 `-L [locations of the generated scripts]` `(only needed if the scripts aren't ran where they are generated)`  
 `-s "[options]"` `(for use on the LUMC sharkcluster calls the scripts with qsub with everyting after the -s)`  
- all the parameters passed to -s have to be entered in ""
+ all the parameters passed to -s have to be entered inbetween ""
 
 This is a README file which we can use to document and discuss the project.
