@@ -28,7 +28,12 @@ while [ "$1" != "" ]; do
                                 VALprog+=${1,,}" "      # Allows for multiple validators to be entered
                             done
                             ;;
-        -L | --location )   location="$1 $2"                        # If the script isn't ran where it was created (for use on the shark cluster)
+        -A | --analyis )    while [[ ${2:0:1} != "-" ]] && [[ "$1" != "" ]]; do
+                                shift                   # Allows for multiple analysis methods to be entered
+                                ANLprog+=${1,,}" "      # Allows for multiple analysis methods to be entered
+                            done
+                            ;;
+        -L | --location )   location="$1 $2"            # If the script isn't ran where it was created (for use on the shark cluster)
                             shift
                             ;;
         -i | --input )      input="$1 $2"
@@ -55,10 +60,8 @@ while [ "$1" != "" ]; do
         -r | --norun )      RUNscripts="n"
                             ;;
         -s | --shark )      SHARK="1"
-                            while [[ "$1" != "" ]]; do
-                                shift                           # Allows Shark options to be entered
-                                SHARKoptions+=$1" "          # Allows Shark options to be entered
-                            done
+                            shift                        # Allows Shark options to be entered
+                            SHARKoptions=$1             # Allows Shark options to be entered
                             ;;
         * )                 echo "Unknown parameter ""$1"
                             exit
@@ -66,6 +69,8 @@ while [ "$1" != "" ]; do
     esac
     shift
 done
+
+echo $SHARKoptions
 
 # sets the parameter files to be used for each peptide identifier
 for prog in $PIDprog
@@ -91,13 +96,14 @@ if [[ $RUNscripts == "" ]]; then
     DirectTest+=$(echo $output | awk '{print $2" "}')
     DirectTest+=$(echo $logfile | awk '{print $2" "}')
     DirectTest+=$PIDparam
+    DirectTest+=$(echo $GPparams | awk '{print $2" "}')
 fi
 # Tests if each file is a direct reference
 for file in $DirectTest
 do
     Direct=$(echo ${file} | cut -c 1-1)
     if [[ $Direct != "/" ]] && [[ $Direct != "" ]]; then
-        echo "ERROR: ${file} is no a direct reference"
+        echo "ERROR: ${file} is not a direct reference"
         Exitcode=2
     fi
 done
@@ -137,41 +143,50 @@ if [[ $VALprog != "" ]]; then
     if [[ $VALprog == *"peptideprophet"* ]];then
         for file in "$LOC".PIDs/*
         do
-            cp -v ${file} ${file}_peptideprophet.sh
-            cp "$LOC".PIDs/*_peptideprophet.sh "$LOC".VALs/
-            rm -f "$LOC".PIDs/*_peptideprophet.sh
+            cp -v ${file} ${file}_peptideprophet
+            cp "$LOC".PIDs/*_peptideprophet "$LOC".VALs/
+            rm -f "$LOC".PIDs/*_peptideprophet
         done
     fi
 
     if [[ $VALprog == *"triqler"* ]];then
         for file in "$LOC".PIDs/*
         do
-            cp -v ${file} ${file}_Triqler.sh
-            cp "$LOC".PIDs/*_Triqler.sh "$LOC".VALs/
-            rm -f "$LOC".PIDs/*_Triqler.sh
+            cp -v ${file} ${file}_Triqler
+            cp "$LOC".PIDs/*_Triqler "$LOC".VALs/
+            rm -f "$LOC".PIDs/*_Triqler
         done
     fi
 
     if [[ $VALprog == *"percolator"* ]];then
         for file in "$LOC".PIDs/*
         do
-            cp -v ${file} ${file}_percolator.sh
-            cp "$LOC".PIDs/*_percolator.sh "$LOC".VALs/
-            rm -f "$LOC".PIDs/*_percolator.sh
+            cp -v ${file} ${file}_percolator
+            cp "$LOC".PIDs/*_percolator "$LOC".VALs/
+            rm -f "$LOC".PIDs/*_percolator
         done
     fi
 fi
 # done adding validators to the name of the scripts
-NUM=$(ls "$LOC".VALs/ | grep ".sh" | wc -l)
 
+NUM=$(ls "$LOC".VALs/ | wc -l)
+# adds .sh to the files
+
+mkdir -vp "$LOC".END
+rm -vf "$LOC".END/*
+for file in "$LOC".VALs/*
+do
+    cp -v ${file} ${file}.sh
+    cp "$LOC".VALs/*.sh "$LOC".END/
+    rm -f "$LOC".VALs/*.sh
+done
 
 # Creates the directory scripts and copies the scripts to it and makes them executable and removes the files in the temp folders
 mkdir -vp "$LOC"scripts
-cp -v "$LOC".VALs/* "$LOC"scripts/
-chmod 744 "$LOC"scripts/*
+cp -v "$LOC".END/* "$LOC"scripts/
+chmod 750 "$LOC"scripts/*
 rm -vf "$LOC".PIDs/* "$LOC".VALs/*
-
-
+rm -f "$LOC".END/*
 # Adds the options fille to all the scripts
 # this should always be first
 for file in "$LOC"scripts/*.sh
@@ -250,12 +265,12 @@ do
 done
 # done adding validators to the scripts
 
-for file in "$LOC"scripts/*
+for file in "$LOC"scripts/*.sh
 do
     cat "$LOC"src/gprofiler >> ${file}
 done
 
-for file in "$LOC"scripts/*
+for file in "$LOC"scripts/*.sh
 do
     cat "$LOC"src/End >> ${file}
 done
