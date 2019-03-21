@@ -38,6 +38,6 @@ The PPG is issued with multiple variables some are required.
 `-l [logfile location]`   
 `-o [output directory]`  
 `-L [locations of the generated scripts]` `(only needed if the scripts aren't ran where they are generated)`  
-`-s [options]` `(for use on the LUMC sharkcluster (calls the scripts with qsub and any parameters added after the -s))`
+`-s [options]` `(for use on the LUMC sharkcluster calls the scripts with qsub with everyting after the -s)`
 
 This is a README file which we can use to document and discuss the project.
