@@ -70,8 +70,6 @@ while [ "$1" != "" ]; do
     shift
 done
 
-echo $SHARKoptions
-
 # sets the parameter files to be used for each peptide identifier
 for prog in $PIDprog
 do
