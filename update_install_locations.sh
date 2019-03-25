@@ -4,25 +4,49 @@
 while [ "$1" != "" ]; do
 
     case ${1,,} in
-		-a | --add )		shift	# Adds another program to the install_locations.sh file only use if you want to add a programm to the pipeline
-									# It still needs to be added to the case
-							sed "s/@/$1/g" install_locations.template >> install_locations.sh
-							;;
+#Databse searchers
         comet )				shift
-							Comet="$1"
+                            LOCprograms+="$1 "
+							programs+="Comet "
 							;;
 		xtandem | tandem )	shift
-							Tandem="$1"
+                            LOCprograms+="$1 "
+							programs+="Tandem "
+                            ;;
+        msgfplus | msgf+ )  shift
+                            LOCprograms+="$1 "
+                            programs+="MSGFPlus "
 							;;
+# Validators
 		peptideprophet )	shift
-							PeptideProphet="$1"
+                            LOCprograms+="$1 "
+							programs+="PeptideProphet "
 							;;
+        percolator )        shift
+                            LOCprograms+="$1 "
+                            programs+="percolator "
+                            ;;
 		triqler )			shift
-							Triqler="$1"
+                            LOCprograms+="$1 "
+							programs+="Triqler "
 							;;
+# Converters
 		tandem2xml )		shift
-							Tandem2XML="$1"
+                            LOCprograms+="$1 "
+							programs+="tandem2XML "
 							;;
+        tandem2pin )        shift
+                            LOCprograms+="$1 "
+                            programs+="tandem2pin "
+                            ;;
+        idconvert )         shift
+                            LOCprograms+="$1 "
+                            programs+="idconvert "
+                            ;;
+        msgf2pin )          shift
+                            LOCprograms+="$1 "
+                            programs+="msgf2pin "
+                            ;;
 		* )					echo -e " $1 " "is not a program in the pipeline \n"
 							shift
 							;;
@@ -30,64 +54,20 @@ while [ "$1" != "" ]; do
 	shift
 done
 
-echo "$Comet"
-echo "$Tandem"
-echo "$PeptideProphet"
-echo "$Tandem2XML"
-echo "$Triqler"
+for prog in $programs
+do
+    # sets the first location in $LOCprograms to $Prog and then removes it form $LOCprograms
+    Prog=$(echo $LOCprograms | awk '{print $1}')
+    LOCprograms=$(echo $LOCprograms | awk '{$1="";print}')
 
-if [ -f $Comet ] && [[ $Comet != "" ]]; then
-	EXComet=$(grep Comet install_locations)
+    if [ -f $Prog ] && [[ $Prog != "" ]]; then
+    	EXProg=$(grep ${prog} install_locations)
 
-	sedComet=${Comet//\//\\/}               # sets backslashes in front of forward slashes for use with sed
-	sedEXComet=${EXComet//\//\\/}
+	    sedProg=${Prog//\//\\/}               # sets backslashes in front of forward slashes for use with sed
+	    sedEXProg=${EXProg//\//\\/}
 
-    sed "s/$sedEXComet/Comet $sedComet/" install_locations > .install_locations
-	cat .install_locations > install_locations
-	rm .install_locations
-fi
-
-if [ -f $Tandem ] && [[ $Tandem != "" ]]; then
-    EXTandem=$(grep "Tandem " install_locations)
-
-    sedTandem=${Tandem//\//\\/}               # sets backslashes in front of forward slashes for use with sed
-    sedEXTandem=${EXTandem//\//\\/}
-
-	sed "s/$sedEXTandem/Tandem $sedTandem/" install_locations  > .install_locations
-    cat .install_locations > install_locations
-    rm .install_locations
-fi
-
-if [ -f $PeptideProphet ] && [[ $PeptideProphet != "" ]]; then
-    EXPeptideProphet=$(grep PeptideProphet install_locations)
-
-    sedPeptideProphet=${PeptideProphet//\//\\/}               # sets backslashes in front of forward slashes for use with sed
-    sedEXPeptideProphet=${EXPeptideProphet//\//\\/}
-
-    sed "s/$sedEXPeptideProphet/PeptideProphet $sedPeptideProphet/" install_locations > .install_locations
-    cat .install_locations > install_locations
-    rm .install_locations
-fi
-
-if [ -f $Triqler ] && [[ $Triqler != "" ]]; then
-    EXTriqler=$(grep Triqler install_locations)
-
-    sedTriqler=${Triqler//\//\\/}               # sets backslashes in front of forward slashes for use with sed
-    sedEXTriqler=${EXTriqler//\//\\/}
-
-    sed "s/$sedEXTriqler/Triqler $sedTriqler/" install_locations > .install_locations
-    cat .install_locations > install_locations
-    rm .install_locations
-fi
-
-if [ -f $Tandem2XML ] && [[ $Tandem2XML != "" ]]; then
-    EXTandem2XML=$(grep tandem2XML install_locations)
-
-    sedTandem2XML=${Tandem2XML//\//\\/}               # sets backslashes in front of forward slashes for use with sed
-    sedEXTandem2XML=${EXTandem2XML//\//\\/}
-
-    sed "s/$sedEXTandem2XML/tandem2XML $sedTandem2XML/" install_locations > .install_locations
-    cat .install_locations > install_locations
-    rm .install_locations
-fi
-
+        sed "s/$sedEXProg/${prog} $sedProg/" install_locations > .install_locations
+	    cat .install_locations > install_locations
+	    rm .install_locations
+    fi
+done
