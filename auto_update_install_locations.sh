@@ -1,4 +1,12 @@
 #!/bin/bash
+case $1 in
+    -l | --location )   shift
+                        LOC="$1""*"
+                        shift
+                        ;;
+esac
+
+echo $LOC
 
 # runs updatedb if the user is root in order to make sure the information is up to date
 if [[ $EUID == 0 ]]; then
@@ -18,7 +26,7 @@ if [[ $PROGs == "all" ]]; then
     PROGs=$valid
 fi
 
-
+exit
 for prog in $PROGs
 do
     notavalible=0
@@ -32,41 +40,42 @@ do
 
 #   Checks all the posible locations of the programs 
     if [[ ${prog} == "comet" ]]; then
-        LOCprog=$(locate comet.exe)
+        LOCprog=$(locate "$LOC"comet.exe)
         EXProg=$(grep "Comet " install_locations | awk '{print $2}')
     fi
     if [[ ${prog} == "tandem" ]]; then
-        LOCprog=$(locate tandem.exe)
+        LOCprog=$(locate "$LOC"tandem.exe)
         EXProg=$(grep "Tandem " install_locations | awk '{print $2}')
     fi
     if [[ ${prog} == "msgfplus" ]]; then
-        LOCprog=$(locate MSGFPlus.jar)
+        LOCprog=$(locate "$LOC"MSGFPlus.jar)
         EXProg=$(grep "MSGFPlus " install_locations | awk '{print $2}')
     fi
     if [[ ${prog} == "peptideprophet" ]]; then
-        LOCprog=$(locate bin/PeptideProphetParser)
+        LOCprog=$(locate "$LOC"PeptideProphetParser)
         EXProg=$(grep "PeptideProphet " install_locations | awk '{print $2}')
     fi
     if [[ ${prog} == "percolator" ]]; then
-        LOCprog=$(locate bin/percolator)
+        LOCprog=$(locate "$LOC"percolator)
         EXProg=$(grep "percolator " install_locations | awk '{print $2}')
     fi
     if [[ ${prog} == "tandem2xml" ]]; then
-        LOCprog=$(locate bin/Tandem2XML)
+        LOCprog=$(locate "$LOC"Tandem2XML)
         EXProg=$(grep "tandem2XML " install_locations | awk '{print $2}')
     fi
     if [[ ${prog} == "tandem2pin" ]]; then
-        LOCprog=$(locate bin/tandem2pin)
+        LOCprog=$(locate "$LOC"tandem2pin)
         EXProg=$(grep "tandem2pin " install_locations | awk '{print $2}')
     fi
     if [[ ${prog} == "idconvert" ]]; then
-        LOCprog=$(locate bin/idconvert)
+        LOCprog=$(locate "$LOC"idconvert)
         EXProg=$(grep "idconvert " install_locations | awk '{print $2}')
     fi
     if [[ ${prog} == "msgf2pin" ]]; then
-        LOCprog=$(locate bin/msgf2pin)
+        LOCprog=$(locate "$LOC"msgf2pin)
         EXProg=$(grep "msgf2pin " install_locations | awk '{print $2}')
     fi
+
 #   Done checking the location of the programs
 #   Tells the user that a program isn't part of the pipeline
     if [[ $notavalible != 1 ]]; then
@@ -74,7 +83,7 @@ do
     else
         #count the amount of programs found
         NUMprog=$(echo $LOCprog | wc -w)
-        if [[ $NUMprog == "1" ]]; then
+        if [[ "$NUMprog" == "1" ]]; then
             #if only one file has been found enter the file into the install_locations file
             echo -e "\n$NUMprog version of ${prog} found and updated\n$LOCprog"
 
@@ -86,10 +95,10 @@ do
             rm .install_locations
         fi
         # errors if more than one program has been foun report to the user the amount and which programs
-        if [[ $NUMprog > 1 ]]; then
+        if [[ "$NUMprog" > "1" ]]; then
             echo -e "\n$NUMprog versions of ${prog} found"
-            if [[ $NUMprog < 10 ]]; then
-                echo -e "\nonly the first 10 results are shown"
+            if (( "$NUMprog" > "10" )); then
+                echo -e "\nonly the first 10 results are shown use the option -f [locaation] to reduce the search space"
                 echo "$LOCprog" | head -n10
             else
                 echo -e "\n$LOCprog"
