@@ -95,7 +95,7 @@ do
         if [[ "$NUMprog" > "1" ]]; then
             echo -e "\n$NUMprog versions of ${prog} found"
             if (( "$NUMprog" > "10" )); then
-                echo -e "\nonly the first 10 results are shown use the option -f [locaation] to reduce the search space"
+                echo -e "\nonly the first 10 results are shown use the option -f [location] to reduce the search space"
                 echo "$LOCprog" | head -n10
             else
                 echo -e "\n$LOCprog"
