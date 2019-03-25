@@ -34,47 +34,38 @@ do
     if [[ ${prog} == "comet" ]]; then
         LOCprog=$(locate comet.exe)
         EXProg=$(grep Comet install_locations | awk '{print $2}')
-        Prog=$LOCprog
     fi
     if [[ ${prog} == "tandem" ]]; then
         LOCprog=$(locate tandem.exe)
         EXProg=$(grep Tandem install_locations | awk '{print $2}')
-        Prog=$LOCprog
     fi
     if [[ ${prog} == "msgfplus" ]]; then
         LOCprog=$(locate MSGFPlus.jar)
         EXProg=$(grep MSGFPlus install_locations | awk '{print $2}')
-        Prog=$LOCprog
     fi
     if [[ ${prog} == "peptideprophet" ]]; then
         LOCprog=$(locate bin/PeptideProphetParser)
         EXProg=$(grep PeptideProphet install_locations | awk '{print $2}')
-        Prog=$LOCprog
     fi
     if [[ ${prog} == "percolator" ]]; then
         LOCprog=$(locate bin/percolator)
         EXProg=$(grep percolator install_locations | awk '{print $2}')
-        Prog=$LOCprog
     fi
     if [[ ${prog} == "tandem2xml" ]]; then
         LOCprog=$(locate bin/Tandem2XML)
         EXProg=$(grep tandem2XML install_locations | awk '{print $2}')
-        Prog=$LOCprog
     fi
     if [[ ${prog} == "tandem2pin" ]]; then
         LOCprog=$(locate bin/tandem2pin)
         EXProg=$(grep tandem2pin install_locations | awk '{print $2}')
-        Prog=$LOCprog
     fi
     if [[ ${prog} == "idconvert" ]]; then
         LOCprog=$(locate bin/idconvert)
         EXProg=$(grep idconvert install_locations | awk '{print $2}')
-        Prog=$LOCprog
     fi
     if [[ ${prog} == "msgf2pin" ]]; then
         LOCprog=$(locate bin/msgf2pin)
         EXProg=$(grep msgf2pin install_locations | awk '{print $2}')
-        Prog=$LOCprog
     fi
 #   Done checking the location of the programs
 #   Tells the user that a program isn't part of the pipeline
@@ -87,7 +78,7 @@ do
             #if only one file has been found enter the file into the install_locations file
             echo -e "\n$NUMprog version of ${prog} found and updated\n$LOCprog"
 
-            sedProg=${Prog//\//\\/}               # sets backslashes in front of forward slashes for use with sed
+            sedProg=${LOCprog//\//\\/}               # sets backslashes in front of forward slashes for use with sed
             sedEXProg=${EXProg//\//\\/}
 
             sed "s/$sedEXProg/$sedProg/" install_locations > .install_locations
@@ -108,6 +99,8 @@ do
         if [[ $NUMprog == 0 ]]; then
             echo -e "\n${prog} not found"
         fi
+        EXProg=$(grep Comet install_locations | awk '{print $2}')
+        Prog=$LOCprog
         #reset variables
         NUMprog=0
         LOCprog=""

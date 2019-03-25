@@ -61,13 +61,13 @@ do
     LOCprograms=$(echo $LOCprograms | awk '{$1="";print}')
 
     if [ -f $Prog ] && [[ $Prog != "" ]]; then
-    	EXProg=$(grep ${prog} install_locations)
+    	EXProg=$(grep "${prog} " install_locations)
 
 	    sedProg=${Prog//\//\\/}               # sets backslashes in front of forward slashes for use with sed
-	    sedEXProg=${EXProg//\//\\/}
+        sedEXProg=${EXProg//\//\\/}
 
         sed "s/$sedEXProg/${prog} $sedProg/" install_locations > .install_locations
-	    cat .install_locations > install_locations
-	    rm .install_locations
+        cat .install_locations > install_locations
+        rm .install_locations
     fi
 done
