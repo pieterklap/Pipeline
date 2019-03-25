@@ -6,8 +6,6 @@ case $1 in
                         ;;
 esac
 
-echo $LOC
-
 # runs updatedb if the user is root in order to make sure the information is up to date
 if [[ $EUID == 0 ]]; then
     updatedb
@@ -26,7 +24,6 @@ if [[ $PROGs == "all" ]]; then
     PROGs=$valid
 fi
 
-exit
 for prog in $PROGs
 do
     notavalible=0
