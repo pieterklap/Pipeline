@@ -33,39 +33,39 @@ do
 #   Checks all the posible locations of the programs 
     if [[ ${prog} == "comet" ]]; then
         LOCprog=$(locate comet.exe)
-        EXProg=$(grep Comet install_locations | awk '{print $2}')
+        EXProg=$(grep "Comet " install_locations | awk '{print $2}')
     fi
     if [[ ${prog} == "tandem" ]]; then
         LOCprog=$(locate tandem.exe)
-        EXProg=$(grep Tandem install_locations | awk '{print $2}')
+        EXProg=$(grep "Tandem " install_locations | awk '{print $2}')
     fi
     if [[ ${prog} == "msgfplus" ]]; then
         LOCprog=$(locate MSGFPlus.jar)
-        EXProg=$(grep MSGFPlus install_locations | awk '{print $2}')
+        EXProg=$(grep "MSGFPlus " install_locations | awk '{print $2}')
     fi
     if [[ ${prog} == "peptideprophet" ]]; then
         LOCprog=$(locate bin/PeptideProphetParser)
-        EXProg=$(grep PeptideProphet install_locations | awk '{print $2}')
+        EXProg=$(grep "PeptideProphet " install_locations | awk '{print $2}')
     fi
     if [[ ${prog} == "percolator" ]]; then
         LOCprog=$(locate bin/percolator)
-        EXProg=$(grep percolator install_locations | awk '{print $2}')
+        EXProg=$(grep "percolator " install_locations | awk '{print $2}')
     fi
     if [[ ${prog} == "tandem2xml" ]]; then
         LOCprog=$(locate bin/Tandem2XML)
-        EXProg=$(grep tandem2XML install_locations | awk '{print $2}')
+        EXProg=$(grep "tandem2XML " install_locations | awk '{print $2}')
     fi
     if [[ ${prog} == "tandem2pin" ]]; then
         LOCprog=$(locate bin/tandem2pin)
-        EXProg=$(grep tandem2pin install_locations | awk '{print $2}')
+        EXProg=$(grep "tandem2pin " install_locations | awk '{print $2}')
     fi
     if [[ ${prog} == "idconvert" ]]; then
         LOCprog=$(locate bin/idconvert)
-        EXProg=$(grep idconvert install_locations | awk '{print $2}')
+        EXProg=$(grep "idconvert " install_locations | awk '{print $2}')
     fi
     if [[ ${prog} == "msgf2pin" ]]; then
         LOCprog=$(locate bin/msgf2pin)
-        EXProg=$(grep msgf2pin install_locations | awk '{print $2}')
+        EXProg=$(grep "msgf2pin " install_locations | awk '{print $2}')
     fi
 #   Done checking the location of the programs
 #   Tells the user that a program isn't part of the pipeline
