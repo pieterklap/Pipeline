@@ -1,18 +1,18 @@
 #PeptideID
 
-Comet 
-Tandem 
-MSGFPlus 
+Comet /path/to/comet.exe
+Tandem /path/to/tandem.exe
+MSGFPlus /path/to/MSGFPlus.jar
 
 #Validator
 
-PeptideProphet 
-Triqler 
-percolator 
+PeptideProphet /path/to/PeptideProphetParser
+Triqler /path/to/Triqler
+percolator /path/to/percolator
 
 #Converters
 
-tandem2XML 
-tandem2pin 
-idconvert
-msgf2pin
+tandem2XML /path/to/Tandem2XML
+tandem2pin /path/to/tandem2pin
+idconvert /path/to/idconvert
+msgf2pin /path/to/msgf2pin
