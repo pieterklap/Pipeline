@@ -256,7 +256,7 @@ do
 done
 # done adding validators to the scripts
 # Adds analysis tools to the pipeline
-if [[ $gprofiler != "" ]] && [[ $NOVAL != "1" ]]; then
+if [[ $Programs == *"gprofiler"* ]] && [[ $NOVAL != "1" ]]; then
     for file in "$LOC"scripts/*.sh
     do
         cat "$LOC"src/gprofiler >> ${file}
@@ -307,29 +307,7 @@ if [[ "$RUNscripts" == "" ]] && [[ "$SHARK" != "1" ]]; then
         read -p "Are you sure you want to run the pipeline locally?(y/n): " RUN
         if [[ $RUN == [nN] ]]; then
             exit
-        fi        # Sets the correct parameter files to be used with the corect program
-        PID=$(echo ${file} | awk -F. '{print $1}' | awk -F_ '{print $1}' | awk -F/ '{print $NF}')
-        VAL=$(echo ${file} | awk -F. '{print $1}' | awk -F_ '{print $2}')
-
-        if [[ $PID == "comet" ]]; then
-            PIDparam="-p $comet"
         fi
-        if [[ $PID == "Xtandem" ]]; then
-            PIDparam="-p $tandem"
-        fi
-        if [[ $PID == "MSGFPlus" ]]; then
-            PIDparam="-p $msgfplus"
-        fi
-        if [[ $VAL == "peptideprophet" ]]; then
-            VALparam="-v $peptideprophet"
-        fi
-        if [[ $VAL == "percolator" ]]; then
-            VALparam="-v $percolator"
-        fi
-        if [[ $gprofiler != "" ]] && [[ $NOVAL != "1" ]]; then
-            GPparams="-g $gprofiler"
-        fi
-
     done
     for file in "$LOC"scripts/*.sh
     do
