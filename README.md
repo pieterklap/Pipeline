@@ -23,7 +23,7 @@ Add the location of the programs that you have installed to second collumn of th
 
 ## Options
 The PPG is issued with multiple variables some are required.  
-**Options required to generate the pipelines**
+**Options required to generate the pipelines**  
 [`-P [Programs to build pipelines for]`](https://github.com/pieterklap/Pipeline#Programs)  
 
 
