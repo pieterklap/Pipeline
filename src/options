@@ -38,6 +38,9 @@ while [ "$1" != "" ]; do
         -p | --parameter )      shift               # Enter -p to specify the paramater locatio
                                 PIDparam=$1
                                 ;;
+        -v | --valparameter )   shift
+                                VALparam=$1
+                                ;;
         -g | --gprofiler )      shift
                                 GPparams=$1
                                 ;;

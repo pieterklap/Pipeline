@@ -12,25 +12,17 @@ if [[ $LOC == "./" ]]; then
     LOC="$PWD/"
 fi
 
+valid="comet tandem msgfplus peptideprophet percolator gprofiler"
+
 echo $LOC
 # allows the options to work
 while [ "$1" != "" ]; do
 
     case $1 in
-        -P | --PeptideID )  while [[ ${2:0:1} != "-" ]] && [[ "$1" != "" ]]; do
+        -P | --Programs )   while [[ ${2:0:1} != "-" ]] && [[ "$1" != "" ]]; do
                                 shift                   # Allows for multiple PeptideIDentifiers (PIDs) to be entered
-                                PIDprog+=${1,,}" "      # Allows for multiple PeptideIDentifiers (PIDs) to be entered
+                                Programs+=${1,,}" "      # Allows for multiple PeptideIDentifiers (PIDs) to be entered
                                 NUMprog=$[$NUMprog+1]   # Counts the amount of programs entered
-                            done
-                            ;;
-        -V | --Validator )  while [[ ${2:0:1} != "-" ]] && [[ "$1" != "" ]]; do
-                                shift                   # Allows for multiple validators to be entered
-                                VALprog+=${1,,}" "      # Allows for multiple validators to be entered
-                            done
-                            ;;
-        -A | --analyis )    while [[ ${2:0:1} != "-" ]] && [[ "$1" != "" ]]; do
-                                shift                   # Allows for multiple analysis methods to be entered
-                                ANLprog+=${1,,}" "      # Allows for multiple analysis methods to be entered
                             done
                             ;;
         -L | --location )   location="$1 $2"            # If the script isn't ran where it was created (for use on the shark cluster)
@@ -44,15 +36,9 @@ while [ "$1" != "" ]; do
                             ;;
         -p | --parameters ) while [[ ${2:0:1} != "-" ]] && [[ "$1" != "" ]]; do
                                 shift
-                                PIDparam+=$1" "
+                                paramsProg+=$1" "
                                 NUMparam=$[$NUMparam+1] # Counts the amount of parameter files entered
                             done
-                            ;;
-        -g | --gprofiler )  GPparams="$1 $2"
-                            shift
-                            ;;
-        -L | --location )   shift
-                            LOC="$1"
                             ;;
         -l | --logfile )    logfile="$1 $2"
                             shift
@@ -68,23 +54,6 @@ while [ "$1" != "" ]; do
                             ;;
     esac
     shift
-done
-
-# sets the parameter files to be used for each peptide identifier
-for prog in $PIDprog
-do
-    if [[ ${prog} == comet ]]; then
-        paramcomet=$(echo $PIDparam | awk '{print "-p "$1}')
-        PIDparam=$(echo $PIDparam | awk '{$1="";print}')
-    fi
-    if [[ ${prog} == tandem ]]; then
-        paramtandem=$(echo $PIDparam | awk '{print "-p "$1}')
-        PIDparam=$(echo $PIDparam | awk '{$1="";print}')
-    fi
-    if [[ ${prog} == msgfplus ]]; then
-        paramMSGFPlus=$(echo $PIDparam | awk '{print "-p "$1}')
-        PIDparam=$(echo $PIDparam | awk '{$1="";print}')
-    fi
 done
 
 # adds all file locations to a variable to test if they are direct references i.e. start with /
@@ -113,57 +82,81 @@ if [[ $Exitcode = 2 ]]; then
 fi
 
 
+# sets the parameter files to be used for each peptide identifier
+for prog in $Programs
+do
+#   Check if the entered programs are a part of the pipeline
+    avalible=0
+    for name in $valid
+    do
+        if [[ ${name} == ${prog} ]]; then
+            avalible=1
+        fi
+    done
+    if [[ $avalible != 1 ]]; then
+        echo "ERROR: ${prog} is not a valid name"
+        exit
+    fi
+
+#   Puts the parameter location into a variable with the programs name and removes the location from the string of locations
+    paramloc=$(echo $paramsProg | awk '{print $1}')
+    declare "${prog}"="$paramloc"
+    paramsProg=$(echo $paramsProg | awk '{$1="";print}')
+done
+
 # Creates the files for the PIDs
-if [[ $PIDprog != "" ]]; then
-    mkdir -vp "$LOC".PIDs
-    rm -vf "$LOC".PIDs/*
-    # Creates the files that will use comet
-    if [[ $PIDprog == *"comet"* ]]; then
-        touch "$LOC".PIDs/comet
-    fi
-    # Creates the files that will use Xtandem
-    if [[ $PIDprog == *"tandem"* ]]; then
-        touch "$LOC".PIDs/Xtandem
-    fi
-    # Creates the files that will use MSGFPlus
-    if [[ $PIDprog == *"msgfplus"* ]]; then
-        touch "$LOC".PIDs/MSGFPlus
-    fi
+mkdir -vp "$LOC".PIDs
+rm -vf "$LOC".PIDs/*
+# Creates the files that will use comet
+if [[ $Programs == *"comet"* ]]; then
+    touch "$LOC".PIDs/comet
+fi
+# Creates the files that will use Xtandem
+if [[ $Programs == *"tandem"* ]]; then
+    touch "$LOC".PIDs/Xtandem
+fi
+# Creates the files that will use MSGFPlus
+if [[ $Programs == *"msgfplus"* ]]; then
+    touch "$LOC".PIDs/MSGFPlus
 fi
 # done creating files for the PIDs
 
 
 # Adds the validator to the name of the scripts
-if [[ $VALprog != "" ]]; then
-    mkdir -vp "$LOC".VALs
-    rm -vf "$LOC".VALs/*
-    # Creates the files that will use PeptideProphet
-    if [[ $VALprog == *"peptideprophet"* ]];then
-        for file in "$LOC".PIDs/*
-        do
-            cp -v ${file} ${file}_peptideprophet
-            cp "$LOC".PIDs/*_peptideprophet "$LOC".VALs/
-            rm -f "$LOC".PIDs/*_peptideprophet
-        done
-    fi
+mkdir -vp "$LOC".VALs
+rm -vf "$LOC".VALs/*
+# Creates the files that will use PeptideProphet
+if [[ $Programs == *"peptideprophet"* ]];then
+    for file in "$LOC".PIDs/*
+    do
+        cp -v ${file} ${file}_peptideprophet
+        cp "$LOC".PIDs/*_peptideprophet "$LOC".VALs/
+        rm -f "$LOC".PIDs/*_peptideprophet
+    done
+fi
+if [[ $Programs == *"triqler"* ]];then
+    for file in "$LOC".PIDs/*
+    do
+        cp -v ${file} ${file}_Triqler
+        cp "$LOC".PIDs/*_Triqler "$LOC".VALs/
+        rm -f "$LOC".PIDs/*_Triqler
+    done
+fi
+if [[ $Programs == *"percolator"* ]];then
+    for file in "$LOC".PIDs/*
+    do
+        cp -v ${file} ${file}_percolator
+        cp "$LOC".PIDs/*_percolator "$LOC".VALs/
+        rm -f "$LOC".PIDs/*_percolator
+    done
+fi
 
-    if [[ $VALprog == *"triqler"* ]];then
-        for file in "$LOC".PIDs/*
-        do
-            cp -v ${file} ${file}_Triqler
-            cp "$LOC".PIDs/*_Triqler "$LOC".VALs/
-            rm -f "$LOC".PIDs/*_Triqler
-        done
-    fi
-
-    if [[ $VALprog == *"percolator"* ]];then
-        for file in "$LOC".PIDs/*
-        do
-            cp -v ${file} ${file}_percolator
-            cp "$LOC".PIDs/*_percolator "$LOC".VALs/
-            rm -f "$LOC".PIDs/*_percolator
-        done
-    fi
+# checks if a validator has been used if not it copies everyting in the .PIDs directory to the .VALs directory
+# It also sets NOVAL to 1 to stop analysis programs from being added
+VALcheck=$(ls "$LOC".VALs)
+if [[ $VALcheck == "" ]]; then
+    cp "$LOC".PIDs/* "$LOC".VALs/
+    NOVAL="1"
 fi
 # done adding validators to the name of the scripts
 
@@ -262,11 +255,13 @@ do
     cat "$LOC"src/percolator >> ${file}
 done
 # done adding validators to the scripts
-
-for file in "$LOC"scripts/*.sh
-do
-    cat "$LOC"src/gprofiler >> ${file}
-done
+# Adds analysis tools to the pipeline
+if [[ $gprofiler != "" ]] && [[ $NOVAL != "1" ]]; then
+    for file in "$LOC"scripts/*.sh
+    do
+        cat "$LOC"src/gprofiler >> ${file}
+    done
+fi
 
 for file in "$LOC"scripts/*.sh
 do
@@ -283,6 +278,10 @@ done
 
 # tells the user the scripts are generated
 echo "$NUM scripts have been generated"
+if [[ $NOVAL == "1" ]] && [[ $gprofiler != "" ]]; then
+    echo "g:profiler isn't added to the script because it requires at least one validator"
+fi
+
 if [[ $RUNscripts == "" ]]; then
     if [[ $input == "" ]]; then
         echo "Error no input file given"
@@ -308,41 +307,84 @@ if [[ "$RUNscripts" == "" ]] && [[ "$SHARK" != "1" ]]; then
         read -p "Are you sure you want to run the pipeline locally?(y/n): " RUN
         if [[ $RUN == [nN] ]]; then
             exit
+        fi        # Sets the correct parameter files to be used with the corect program
+        PID=$(echo ${file} | awk -F. '{print $1}' | awk -F_ '{print $1}' | awk -F/ '{print $NF}')
+        VAL=$(echo ${file} | awk -F. '{print $1}' | awk -F_ '{print $2}')
+
+        if [[ $PID == "comet" ]]; then
+            PIDparam="-p $comet"
         fi
+        if [[ $PID == "Xtandem" ]]; then
+            PIDparam="-p $tandem"
+        fi
+        if [[ $PID == "MSGFPlus" ]]; then
+            PIDparam="-p $msgfplus"
+        fi
+        if [[ $VAL == "peptideprophet" ]]; then
+            VALparam="-v $peptideprophet"
+        fi
+        if [[ $VAL == "percolator" ]]; then
+            VALparam="-v $percolator"
+        fi
+        if [[ $gprofiler != "" ]] && [[ $NOVAL != "1" ]]; then
+            GPparams="-g $gprofiler"
+        fi
+
     done
     for file in "$LOC"scripts/*.sh
     do
-        PID=$(echo ${file} | awk -F_ '{print $1}' | awk -F/ '{print $NF}')
+        # Sets the correct parameter files to be used with the corect program
+        PID=$(echo ${file} | awk -F. '{print $1}' | awk -F_ '{print $1}' | awk -F/ '{print $NF}')
+        VAL=$(echo ${file} | awk -F. '{print $1}' | awk -F_ '{print $2}')
 
         if [[ $PID == "comet" ]]; then
-            PIDparam=$paramcomet
+            PIDparam="-p $comet"
         fi
         if [[ $PID == "Xtandem" ]]; then
-            PIDparam=$paramtandem
+            PIDparam="-p $tandem"
         fi
         if [[ $PID == "MSGFPlus" ]]; then
-            PIDparam=$paramMSGFPlus
+            PIDparam="-p $msgfplus"
         fi
-        ${file} $PIDparam $input $output $logfile $location $GPparams
+        if [[ $VAL == "peptideprophet" ]]; then
+            VALparam="-v $peptideprophet"
+        fi
+        if [[ $VAL == "percolator" ]]; then
+            VALparam="-v $percolator"
+        fi
+        if [[ $gprofiler != "" ]] && [[ $NOVAL != "1" ]]; then
+            GPparams="-g $gprofiler"
+        fi
+#           Run the pipeline for each combination of programs
+            ${file} $PIDparam $VALparam $input $output $logfile $location $GPparams
     done
 fi
 
 if [[ "$RUNscripts" == "" ]] && [[ "$SHARK" == "1" ]]; then
     for file in "$LOC"scripts/*.sh
     do
-        PID=$(echo ${file} | awk -F_ '{print $1}' | awk -F/ '{print $NF}')
+        # Sets the correct parameter files to be used with the corect program
+        PID=$(echo ${file} | awk -F. '{print $1}' | awk -F_ '{print $1}' | awk -F/ '{print $NF}')
+        VAL=$(echo ${file} | awk -F. '{print $1}' | awk -F_ '{print $2}')
 
         if [[ $PID == "comet" ]]; then
-            PIDparam=$paramcomet
+            PIDparam="-p $comet"
         fi
         if [[ $PID == "Xtandem" ]]; then
-            PIDparam=$paramtandem
+            PIDparam="-p $tandem"
         fi
         if [[ $PID == "MSGFPlus" ]]; then
-            PIDparam=$paramMSGFPlus
+            PIDparam="-p $msgfplus"
+        fi
+        if [[ $VAL == "peptideprophet" ]]; then
+            VALparam="-v $peptideprophet"
+        fi
+        if [[ $VAL == "percolator" ]]; then
+            VALparam="-v $percolator"
+        fi
+        if [[ $gprofiler != "" ]] && [[ $NOVAL != "1" ]]; then
+            GPparams="-g $gprofiler"
         fi
         qsub $SHARKoptions ${file} $PIDparam $input $output $logfile $location $GPparams
     done
 fi
-
-

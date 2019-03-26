@@ -15,4 +15,3 @@ java -Xmx3500M -jar $PIDMSGF -s $PIDinput -o $PIDoutput/$MSGFoutput $MSGFparam |
 PIDoutput="$PIDoutput/$MSGFoutput"
 
 ##End## "MSGFPlus"
-
