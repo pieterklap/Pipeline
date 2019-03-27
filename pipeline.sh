@@ -97,7 +97,6 @@ do
         echo "ERROR: ${prog} is not a valid name"
         exit
     fi
-
 #   Puts the parameter location into a variable with the programs name and removes the location from the string of locations
     paramloc=$(echo $paramsProg | awk '{print $1}')
     declare "${prog}"="$paramloc"
@@ -282,6 +281,7 @@ if [[ $NOVAL == "1" ]] && [[ $gprofiler != "" ]]; then
     echo "g:profiler isn't added to the script because it requires at least one validator"
 fi
 
+# Checks if the required parameters have been passed to the script
 if [[ $RUNscripts == "" ]]; then
     if [[ $input == "" ]]; then
         echo "Error no input file given"
