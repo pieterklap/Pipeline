@@ -35,7 +35,7 @@ sed "s/\"spectrum, path\".*/\"spectrum, path\">$inputXT<\/note>/" "$PIDparam" > 
 sed "s/\"output, path\".*/\"output, path\">$outputXT\/output.xml<\/note>/" "$LOC".tandemtemp/input.xml > "$PIDparam"  # Changes the output path to$
 
 # run Xtandem
-$XTprog $PIDparam |tee -a "$datelog"
+$XTprog $PIDparam |& tee -a "$datelog"
 
 # remove the temporary directory
 rm -fr "$LOC".tandemtemp/

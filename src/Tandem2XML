@@ -9,7 +9,7 @@ VALinput=${T2XMLinput//.xml/.pep.xml}
 T2XML=$(grep Tandem2XML $LOC../install_locations | awk '{print $2}')
 
 # runs Tandem2XML
-$T2XML $T2XMLinput $VALinput | tee -a "$datelog"
+$T2XML $T2XMLinput $VALinput |& tee -a "$datelog"
 
 # sets PIDoutput to be used in peptideprophet
 PIDoutput="$VALinput"

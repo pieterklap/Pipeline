@@ -7,7 +7,7 @@ sed 's/taxon">human/taxon">human_decoy/' $PIDparam > $PIDparam_decoy
 
 # run tandem with the decoy
 
-$XTprog $PIDparam_decoy | tee -a $datelog
+$XTprog $PIDparam_decoy |& tee -a $datelog
 
 PIDoutput_decoy=$(ls -t "$STout""$NAME"/* |head -n1)
 
@@ -18,7 +18,7 @@ tandem2pin=$(grep tandem2pin $LOC../install_locations | awk '{print $2}')
 EXTENTION=$(echo $PIDoutput |awk -F\. '{print $NF}')
 VALinput=$(echo $PIDoutput | sed "s/$EXTENTION/tsv/")
 
-$tandem2pin -o $VALinput $PIDoutput $PIDoutput_decoy
+$tandem2pin -o $VALinput $PIDoutput $PIDoutput_decoy |& tee -a $datelog
 
 PIDoutput=$VALinput
 

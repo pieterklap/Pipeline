@@ -9,7 +9,7 @@ if [ ! -f $PIDcomet ]; then
 fi
 
 # run comet 
-"$PIDcomet" -P"$PIDparam" "$PIDinput" | tee -a "$datelog"
+"$PIDcomet" -P"$PIDparam" "$PIDinput" |& tee -a "$datelog"
 
 if [[ $COMEToutput == "" ]]; then
     COMEToutput=$(echo $STout*.xml)

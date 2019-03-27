@@ -10,7 +10,7 @@ PIDMSGF=$(grep MSGFPlus $LOC../install_locations | awk '{print $2}')
 
 MSGFparam=$(grep -v "^#" $PIDparam |awk '{print $2,$3}' |tr "\n" " ")
 
-java -Xmx3500M -jar $PIDMSGF -s $PIDinput -o $PIDoutput/$MSGFoutput $MSGFparam |tee -a "$datelog"
+java -Xmx3500M -jar $PIDMSGF -s $PIDinput -o $PIDoutput/$MSGFoutput $MSGFparam |& tee -a "$datelog"
 
 PIDoutput="$PIDoutput/$MSGFoutput"
 

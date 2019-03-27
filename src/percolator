@@ -7,11 +7,12 @@ percolator=$(grep percolator $LOC../install_locations | awk '{print $2}')
 
 EXTENTION=$(echo $PIDoutput | awk -F. '{print $NF}')
 VALoutput=$(echo $PIDoutput | sed "s/$EXTENTION/put.xml/")
+TSVoutput=$(echo $PIDoutput | sed "s/$EXTENTION/tsv/")
 
 VALparam=$(grep -v "^#" $VALparam | awk '{print $1, $2}' | tr "\n" " ")
 
 
-$percolator -X $VALoutput $VALparam $PIDoutput >> $datelog
+$percolator -X $VALoutput $VALparam $PIDoutput >$TSVoutput 2>> $datelog
 
 #	convert pin.xml to pep.xml with psmconvert
 

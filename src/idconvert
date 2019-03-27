@@ -4,7 +4,7 @@ EXTENTION=$(echo "$PIDoutput" |awk -F. '{print $NF}')
 
 IDCONVoutput=$(echo $PIDoutput | awk -F/ '{$NF="";print $0}' | tr " " "/")
 
-$idconvert $PIDoutput --pepXML -o $IDCONVoutput |tee -a "$datelog"
+$idconvert $PIDoutput --pepXML -o $IDCONVoutput |& tee -a "$datelog"
 
 PIDoutput=$(echo $PIDoutput | sed "s/$EXTENTION//")
 mv $PIDoutput"pepXML" $PIDoutput"pep.xml"
