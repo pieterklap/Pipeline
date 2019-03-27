@@ -16,7 +16,7 @@ PIDoutput_decoy=$(ls -t "$STout""$NAME"/* |head -n1)
 
 tandem2pin=$(grep tandem2pin $LOC../install_locations | awk '{print $2}')
 EXTENTION=$(echo $PIDoutput |awk -F\. '{print $NF}')
-VALinput=$(echo $PIDoutput | sed "s/$EXTENTION/tsv/")
+VALinput=$(echo $PIDoutput | sed "s/$EXTENTION/pin/")
 
 $tandem2pin -o $VALinput $PIDoutput $PIDoutput_decoy |& tee -a $datelog
 
