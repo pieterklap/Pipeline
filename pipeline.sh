@@ -172,6 +172,7 @@ do
 done
 
 # Creates the directory scripts and copies the scripts to it and makes them executable and removes the files in the temp folders
+rm -v "$LOC"scripts/*
 mkdir -vp "$LOC"scripts
 cp -v "$LOC".END/* "$LOC"scripts/
 chmod 750 "$LOC"scripts/*
@@ -339,6 +340,10 @@ if [[ "$RUNscripts" == "" ]] && [[ "$SHARK" != "1" ]]; then
 fi
 
 if [[ "$RUNscripts" == "" ]] && [[ "$SHARK" == "1" ]]; then
+    if [[ $location == "" ]]; then
+        location="-L $LOC/scripts"
+    fi
+
     for file in "$LOC"scripts/*.sh
     do
         # Sets the correct parameter files to be used with the corect program

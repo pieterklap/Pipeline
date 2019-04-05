@@ -5,4 +5,10 @@ echo "$0 is done runnig"
 echo -e "\nEnd time: " >> "$datelog"
 date -I'seconds' >> "$datelog"
 
+End_Seconds=$(date +%s)
+
+Total_Time=$(($End_Seconds-$Start_Seconds))
+
+echo "Total seconds: $Total_Time" | tee -a $datelog
+
 ##End## "End"

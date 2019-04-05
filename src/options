@@ -80,6 +80,7 @@ datelog="$logfile"logfile_"$NAME"_"$datelog"    #sets the name of the logfile, d
 echo "Start time: " > "$datelog"
 date -I'seconds' >> "$datelog"
 echo " " >> "$datelog"
+Start_Seconds=$(date +%s)
 
 # Tells the user where the logfile is located
 if [[ $logfile == "" ]]; then

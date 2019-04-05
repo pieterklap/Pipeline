@@ -13,6 +13,9 @@ else
     echo -e "Run the script as root if some programs are missing or removed programs are shown\n"
 fi
 
+if [[ $LOC == "" ]]; then
+    LOC="*/bin/"
+fi
 
 PROGs=${@,,}
 
@@ -37,11 +40,11 @@ do
 
 #   Checks all the posible locations of the programs 
     if [[ ${prog} == "comet" ]]; then
-        LOCprog=$(locate "$LOC"comet.exe)
+        LOCprog=$(locate "$LOC"comet)
         EXProg=$(grep "Comet " install_locations | awk '{print $2}')
     fi
     if [[ ${prog} == "tandem" ]]; then
-        LOCprog=$(locate "$LOC"tandem.exe)
+        LOCprog=$(locate "$LOC"tandem)
         EXProg=$(grep "Tandem " install_locations | awk '{print $2}')
     fi
     if [[ ${prog} == "msgfplus" ]]; then
@@ -78,10 +81,10 @@ do
     if [[ $notavalible != 1 ]]; then
         echo "${prog} is not an avalible program"
     else
-        #count the amount of programs found
+#       Count the amount of programs found
         NUMprog=$(echo $LOCprog | wc -w)
         if [[ "$NUMprog" == "1" ]]; then
-            #if only one file has been found enter the file into the install_locations file
+#           If only one file has been found enter the file into the install_locations file
             echo -e "\n$NUMprog version of ${prog} found and updated\n$LOCprog"
 
             sedProg=${LOCprog//\//\\/}               # sets backslashes in front of forward slashes for use with sed
@@ -91,11 +94,11 @@ do
             cat .install_locations > install_locations
             rm .install_locations
         fi
-        # errors if more than one program has been foun report to the user the amount and which programs
+#       If more than one program has been found report to the user the amount and which programs
         if [[ "$NUMprog" > "1" ]]; then
             echo -e "\n$NUMprog versions of ${prog} found"
             if (( "$NUMprog" > "10" )); then
-                echo -e "\nonly the first 10 results are shown use the option -f [location] to reduce the search space"
+                echo -e "\nonly the first 10 results are shown use the option -l [location] to reduce the search space"
                 echo "$LOCprog" | head -n10
             else
                 echo -e "\n$LOCprog"
@@ -104,6 +107,7 @@ do
 #       Tells the user which prorgam hasn't been found
         if [[ $NUMprog == 0 ]]; then
             echo -e "\n${prog} not found"
+            echo "use the option -l [location] to increase the search space"
         fi
         EXProg=$(grep Comet install_locations | awk '{print $2}')
         Prog=$LOCprog
