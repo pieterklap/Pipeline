@@ -14,18 +14,21 @@ fi
 
 valid="comet tandem msgfplus peptideprophet percolator gprofiler"
 
-echo $LOC
+NUMprog="0"
+NUMparam="0"
+
+#echo $LOC
 # allows the options to work
 while [ "$1" != "" ]; do
 
     case $1 in
-        -P | --Programs )   while [[ ${2:0:1} != "-" ]] && [[ "$1" != "" ]]; do
-                                shift                   # Allows for multiple PeptideIDentifiers (PIDs) to be entered
-                                Programs+=${1,,}" "      # Allows for multiple PeptideIDentifiers (PIDs) to be entered
+        -P | --Programs )   while [[ ${2:0:1} != "-" ]] && [[ "$2" != "" ]]; do
+                                shift
+                                Programs+=${1,,}" "     # Puts the program names in a variable
                                 NUMprog=$[$NUMprog+1]   # Counts the amount of programs entered
                             done
                             ;;
-        -L | --location )   location="$1 $2"            # If the script isn't ran where it was created (for use on the shark cluster)
+        -L | --location )   location="$1 $2"            # If the script isn't ran where it was created (for use on the shark cluster) Probably redundent
                             shift
                             ;;
         -i | --input )      input="$1 $2"
@@ -34,7 +37,7 @@ while [ "$1" != "" ]; do
         -o | --output )     output="$1 $2"
                             shift
                             ;;
-        -p | --parameters ) while [[ ${2:0:1} != "-" ]] && [[ "$1" != "" ]]; do
+        -p | --parameters ) while [[ ${2:0:1} != "-" ]] && [[ "$2" != "" ]]; do
                                 shift
                                 paramsProg+=$1" "
                                 NUMparam=$[$NUMparam+1] # Counts the amount of parameter files entered
@@ -82,27 +85,72 @@ if [[ $Exitcode = 2 ]]; then
 fi
 
 
-# sets the parameter files to be used for each peptide identifier
-for prog in $Programs
-do
-#   Check if the entered programs are a part of the pipeline
-    avalible=0
-    for name in $valid
-    do
-        if [[ ${name} == ${prog} ]]; then
-            avalible=1
-        fi
-    done
-    if [[ $avalible != 1 ]]; then
-        echo "ERROR: ${prog} is not a valid name"
-        exit
-    fi
-#   Puts the parameter location into a variable with the programs name and removes the location from the string of locations
-    paramloc=$(echo $paramsProg | awk '{print $1}')
-    declare "${prog}"="$paramloc"
-    paramsProg=$(echo $paramsProg | awk '{$1="";print}')
-done
+# if only one parameter file was entered but multiple programs the pipeline assumes the parameter file is the Shared parameter file.
+if (($NUMprog > 1)) && [[ $NUMparam == "1" ]]; then
+#   Use the Shared parameter file
+    echo "not fully implemented yet"
 
+    LOC_Shared_param_file="$paramsProg"
+    echo "Shared param file"
+
+#   removes the spaces between the parameter name and value and makes sure there is one space between each parameter
+    Shared_param_file=$(grep -v "^#" $LOC_Shared_param_file | sed "s/ //g" | tr "\n" " " | tr "\t" " " | sed "s/ \+/ /g" |tr " " "\n" )
+
+#   if no output directory is given set the outputdirectory to the working directory
+    LOC_param=$(echo $LOC_Shared_param_file | awk -F/ '{$NF="";print $0}' | tr " " "/")
+    output_dir=$LOC_param
+#   resets the parameter counter
+    NUMparam="0"
+
+    source "$LOC"Shared_parameter_maker.sh
+
+    if [[ $Programs == *"comet"* ]]; then
+        Comet
+        comet="$cometparam"
+        NUMparam=$[$NUMparam+1]
+    fi
+    if [[ $Programs == *"tandem"* ]]; then
+        Tandem
+        tandem="Tandemparam_input"
+        NUMparam=$[$NUMparam+1]
+    fi
+    if [[ $Programs == *"msgfplus"* ]]; then
+        MSGFPlus
+        msgfplus="$MSGFPlusparam"
+        NUMparam=$[$NUMparam+1]
+    fi
+    if [[ $Programs == *"peptideprophet"* ]]; then
+        NUMparam=$[$NUMparam+1]
+    fi
+    if [[ $Programs == *"percolator"* ]]; then
+        NUMparam=$[$NUMparam+1]
+    fi
+else
+#   use the parameter files the user entered
+    echo "idividual parameter files"
+
+# sets the parameter files to be used for each peptide identifier
+    for prog in $Programs
+    do
+#   Check if the entered programs are a part of the pipeline
+        avalible=0
+        for name in $valid
+        do
+            if [[ ${name} == ${prog} ]]; then
+                avalible=1
+            fi
+        done
+        if [[ $avalible != 1 ]]; then
+            echo "ERROR: ${prog} is not a valid name"
+            exit
+        fi
+#   Puts the parameter location into a variable with the programs name and removes the location from the string of locations
+        paramloc=$(echo $paramsProg | awk '{print $1}')
+        declare "${prog}"="$paramloc"
+        paramsProg=$(echo $paramsProg | awk '{$1="";print}')
+    done
+
+fi
 # Creates the files for the PIDs
 mkdir -vp "$LOC".PIDs
 rm -vf "$LOC".PIDs/*
@@ -371,3 +419,6 @@ if [[ "$RUNscripts" == "" ]] && [[ "$SHARK" == "1" ]]; then
         qsub $SHARKoptions ${file} $PIDparam $input $output $logfile $location $GPparams
     done
 fi
+
+#END of pipeline generator
+exit
