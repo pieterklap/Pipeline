@@ -5,8 +5,6 @@ Header_ver="(v0.x)"
 Header_file_ver=$(head -n1 $LOC_Shared_param_file | awk '{print $NF}')
 Header_file=$(head -n1 $LOC_Shared_param_file | awk '{$NF="";print $0}')
 
-echo "$Header"
-echo "$Header_file"
 
 if [[ "$Header" != "$Header_file" ]]; then
     echo "Shared parameter file is in the incorrect format"
@@ -56,7 +54,7 @@ Comet ()
     echo "peff_obo =" >> $cometparam
     echo "num_threads = $NumThreads" >> $cometparam
     echo "peptide_mass_tolerance = $PrecursorMassTolerance" >> $cometparam
-    echo "peptide_mass_units = $PrecursorMassUnit" >> $cometparam
+    echo "peptide_mass_units = $MassUnit" >> $cometparam
     echo "mass_type_parent = $mass_type_precursor" >> $cometparam
     echo "mass_type_fragment = $mass_type_fragment" >> $cometparam
 
@@ -128,6 +126,61 @@ Comet ()
 
 
 #   TODO: Add modification to the list
+    echo "variable_mod01 = 0.0 X 0 0 -1 0 0" >> $cometparam
+    echo "variable_mod02 = 0.0 X 0 3 -1 0 0" >> $cometparam
+    echo "variable_mod03 = 0.0 X 0 3 -1 0 0" >> $cometparam
+    echo "variable_mod04 = 0.0 X 0 3 -1 0 0" >> $cometparam
+    echo "variable_mod05 = 0.0 X 0 3 -1 0 0" >> $cometparam
+    echo "variable_mod06 = 0.0 X 0 3 -1 0 0" >> $cometparam
+    echo "variable_mod07 = 0.0 X 0 3 -1 0 0" >> $cometparam
+    echo "variable_mod08 = 0.0 X 0 3 -1 0 0" >> $cometparam
+    echo "variable_mod09 = 0.0 X 0 3 -1 0 0" >> $cometparam
+    echo "max_variable_mods_in_peptide = 5" >> $cometparam
+    echo -e "require_variable_mod = 0\n" >> $cometparam
+
+    echo "add_Cterm_peptide = 0.0" >> $cometparam
+    echo "add_Nterm_peptide = 0.0" >> $cometparam
+    echo "add_Cterm_protein = 0.0" >> $cometparam
+    echo "add_Nterm_protein = 0.0" >> $cometparam
+    echo "add_G_glycine = 0.0000" >> $cometparam
+    echo "add_A_alanine = 0.0000" >> $cometparam
+    echo "add_S_serine = 0.0000" >> $cometparam
+    echo "add_P_proline = 0.0000" >> $cometparam
+    echo "add_V_valine = 0.0000" >> $cometparam
+    echo "add_T_threonine = 0.0000" >> $cometparam
+    echo "add_C_cysteine = 0.0000" >> $cometparam
+    echo "add_L_leucine = 0.0000" >> $cometparam
+    echo "add_I_isoleucine = 0.0000" >> $cometparam
+    echo "add_N_asparagine = 0.0000" >> $cometparam
+    echo "add_D_aspartic_acid = 0.0000" >> $cometparam
+    echo "add_Q_glutamine = 0.0000" >> $cometparam
+    echo "add_K_lysine = 0.0000" >> $cometparam
+    echo "add_E_glutamic_acid = 0.0000" >> $cometparam
+    echo "add_M_methionine = 0.0000" >> $cometparam
+    echo "add_O_ornithine = 0.0000" >> $cometparam
+    echo "add_H_histidine = 0.0000" >> $cometparam
+    echo "add_F_phenylalanine = 0.0000" >> $cometparam
+    echo "add_U_selenocysteine = 0.0000" >> $cometparam
+    echo "add_R_arginine = 0.0000" >> $cometparam
+    echo "add_Y_tyrosine = 0.0000" >> $cometparam
+    echo "add_W_tryptophan = 0.0000" >> $cometparam
+    echo "add_B_user_amino_acid = 0.0000" >> $cometparam
+    echo "add_J_user_amino_acid = 0.0000" >> $cometparam
+    echo "add_X_user_amino_acid = 0.0000" >> $cometparam
+    echo -e "add_Z_user_amino_acid = 0.0000\n" >> $cometparam
+
+    echo "[COMET_ENZYME_INFO]" >> $cometparam
+    echo "0.  NoEnzyme               0      -           -" >> $cometparam
+    echo "1.  Trypsin                1      KR          P" >> $cometparam
+    echo "2.  Trypsin/P              1      KR          -" >> $cometparam
+    echo "3.  Lys_C                  1      K           P" >> $cometparam
+    echo "4.  Lys_N                  0      K           -" >> $cometparam
+    echo "5.  Arg_C                  1      R           P" >> $cometparam
+    echo "6.  Asp_N                  0      D           -" >> $cometparam
+    echo "7.  CNBr                   1      M           -" >> $cometparam
+    echo "8.  Glu_C                  1      DE          P" >> $cometparam
+    echo "9.  PepsinA                1      FL          P" >> $cometparam
+    echo "10. Chymotrypsin           1      FWYL        P" >> $cometparam
 
 #   End of Comet parameter generation
     echo "Comet parameter file has been generated. located at: $cometparam"
@@ -154,10 +207,10 @@ MSGFPlus ()
 
 
     echo "DatabaseFile -d $fasta_file" > $MSGFPlusparam
-    if [[ "$PrecursorMassUnit" == "Daltons" ]]; then
-        local PrecursorMassUnit="Da"
+    if [[ "$MassUnit" == "Daltons" ]]; then
+        local MassUnit="Da"
     fi
-    echo "PrecursorMassTolerance -t $PrecursorMassTolerance$PrecursorMassUnit" >> $MSGFPlusparam
+    echo "PrecursorMassTolerance -t $PrecursorMassTolerance$MassUnit" >> $MSGFPlusparam
     echo "IsotopeErrorRange -ti $IsotopeErrorRange" >> $MSGFPlusparam
     echo "NumThreads -thread $NumThreads" >> $MSGFPlusparam
     echo "NumTasks -tasks $NumTasks" >> $MSGFPlusparam
@@ -168,10 +221,10 @@ MSGFPlus ()
     echo "FragmentMethodID -m $FragmentMethodID" >> $MSGFPlusparam
     echo "MS2DetectorID -inst $MS2DetectorID" >> $MSGFPlusparam
 
-    local search_enzyme_number=$(grep "^#enzyme: $search_enzyme_number" $LOC_Shared_param_file | awk '{print $7}')
+    local search_enzyme_number=$(grep "^#enzyme: $search_enzyme_number " $LOC_Shared_param_file | awk '{print $7}')
     echo "EnzymeID -e $search_enzyme_number" >> $MSGFPlusparam
     echo "ProtocolID -protocol $ProtocolID" >> $MSGFPlusparam
-    echo "Tolerable_Termini -ntt $Tolerable_Termini" >> $MSGFPlusparam
+    echo "Tolerable_Termini -ntt $num_enzyme_termini" >> $MSGFPlusparam
 
     echo "MinPepLength -minLength $MinPepLength" >> $MSGFPlusparam
     echo "MaxPepLength -maxLength $MaxPepLength" >> $MSGFPlusparam
@@ -355,3 +408,14 @@ Tandem ()
     echo "Tandem parameter file has been generated. located at: $Tandemparam"
 }
 
+PeptideProphet ()
+{
+PepProphParam=$(grep "^PeptideProphet_parameter" $LOC_Shared_param_file | awk '{print $3}')
+
+}
+
+Percolator ()
+{
+PercolatorParam=$(grep "^Percolator_parameter" $LOC_Shared_param_file | awk '{print $3}')
+
+}

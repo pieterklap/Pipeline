@@ -103,26 +103,33 @@ if (($NUMprog > 1)) && [[ $NUMparam == "1" ]]; then
     NUMparam="0"
 
     source "$LOC"Shared_parameter_maker.sh
-
+    source "$LOC"modifications.sh
     if [[ $Programs == *"comet"* ]]; then
         Comet
+        Comet_mods
         comet="$cometparam"
         NUMparam=$[$NUMparam+1]
     fi
     if [[ $Programs == *"tandem"* ]]; then
         Tandem
-        tandem="Tandemparam_input"
+        Tandem_mods
+        tandem="$Tandemparam_input"
         NUMparam=$[$NUMparam+1]
     fi
     if [[ $Programs == *"msgfplus"* ]]; then
         MSGFPlus
+        MSGF_mods
         msgfplus="$MSGFPlusparam"
         NUMparam=$[$NUMparam+1]
     fi
     if [[ $Programs == *"peptideprophet"* ]]; then
+        PeptideProphet
+        peptideprophet="$PepProphParam"
         NUMparam=$[$NUMparam+1]
     fi
     if [[ $Programs == *"percolator"* ]]; then
+        Percolator
+        percolator="$PercolatorParam"
         NUMparam=$[$NUMparam+1]
     fi
 else
