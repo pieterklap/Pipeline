@@ -1,0 +1,144 @@
+#!/bin/bash
+
+Maximum_mods_per_peptide = 3
+
+# Only able to add up to 9 variable modification and one fixed modification per residue.
+#mod[0-9][0-9]=[Name]:[mass]:[residue(s)]:[fix/opt]:[n/c-term]:[distance]:[forced]
+mod01=Oxidation:15.994915:M:opt:0:-1:0
+mod02=Carbamidomethyl:57.021464:C:fix:0:-1:0
+#mod03=Acetyl:42.037:n:opt:0:0:0
+
+
+
+#C2H2O,*,opt,Prot-N-term,Acetyl
+#Comet:variable_mod_num 1.mass 2.residues 3.variable/binary 4.max_mods_per_peptide 5.distence_from_terminal 6.N/C-term 7.mod_required
+#MSGF+: 1.mass 2.residues 3.fixed/variable 4.N/C-term 5.Unimod_PSI-MS_name
+
+
+#variable_mod01 = 15.994915 M 0 3 -1 0 0 
+#15.994915,M,opt,any,Oxidation 
+
+
+# [1  ]:[2  ]:[3  ]:[4  ]:[5  ]:[6  ]:[7  ]:[8  ]
+# [ctm]:[ctm]:[c  ]:[c.m]:[c.0]:[c.m]:[c.0]:[ctm]
+#   1.mass 
+#       decimal value specifying the modification mass difference. 
+#   2.residues
+#       the residue(s) that the modifications are possibly applied to. 
+#       If more than a single residue is modified by the same mass difference, list them all as a string. 
+#       Use 'n' for N-terminal modfication and 'c' for C-terminal modification
+#   3.variable/binary
+#       an integer 0 or 1 to specify whether the modification is a variable modification (0) or a binary modification (1).
+#           0 = variable modification analyzes all permutations of modified and unmodified residues.
+#           1 = A binary modification analyzes peptides where all residues are either modified or all residues are not modified. 
+#   4.max_mods_per_peptide
+#       an integer specifying the maximum number of modified residues possible in a peptide for this modification entry.
+#   5.distence_from_terminal
+#       specifies the distance the modification is applied to from the respective terminus:
+#          -1 = no distance contraint
+#           0 = only applies to terminal residue
+#           1 = only applies to terminal residue and next residue
+#           2 = only applies to terminal residue through next 2 residues
+#           N = only applies to terminal residue through next N residues where N is a positive integer 
+#   6.N/C-term
+#       specifies which terminus the distance constraint is applied to:
+#           0 = protein N-terminus
+#           1 = protein C-terminus
+#           2 = peptide N-terminus
+#           3 = peptide C-terminus 
+#   7.mod_required
+#       specifies whether peptides are must contain this modification 
+#           0 = not forced to be present
+#           1 = modification is required 
+
+comet
+# format:  <mass> <residues> <0=variable/else binary> <max_mods_per_peptide> <term_distance> <n/c-term> <required>
+#     e.g. 79.966331 STY 0 3 -1 0 0
+#   variable modifications
+variable_mod01 = 15.9949 M 0 3 -1 0 0
+variable_mod02 = 0.0 X 0 3 -1 0 0
+variable_mod03 = 0.0 X 0 3 -1 0 0
+variable_mod04 = 0.0 X 0 3 -1 0 0
+variable_mod05 = 0.0 X 0 3 -1 0 0
+variable_mod06 = 0.0 X 0 3 -1 0 0
+variable_mod07 = 0.0 X 0 3 -1 0 0
+variable_mod08 = 0.0 X 0 3 -1 0 0
+variable_mod09 = 0.0 X 0 3 -1 0 0
+max_variable_mods_in_peptide = 5
+require_variable_mod = 0
+
+#   fixed modifications
+add_Cterm_peptide = 0.0
+add_Nterm_peptide = 0.0
+add_Cterm_protein = 0.0
+add_Nterm_protein = 0.0
+
+add_G_glycine = 0.0000                 # added to G - avg.  57.0513, mono.  57.02146
+add_A_alanine = 0.0000                 # added to A - avg.  71.0779, mono.  71.03711
+add_S_serine = 0.0000                  # added to S - avg.  87.0773, mono.  87.03203
+add_P_proline = 0.0000                 # added to P - avg.  97.1152, mono.  97.05276
+add_V_valine = 0.0000                  # added to V - avg.  99.1311, mono.  99.06841
+add_T_threonine = 0.0000               # added to T - avg. 101.1038, mono. 101.04768
+add_C_cysteine = 57.021464             # added to C - avg. 103.1429, mono. 103.00918
+add_L_leucine = 0.0000                 # added to L - avg. 113.1576, mono. 113.08406
+add_I_isoleucine = 0.0000              # added to I - avg. 113.1576, mono. 113.08406
+add_N_asparagine = 0.0000              # added to N - avg. 114.1026, mono. 114.04293
+add_D_aspartic_acid = 0.0000           # added to D - avg. 115.0874, mono. 115.02694
+add_Q_glutamine = 0.0000               # added to Q - avg. 128.1292, mono. 128.05858
+add_K_lysine = 0.0000                  # added to K - avg. 128.1723, mono. 128.09496
+add_E_glutamic_acid = 0.0000           # added to E - avg. 129.1140, mono. 129.04259
+add_M_methionine = 0.0000              # added to M - avg. 131.1961, mono. 131.04048
+add_O_ornithine = 0.0000               # added to O - avg. 132.1610, mono  132.08988
+add_H_histidine = 0.0000               # added to H - avg. 137.1393, mono. 137.05891
+add_F_phenylalanine = 0.0000           # added to F - avg. 147.1739, mono. 147.06841
+add_U_selenocysteine = 0.0000          # added to U - avg. 150.0379, mono. 150.95363
+add_R_arginine = 0.0000                # added to R - avg. 156.1857, mono. 156.10111
+add_Y_tyrosine = 0.0000                # added to Y - avg. 163.0633, mono. 163.06333
+add_W_tryptophan = 0.0000              # added to W - avg. 186.0793, mono. 186.07931
+
+tandem
+1. Mass
+2. residue
+3. fixed/var
+4. complex
+
+
+    <note type="input" label="protein, cleavage C-terminal mass change">+17.002735</note>
+    <note type="input" label="protein, cleavage N-terminal mass change">+1.007825</note>
+    <note type="input" label="protein, N-terminal residue modification mass">0.0</note>
+    <note type="input" label="protein, C-terminal residue modification mass">0.0</note>
+
+<note>residue modification parameters</note>
+    <note type="input" label="residue, modification mass">57.022@C</note>
+        <note>The format of this parameter is m@X, where m is the modfication
+        mass in Daltons and X is the appropriate residue to modify. Lists of
+        modifications are separated by commas. For example, to modify M and C
+        with the addition of 16.0 Daltons, the parameter line would be
+        +16.0@M,+16.0@C
+        Positive and negative values are allowed.
+        </note>
+    <note type="input" label="residue, potential modification mass"></note>
+        <note>The format of this parameter is the same as the format
+        for residue, modification mass (see above).</note>
+    <note type="input" label="residue, potential modification motif"></note>
+        <note>The format of this parameter is similar to residue, modification mass,
+        with the addition of a modified PROSITE notation sequence motif specification.
+        For example, a value of 80@[ST!]PX[KR] indicates a modification
+        of either S or T when followed by P, and residue and the a K or an R.
+        A value of 204@N!{P}[ST]{P} indicates a modification of N by 204, if it
+        is NOT followed by a P, then either an S or a T, NOT followed by a P.
+        Positive and negative values are allowed.
+        </note>
+
+
+MS-GF+
+
+NumMods=2
+
+
+C2H3N1O1,C,fix,any,Carbamidomethyl      # Fixed Carbamidomethyl C
+
+O1,M,opt,any,Oxidation              # Oxidation M
+C2H2O,*,opt,Prot-N-term,Acetyl          # Acetylation Protein N-term
+
+
