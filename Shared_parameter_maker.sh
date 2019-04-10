@@ -81,6 +81,7 @@ Comet ()
     echo "num_output_lines = $NumMatchesPerSpec" >> $cometparam
     echo "show_fragment_ions = 0" >> $cometparam
     echo "sample_enzyme_number = $search_enzyme_number" >> $cometparam
+
     echo "scan_range = 0" >> $cometparam
     echo "precursor_charge = 0" >> $cometparam
     echo "override_charge = 0" >> $cometparam
@@ -104,13 +105,14 @@ Comet ()
     echo "num_results = 100" >> $cometparam
     echo "skip_researching = 1" >> $cometparam
     echo "max_fragment_charge = 3" >> $cometparam
-    echo "max_precursor_charge = 6" >> $cometparam
+    echo "max_precursor_charge = $MaxCharge" >> $cometparam
     echo "nucleotide_reading_frame = 0" >> $cometparam
     echo "clip_nterm_methionine = 0" >> $cometparam
-    echo "spectrum_batch_size = 10000" >> $cometparam
+    echo "spectrum_batch_size = $spectrum_batch_size" >> $cometparam
     echo "decoy_prefix = DECOY_" >> $cometparam
     echo "output_suffix =" >> $cometparam
     echo "mass_offsets = " >> $cometparam
+
     echo "minimum_peaks = 10" >> $cometparam
     echo "minimum_intensity = 0" >> $cometparam
     echo "remove_precursor_peak = 0" >> $cometparam
@@ -125,7 +127,7 @@ Comet ()
     echo "output_percolatorfile = 0" >> $cometparam
 
 
-#   TODO: Add modification to the list
+#   will be changed by the modification file
     echo "variable_mod01 = 0.0 X 0 0 -1 0 0" >> $cometparam
     echo "variable_mod02 = 0.0 X 0 3 -1 0 0" >> $cometparam
     echo "variable_mod03 = 0.0 X 0 3 -1 0 0" >> $cometparam
@@ -275,17 +277,18 @@ Tandem ()
             declare local "$param_name"="$param_value"
         fi
     done
-#   taxonomy
+#   taxonomy: generates the taxonomy.xml like file
     echo -e "<?xml version=\"1.0\"?>\n"\
             "<bioml label=\"x! taxon-to-file matching list\">\n"\
             "    <taxon label=\""$Taxon"_decoy\">\n"\
             "        <file format=\"peptide\" URL=\"$decoy_fasta_file\" />\n"\
             "    </taxon>\n"\
             "    <taxon label=\"$Taxon\">\n"\
-            "        <file format=\"peptide\" URL=\"/home/pieter/pipeline/fasta/up000005640.fasta\" />\n"\
+            "        <file format=\"peptide\" URL=\"$fasta_file\" />\n"\
             "    </taxon>\n"\
             "</bioml>" > $Tandem_taxonomy
 
+#   input: generates the input.xml like file
     echo -e "<?xml version=\"1.0\"?>\n"\
             "<bioml>\n"\
             "    <note type=\"input\" label=\"list path, default parameters\">$Tandemparam</note>\n"\
@@ -294,8 +297,10 @@ Tandem ()
             "    <note type=\"input\" label=\"spectrum, path\">/path/to/input</note>\n"\
             "    <note type=\"input\" label=\"output, path\">/path/to/output</note>\n"\
             "</bioml>" > $Tandemparam_input
+# The spectrum, path and output, path will be edited by the pipeline.
 
 
+#   start of the main parameter file (default_input.xml)
 
 #   spectrum parameters
     sed "s/label=\"spectrum, fragment monoisotopic mass error\">.*</label=\"spectrum, fragment monoisotopic mass error\">$fragment_ion_tolerance</g" $Tandemparam > $temp_Tandemparam
@@ -404,18 +409,22 @@ Tandem ()
 #   label="scoring, cyclic permutation">no</note>
 #   label="scoring, include reverse">no</note>
 
+
+
 #   End of tandem param generator
     echo "Tandem parameter file has been generated. located at: $Tandemparam"
 }
 
 PeptideProphet ()
 {
+#   for possible use later currently need input in the Shared parameter file
 PepProphParam=$(grep "^PeptideProphet_parameter" $LOC_Shared_param_file | awk '{print $3}')
 
 }
 
 Percolator ()
 {
+#   for possible use later currently need input in the Shared parameter file
 PercolatorParam=$(grep "^Percolator_parameter" $LOC_Shared_param_file | awk '{print $3}')
 
 }
