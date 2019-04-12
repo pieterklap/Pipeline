@@ -1,14 +1,21 @@
 #!/bin/bash
 
+#   location of the modification file extrected fro=m the shared parameter file
 Shared_mod_file=$(grep "^Modification_file" $LOC_Shared_param_file | awk '{print $3}')
 
+# maximum amount of mods per peptide
 Max_mods=$(grep "Maximum_mods_per_peptide" $Shared_mod_file | awk '{print $3}')
+
+# all the modifications
 MODS=$(grep "^mod" $Shared_mod_file | awk -F= '{print $2}')
 
+#   the letters representing amino acids needed fo fixed mods of comet
 aminoacids="G A S P V T C L I N D Q K E M O H F U R Y W"
 
+
 if [[ $output_dir == "" ]]; then
-    output_dir=$PWD
+    output_dir=$PWD/
+    echo "ERROR: This sould never happen"
 fi
 
 
@@ -73,7 +80,7 @@ Comet_mods ()
 }
 
 
-MSGF_mods ()
+MSGFPlus_mods ()
 {
     #   1.mass 2.residues 3.fixed/variable 4.N/C-term 5.Unimod_PSI-MS_name
     #   [Name]:[mass]:[residue(s)]:[fix/opt]:[n/c-term]:[distance]:[forced]
@@ -197,3 +204,52 @@ Tandem_mods ()
     #   TODO:  find out where the peptide N/C term modifications should go
 }
 
+MSFragger_mods ()
+{
+    local temp_MSFragger=$output_dir/.temp.MSFragger
+
+#   reset fixed comet params
+    for AA in $aminoacids
+    do
+        fixmod_old=$(grep "add_""${AA}""_" $MSFraggerparam | awk '{print $1,$2,$3}') 
+        fixmod=$(grep "add_""${AA}""_" $MSFraggerparam | awk '{print $1,$2}')
+        sed "s/$fixmod_old/$fixmod 0.0000/" $MSFraggerparam > $temp_MSFragger
+        cat $temp_MSFragger > $MSFraggerparam
+        rm $temp_MSFragger
+    done
+
+    local NUM=0
+    for mod in $MODS
+    do
+        Seperate
+
+    #   Seperates the fixed and variable modifications
+    #   Swaps the old fixed modificion with the new one
+        if [[ $mod04 == fix ]]; then
+            fixmod_old=$(grep "add_""$mod03""_" $MSFraggerparam | awk '{print $1,$2,$3}')
+            fixmod=$(grep "add_""$mod03""_" $MSFraggerparam | awk '{print $1,$2}')
+            sed "s/$fixmod_old/$fixmod $mod02/" $MSFraggerparam > $temp_MSFragger
+            cat $temp_MSFragger > $MSFraggerparam
+            rm $temp_MSFragger
+        fi
+
+#maximum of 7 mods - amino acid codes, * for any amino acid, ^ for termini, [ and ] specifies protein termini, n and c specifies peptide termini
+        if [[ $mod04 == opt ]] && (( $NUM <= 7 )); then
+            NUM=$(($NUM+1))
+
+            optmod_old=$(grep "variable_mod0""$NUM" $MSFraggerparam | awk '{print $0}')
+            optmod=$(grep "variable_mod0""$NUM" $MSFraggerparam | awk '{print $1,$2}')
+            MSFragger_order=$(echo "$optmod $mod02 $mod03 0 $Max_mods $mod06 $mod05 $mod07")
+
+            echo "variable_mod0""$NUM"" $mod02 $mod03 "
+
+            sed "s/$optmod_old/$MSFragger_order/" $MSFraggerparam > $temp_MSFragger
+            cat $temp_MSFragger > $MSFraggerparam
+            rm $temp_MSFragger
+        fi
+        if (( $NUM >= 8 )) && [[ $mod04 == opt ]]; then
+            echo "${mod} isn't added to the MSFragger parameter file because more than 7 variable modifications have been used"
+        fi
+
+    done
+}

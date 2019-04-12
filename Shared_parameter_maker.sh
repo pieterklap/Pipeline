@@ -36,11 +36,11 @@ Comet ()
         fi
     done
 #   set the parammeter to use the correct notation
-    if [[ $PrecursorMassUnit == "Daltons" ]]; then
-        PrecursorMassUnit="0"
+    if [[ $MassUnit == "Daltons" ]]; then
+        MassUnit="0"
     fi
-    if [[ $PrecursorMassUnit == "ppm" ]]; then
-        PrecursorMassUnit="2"
+    if [[ $MassUnit == "ppm" ]]; then
+        MassUnit="2"
     fi
 
 #   echos all the comet parameters into a parameter file named cometparam_PPG
@@ -216,6 +216,7 @@ MSGFPlus ()
     echo "IsotopeErrorRange -ti $IsotopeErrorRange" >> $MSGFPlusparam
     echo "NumThreads -thread $NumThreads" >> $MSGFPlusparam
     echo "NumTasks -tasks $NumTasks" >> $MSGFPlusparam
+    echo "Mem_Use $Mem_Use" >> $MSGFPlusparam
 
     echo "verbose -verbose 0" >> $MSGFPlusparam
     echo "Decoy_search -tda 1" >> $MSGFPlusparam
@@ -313,7 +314,7 @@ Tandem ()
         local IsotopeErrorRange="yes"
     fi
     sed "s/label=\"spectrum, parent monoisotopic mass isotope error\">.*</label=\"spectrum, parent monoisotopic mass isotope error\">$IsotopeErrorRange</g" $temp_Tandemparam > $Tandemparam
-    sed "s/label=\"spectrum, fragment monoisotopic mass error units\">.*</label=\"spectrum, fragment monoisotopic mass error units\">$MassUnit</g" $Tandemparam > $temp_Tandemparam
+    sed "s/label=\"spectrum, fragment monoisotopic mass error units\">.*</label=\"spectrum, fragment monoisotopic mass error units\">$Fragment_MassUnit</g" $Tandemparam > $temp_Tandemparam
     sed "s/label=\"spectrum, parent monoisotopic mass error units\">.*</label=\"spectrum, parent monoisotopic mass error units\">$MassUnit</g" $temp_Tandemparam > $Tandemparam
     if [[ $mass_type_fragment == "0" ]]; then
         mass_type_fragment="average"
@@ -410,9 +411,33 @@ Tandem ()
 #   label="scoring, include reverse">no</note>
 
 
+#   TODO: either remove or add the parameters that are currently unedited (#    label=)
 
 #   End of tandem param generator
     echo "Tandem parameter file has been generated. located at: $Tandemparam"
+}
+
+
+MSFragger ()
+{
+
+    MSFraggerparam="$output_dir"fraggerparam_PPG
+    local Shared_param_file=$(echo $Shared_param_file | tr "[" "=")
+    for param in $Shared_param_file
+    do
+    #   Check if the parameter is usable with comet
+        local param_program=$(echo ${param} | awk -F\= '{print $3}')
+        if [[ $param_program == *"MSFragger"* ]]; then
+        #   If the parameter is usable with comet extract the parameter name and value from the file
+            local param_name=$(echo ${param} | awk -F\= '{print $1}')
+            local param_value=$(echo ${param} | awk -F\= '{print $2}')
+        #   Set the parameter value in a variable with the parameter name
+            declare local "$param_name"="$param_value"
+        fi
+    done
+
+
+
 }
 
 PeptideProphet ()

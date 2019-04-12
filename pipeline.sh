@@ -48,6 +48,8 @@ while [ "$1" != "" ]; do
                             ;;
         -r | --norun )      RUNscripts="n"
                             ;;
+        -g | --genparam )   onlyparam="1"
+                            ;;
         -s | --shark )      SHARK="1"
                             shift                        # Allows Shark options to be entered
                             SHARKoptions=$1             # Allows Shark options to be entered
@@ -101,14 +103,14 @@ if (($NUMprog > 1)) && [[ $NUMparam == "1" ]]; then
     output_dir=$LOC_param
 #   resets the parameter counter
     NUMparam="0"
-
+#   uses the functions in the following bash scripts
     source "$LOC"Shared_parameter_maker.sh
     source "$LOC"modifications.sh
     if [[ $Programs == *"comet"* ]]; then
-        Comet
-        Comet_mods
-        comet="$cometparam"
-        NUMparam=$[$NUMparam+1]
+        Comet                   #   generates the main bulk of the parameter file
+        Comet_mods              #   generates the modification data for the parameter file
+        comet="$cometparam"     #   sets the variable comet to the generated comet parameterfile
+        NUMparam=$[$NUMparam+1] #   recounts the parameter files
     fi
     if [[ $Programs == *"tandem"* ]]; then
         Tandem
@@ -118,18 +120,18 @@ if (($NUMprog > 1)) && [[ $NUMparam == "1" ]]; then
     fi
     if [[ $Programs == *"msgfplus"* ]]; then
         MSGFPlus
-        MSGF_mods
+        MSGFPlus_mods
         msgfplus="$MSGFPlusparam"
         NUMparam=$[$NUMparam+1]
     fi
     if [[ $Programs == *"peptideprophet"* ]]; then
-        PeptideProphet
-        peptideprophet="$PepProphParam"
+        PeptideProphet                  #   For use later if peptideprophet gets added to the shared parameter file
+        peptideprophet="$PepProphParam" #
         NUMparam=$[$NUMparam+1]
     fi
     if [[ $Programs == *"percolator"* ]]; then
-        Percolator
-        percolator="$PercolatorParam"
+        Percolator                      #   For use later if percolator gets added to the shared parameter file
+        percolator="$PercolatorParam"   #
         NUMparam=$[$NUMparam+1]
     fi
 else
@@ -158,6 +160,13 @@ else
     done
 
 fi
+
+# Exits if only the parameterfiles were required
+if [[ $onlyparam == "1" ]] && [[ $LOC_Shared_param_file != "" ]]; then
+    echo "the parameter file have been genegrated"
+    exit
+fi
+
 # Creates the files for the PIDs
 mkdir -vp "$LOC".PIDs
 rm -vf "$LOC".PIDs/*
