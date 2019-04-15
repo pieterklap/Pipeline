@@ -20,7 +20,7 @@ fi
 PROGs=${@,,}
 
 #   Programs that work with the pipeline
-valid="comet tandem msgfplus peptideprophet percolator tandem2pin tandem2xml idconvert msgf2pin"
+valid="comet tandem msgfplus msfragger peptideprophet percolator tandem2pin tandem2xml idconvert msgf2pin crux"
 
 # if all has been added check all the programs e.g. $valid
 if [[ $PROGs == "all" ]]; then
@@ -48,8 +48,12 @@ do
         EXProg=$(grep "Tandem " install_locations | awk '{print $2}')
     fi
     if [[ ${prog} == "msgfplus" ]]; then
-        LOCprog=$(locate "$LOC"MSGFPlus.jar)
+        LOCprog=$(locate "$LOC"MSGFPlus*.jar)
         EXProg=$(grep "MSGFPlus " install_locations | awk '{print $2}')
+    fi
+    if [[ ${prog} == "msfragger" ]]; then
+        LOCprog=$(locate "$LOC"MSFragger*.jar)
+        EXProg=$(grep "MSFragger " install_locations | awk '{print $2}')
     fi
     if [[ ${prog} == "peptideprophet" ]]; then
         LOCprog=$(locate "$LOC"PeptideProphetParser)
@@ -74,6 +78,16 @@ do
     if [[ ${prog} == "msgf2pin" ]]; then
         LOCprog=$(locate "$LOC"msgf2pin)
         EXProg=$(grep "msgf2pin " install_locations | awk '{print $2}')
+    fi
+    if [[ ${prog} == "crux" ]]; then
+        LOCprog=$(locate "$LOC"crux)
+        EXProg=$(grep "crux " install_locations | awk '{print $2}')
+    fi
+
+#   sets EXProg to something if it is empty if it does not do that it will delete the install_locations file
+    if [[ $EXProg == "" ]]; then
+        EXProg="something"
+        echo "${prog} is not in the install_locations file"
     fi
 
 #   Done checking the location of the programs
