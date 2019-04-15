@@ -1,7 +1,7 @@
 ##Start## "Xtandem"
 
 # Stes the location of tandem into a variable
-XTloc=$(grep "Tandem " $LOC../install_locations | awk '{print $2}')
+XTloc=$(grep "Tandem " "$LOC"install_locations | awk '{print $2}')
 # if the given location isn't a file try to find tandem.
 if [ ! -f $XTloc ]; then
 	XTloc=$(locate -n1 tandem.exe | head -c-15)

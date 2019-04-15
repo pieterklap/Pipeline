@@ -3,7 +3,7 @@
 
 #	run Percolator
 
-percolator=$(grep percolator $LOC../install_locations | awk '{print $2}')
+percolator=$(grep percolator "$LOC"install_locations | awk '{print $2}')
 
 EXTENTION=$(echo $PIDoutput | awk -F. '{print $NF}')
 VALoutput=$(echo $PIDoutput | sed "s/$EXTENTION/put.xml/")

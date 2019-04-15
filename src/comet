@@ -1,7 +1,7 @@
 ##Start## "comet"
 
 # check where comet is installed
-PIDcomet=$(grep Comet $LOC../install_locations | awk '{print $2}')
+PIDcomet=$(grep Comet "$LOC"install_locations | awk '{print $2}')
 
 if [ ! -f $PIDcomet ]; then
     echo -e "\n Error " $PIDcomet " is not a file  \n" | tee -a "$datelog"

@@ -14,7 +14,7 @@ PIDoutput_decoy=$(ls -t "$STout""$NAME"/* |head -n1)
 
 # t.xml to tab delimited file with tandem2pin
 
-tandem2pin=$(grep tandem2pin $LOC../install_locations | awk '{print $2}')
+tandem2pin=$(grep tandem2pin "$LOC"install_locations | awk '{print $2}')
 EXTENTION=$(echo $PIDoutput |awk -F\. '{print $NF}')
 VALinput=$(echo $PIDoutput | sed "s/$EXTENTION/pin/")
 

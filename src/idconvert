@@ -1,5 +1,5 @@
 ##Start## "idconvert"
-idconvert=$(grep idconvert $LOC../install_locations | awk '{print $2}')
+idconvert=$(grep idconvert "$LOC"install_locations | awk '{print $2}')
 EXTENTION=$(echo "$PIDoutput" |awk -F. '{print $NF}')
 
 IDCONVoutput=$(echo $PIDoutput | awk -F/ '{$NF="";print $0}' | tr " " "/")

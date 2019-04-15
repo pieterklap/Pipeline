@@ -4,7 +4,7 @@
 VALinput=${PIDoutput//.xml/.pep.xml}
 
 # Location of Tandem2XMl
-T2XML=$(grep Tandem2XML $LOC../install_locations | awk '{print $2}')
+T2XML=$(grep Tandem2XML "$LOC"install_locations | awk '{print $2}')
 
 # runs Tandem2XML
 $T2XML $PIDoutput $VALinput |& tee -a "$datelog"

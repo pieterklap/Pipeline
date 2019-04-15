@@ -1,0 +1,24 @@
+## Start ## "MSFragger"
+
+#input:     mzML
+Extention=$(echo $PIDinput | awk -F. '{print $NF}')
+Fraggerout=$(echo $PIDinput | sed "s/$Extention/pep.xml/")   # might be pepXMl
+
+MemUse=$(grep "^#Mem_Use" $PIDparam | awk '{print $2}')
+
+if [[ $MemUse == "" ]]; then
+    MemUse="4G"
+fi
+
+
+java -Xmx"$MemUse" -jar $MSFragger $PIDparam $PIDinput
+
+mv $Fraggerout $PIDoutput 
+
+#output:    pep.xml
+
+
+
+#percolator:    crux pep.xml to pin
+
+## End ## "MSFragger"

@@ -1,7 +1,13 @@
 ##Start## "PeptideProphet"
 
 # sets the location of peptideprophet into variable VALprog
-VALprog=$(grep PeptideProphet $LOC../install_locations | awk '{print $2}')
+VALprog=$(grep PeptideProphet "$LOC"install_locations | awk '{print $2}')
+EXTENTION=$(echo $PIDoutput | awk -F. '{print $(NF-1)"."$NF}')
+
+if [[ $EXTENTION == "pep.xml" ]]; then
+    copy_PIDoutput=$(echo $PIDoutput | sed "s/\.$EXTENTION/_database_search\.$EXTENTION/")
+    cp $PIDoutput $copy_PIDoutput
+fi
 
 
 VALparam=$(grep -v "^#" $VALparam | awk '{print $1}' | tr "\n" " ")

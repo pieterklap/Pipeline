@@ -29,6 +29,7 @@ while [ "$1" != "" ]; do
                             done
                             ;;
         -L | --location )   location="$1 $2"            # If the script isn't ran where it was created (for use on the shark cluster) Probably redundent
+                            LOCscripts="$2"
                             shift
                             ;;
         -i | --input )      input="$1 $2"
@@ -60,6 +61,11 @@ while [ "$1" != "" ]; do
     esac
     shift
 done
+
+if [[ $LOCscripts == "" ]]; then
+    LOCscripts="$LOC"scripts
+fi
+
 
 # adds all file locations to a variable to test if they are direct references i.e. start with /
 if [[ $RUNscripts == "" ]]; then
@@ -236,26 +242,26 @@ do
 done
 
 # Creates the directory scripts and copies the scripts to it and makes them executable and removes the files in the temp folders
-rm -v "$LOC"scripts/*
-mkdir -vp "$LOC"scripts
-cp -v "$LOC".END/* "$LOC"scripts/
-chmod 750 "$LOC"scripts/*
+rm -v "$LOCscripts"/*
+mkdir -vp "$LOCscripts"
+cp -v "$LOC".END/* "$LOCscripts"/
+chmod 750 "$LOCscripts"/*
 rm -vf "$LOC".PIDs/* "$LOC".VALs/*
 rm -f "$LOC".END/*
 # Adds the options fille to all the scripts
 # this should always be first
-for file in "$LOC"scripts/*.sh
+for file in "$LOCscripts"/*.sh
 do
     cat "$LOC"src/options > ${file}
 done
 
 # Makes changes to the parameter files
 # Changes the comet output file from pep.xml to PIN
-for file in "$LOC"scripts/*comet_percolator*
+for file in "$LOCscripts"/*comet_percolator*
 do
     cat "$LOC"src/comet2pin >> ${file}
 done
-for file in "$LOC"scripts/*MSGFPlus_percolator*
+for file in "$LOCscripts"/*MSGFPlus_percolator*
 do
     cat "$LOC"src/MSGF2percolator >> ${file}
 done
@@ -264,17 +270,17 @@ done
 
 # starts adding PIDs to the scripts
 # Adds the comet file to all the scripts containing comet
-for file in "$LOC"scripts/*comet*
+for file in "$LOCscripts"/*comet*
 do
     cat "$LOC"src/comet >> ${file}
 done
 # Adds the Xtandem file to all the scripts containing Xtandem
-for file in "$LOC"scripts/*Xtandem*
+for file in "$LOCscripts"/*Xtandem*
 do
     cat "$LOC"src/Xtandem >> ${file}
 done
 # adds the MSGFPlus file to all the scripts containing MSGFPlus
-for file in "$LOC"scripts/*MSGFPlus*
+for file in "$LOCscripts"/*MSGFPlus*
 do
     cat "$LOC"src/MSGFPlus >> ${file}
 done
@@ -283,19 +289,19 @@ done
 
 # starts adding converters to the scripts
 # Adds the Tandem2XML file to all the scripts that contain Xtandem and Peptideprophet
-for file in "$LOC"scripts/*Xtandem_peptideprophet*
+for file in "$LOCscripts"/*Xtandem_peptideprophet*
 do
     cat "$LOC"src/Tandem2XML >> ${file}
 done
-for file in "$LOC"scripts/*MSGFPlus_peptideprophet*
+for file in "$LOCscripts"/*MSGFPlus_peptideprophet*
 do
     cat "$LOC"src/idconvert >> ${file}
 done
-for file in "$LOC"scripts/*Xtandem_percolator*
+for file in "$LOCscripts"/*Xtandem_percolator*
 do
     cat "$LOC"src/tandem2pin >> ${file}
 done
-for file in "$LOC"scripts/*MSGFPlus_percolator*
+for file in "$LOCscripts"/*MSGFPlus_percolator*
 do
     cat "$LOC"src/msgf2pin >> ${file}
 done
@@ -304,30 +310,30 @@ done
 
 # starts adding validators to the scripts
 # Adds the PeptideProphet file to all the scripts containing peptideprophet
-for file in "$LOC"scripts/*peptideprophet*
+for file in "$LOCscripts"/*peptideprophet*
 do
     cat "$LOC"src/PeptideProphet >> ${file}
 done
 # Adds the Triqler file to all the scripts containing Triqler
-for file in "$LOC"scripts/*Triqler*
+for file in "$LOCscripts"/*Triqler*
 do
     cat "$LOC"src/Triqler >> ${file}
 done
 # Adds the percolator file to all the scripts containing percolator
-for file in "$LOC"scripts/*percolator*
+for file in "$LOCscripts"/*percolator*
 do
     cat "$LOC"src/percolator >> ${file}
 done
 # done adding validators to the scripts
 # Adds analysis tools to the pipeline
 if [[ $Programs == *"gprofiler"* ]] && [[ $NOVAL != "1" ]]; then
-    for file in "$LOC"scripts/*.sh
+    for file in "$LOCscripts"/*.sh
     do
         cat "$LOC"src/gprofiler >> ${file}
     done
 fi
 
-for file in "$LOC"scripts/*.sh
+for file in "$LOCscripts"/*.sh
 do
     cat "$LOC"src/End >> ${file}
 done
@@ -335,10 +341,12 @@ done
 # The pipeline generates a file named *[program]* if the program was not selected
 # the following code removes the files that were created when a program was not selected
 # All new programs in the pipeline should be added above this line of code
-for file in "$LOC"scripts/\**
+for file in "$LOCscripts"/\**
 do
     rm ${file}
 done
+
+cp "$LOC"install_locations "$LOCscripts"/
 
 # tells the user the scripts are generated
 echo "$NUM scripts have been generated"
@@ -374,7 +382,7 @@ if [[ "$RUNscripts" == "" ]] && [[ "$SHARK" != "1" ]]; then
             exit
         fi
     done
-    for file in "$LOC"scripts/*.sh
+    for file in "$LOCscripts"/*.sh
     do
         # Sets the correct parameter files to be used with the corect program
         PID=$(echo ${file} | awk -F. '{print $1}' | awk -F_ '{print $1}' | awk -F/ '{print $NF}')
@@ -408,7 +416,7 @@ if [[ "$RUNscripts" == "" ]] && [[ "$SHARK" == "1" ]]; then
         location="-L $LOC/scripts"
     fi
 
-    for file in "$LOC"scripts/*.sh
+    for file in "$LOCscripts"/*.sh
     do
         # Sets the correct parameter files to be used with the corect program
         PID=$(echo ${file} | awk -F. '{print $1}' | awk -F_ '{print $1}' | awk -F/ '{print $NF}')

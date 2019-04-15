@@ -13,7 +13,7 @@ java -Xmx3500M -jar $PIDMSGF -s $PIDinput -o $MSGFoutput_decoy $MSGFparam |tee -
 PIDoutput_decoy="$MSGFoutput_decoy"
 
 
-msgf2pin=$(grep msgf2pin $LOC../install_locations | awk '{print $2}')
+msgf2pin=$(grep msgf2pin "$LOC"install_locations | awk '{print $2}')
 EXTENTION=$(echo "$PIDoutput" |awk -F. '{print $NF}')
 VALinput=$(echo "$PIDoutput" | sed "s/.$EXTENTION/.tsv/")
 
