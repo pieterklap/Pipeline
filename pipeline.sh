@@ -163,7 +163,7 @@ fi
 
 # Exits if only the parameterfiles were required
 if [[ $onlyparam == "1" ]] && [[ $LOC_Shared_param_file != "" ]]; then
-    echo "the parameter file have been genegrated"
+    echo "the parameter files have been genegrated"
     exit
 fi
 
