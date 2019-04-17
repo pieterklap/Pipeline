@@ -49,7 +49,7 @@ Comet_mods ()
     done
 
 #   TODO: reset the fixed and variable modifications
-    local NUM=0
+    local NUM=1
     for mod in $MODS
     do
         Seperate
@@ -65,13 +65,13 @@ Comet_mods ()
         fi
     #   Swaps the old variable mod with a new one
         if [[ $mod04 == opt ]] && (( $NUM <= 9 )); then
-            NUM=$(($NUM+1))
             optmod_old=$(grep "variable_mod0""$NUM" $cometparam | awk '{print $0}')
             optmod=$(grep "variable_mod0""$NUM" $cometparam | awk '{print $1,$2}')
             comet_order=$(echo "$optmod $mod02 $mod03 0 $Max_mods $mod06 $mod05 $mod07")
             sed "s/$optmod_old/$comet_order/" $cometparam > $temp_comet
             cat $temp_comet > $cometparam
             rm $temp_comet
+            NUM=$(($NUM+1))
         fi
         if (( $NUM >= 10 )) && [[ $mod04 == opt ]]; then
             echo "${mod} isn't added to the comet parameter file because more than 9 variable modifications have been used"
@@ -206,6 +206,8 @@ Tandem_mods ()
 
 MSFragger_mods ()
 {
+
+
     local temp_MSFragger=$output_dir/.temp.MSFragger
 
 #   reset fixed comet params
@@ -218,7 +220,8 @@ MSFragger_mods ()
         rm $temp_MSFragger
     done
 
-    local NUM=0
+
+    local NUM=1
     for mod in $MODS
     do
         Seperate
@@ -233,22 +236,59 @@ MSFragger_mods ()
             rm $temp_MSFragger
         fi
 
-#maximum of 7 mods - amino acid codes, * for any amino acid, ^ for termini, [ and ] specifies protein termini, n and c specifies peptide termini
+    #   maximum of 7 mods - amino acid codes, * for any amino acid, ^ for termini, [ and ] specifies protein termini, n and c specifies peptide termini
         if [[ $mod04 == opt ]] && (( $NUM <= 7 )); then
-            NUM=$(($NUM+1))
 
-            optmod_old=$(grep "variable_mod0""$NUM" $MSFraggerparam | awk '{print $0}')
-            optmod=$(grep "variable_mod0""$NUM" $MSFraggerparam | awk '{print $1,$2}')
-            MSFragger_order=$(echo "$optmod $mod02 $mod03 0 $Max_mods $mod06 $mod05 $mod07")
+            if [[ $mod03 == "n" ]] || [[ $mod03 == "c" ]]; then
+                mod03="^"
+            fi
+#           Checks if the modification is on the N/C terminal
+            if [[ $mod06 != "-1" ]]; then
 
-            echo "variable_mod0""$NUM"" $mod02 $mod03 "
+                if [[ $mod05 == "0" ]]; then
+                    local terminal="["
+                fi
+                if [[ $mod05 == "1" ]]; then
+                    local terminal="]"
+                fi
+                if [[ $mod05 == "2" ]]; then
+                    local terminal="n"
+                fi
+                if [[ $mod05 == "3" ]]; then
+                    local terminal="c"
+                fi
+            fi
+    #       When mod06 is -1 set terminal to nothing
+            if [[ $mod06 == "-1" ]]; then
+                terminal=""
+            fi
 
-            sed "s/$optmod_old/$MSFragger_order/" $MSFraggerparam > $temp_MSFragger
-            cat $temp_MSFragger > $MSFraggerparam
-            rm $temp_MSFragger
+    #       Puts the fixed modifications in the variable fix and the variable modifications in the variable opt
+            residue_amount=$(echo $mod03 | wc -c)
+    #       Resets the residue location
+            residue_location=""
+    #       if the amount of residues is greater than 1 split them ( wc -c returns 1 + the amount of characters)
+            if (( $residue_amount > 2 )); then
+            #   Adds speces inbetween the residues
+                local Residues=$(echo $mod03 | sed "s/./& /g")
+                for res in $Residues
+                do
+                #   Puts the fixed modifications in the variable fix and the variable modifications in the variable opt
+                    local residue_location+=$(echo "$terminal""${res}")
+                done
+            else
+            #   Puts the fixed modifications in the variable fix and the variable modifications in the variable opt
+                local residue_location+=$(echo "$terminal""$mod03")
+            fi
+
+            echo "variable_mod_0""$NUM = $mod02 $residue_location" >> $MSFraggerparam
+
+            local NUM=$(($NUM+1))
         fi
+
         if (( $NUM >= 8 )) && [[ $mod04 == opt ]]; then
-            echo "${mod} isn't added to the MSFragger parameter file because more than 7 variable modifications have been used"
+            echo "${mod} isn't added to the MSFragger parameter file because more than $(($NUM-1)) variable modifications have been used"
+            local NUM=$(($NUM+1))
         fi
 
     done

@@ -12,7 +12,7 @@ if [[ $LOC == "./" ]]; then
     LOC="$PWD/"
 fi
 
-valid="comet tandem msgfplus peptideprophet percolator gprofiler"
+valid="comet tandem msgfplus msfragger peptideprophet percolator gprofiler"
 
 NUMprog="0"
 NUMparam="0"
@@ -188,6 +188,10 @@ fi
 if [[ $Programs == *"msgfplus"* ]]; then
     touch "$LOC".PIDs/MSGFPlus
 fi
+if [[ $Programs == *"msfragger"* ]]; then
+    touch "$LOC".PIDs/MSFragger
+fi
+
 # done creating files for the PIDs
 
 
@@ -284,6 +288,11 @@ for file in "$LOCscripts"/*MSGFPlus*
 do
     cat "$LOC"src/MSGFPlus >> ${file}
 done
+for file in "$LOCscripts"/*MSFragger*
+do
+    cat "$LOC"src/MSFragger >> ${file}
+done
+
 
 # done with adding PIDs to the scripts
 

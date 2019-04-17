@@ -216,6 +216,10 @@ MSGFPlus ()
     echo "IsotopeErrorRange -ti $IsotopeErrorRange" >> $MSGFPlusparam
     echo "NumThreads -thread $NumThreads" >> $MSGFPlusparam
     echo "NumTasks -tasks $NumTasks" >> $MSGFPlusparam
+
+    if [[ $MemUse == "" ]]; then
+        Mem_Use="4G"
+    fi
     echo "Mem_Use $Mem_Use" >> $MSGFPlusparam
 
     echo "verbose -verbose 0" >> $MSGFPlusparam
@@ -437,6 +441,95 @@ MSFragger ()
     done
 
 
+    echo "database_name =  $fasta_file " > $MSFraggerparam
+    echo "num_threads = 0" >> $MSFraggerparam
+    if [[ $MemUse == "" ]]; then
+        Mem_Use="4G"
+    fi
+    echo "#Mem_Use $Mem_Use" >> $MSFraggerparam
+
+    echo "precursor_mass_tolerance = 500.00" >> $MSFraggerparam
+    echo "precursor_mass_units = 0" >> $MSFraggerparam
+    echo "precursor_true_tolerance = 20.00" >> $MSFraggerparam
+    echo "precursor_true_units = 1" >> $MSFraggerparam
+    echo "fragment_mass_tolerance = 20.00" >> $MSFraggerparam
+    echo "fragment_mass_units = 1" >> $MSFraggerparam
+
+    echo "isotope_error = 0" >> $MSFraggerparam
+
+    echo "search_enzyme_name = NoEnzyme" >> $MSFraggerparam
+    echo "search_enzyme_cutafter = X" >> $MSFraggerparam
+    echo "search_enzyme_butnotafter = X" >> $MSFraggerparam
+
+    echo "num_enzyme_termini = 0" >> $MSFraggerparam
+    echo "allowed_missed_cleavage = 1" >> $MSFraggerparam
+
+    echo "clip_nTerm_M = 1" >> $MSFraggerparam
+
+    echo "allow_multiple_variable_mods_on_residue = 1" >> $MSFraggerparam
+    echo "max_variable_mods_per_mod = 3" >> $MSFraggerparam
+    echo "max_variable_mods_combinations = 1000" >> $MSFraggerparam
+
+    echo "output_file_extension = pepXML" >> $MSFraggerparam
+    echo "output_format = pepXML" >> $MSFraggerparam
+    echo "output_report_topN = 1" >> $MSFraggerparam
+    echo "output_max_expect = 50" >> $MSFraggerparam
+
+    echo "precursor_charge = 0 0" >> $MSFraggerparam
+    echo "override_charge = 0" >> $MSFraggerparam
+
+    echo "digest_min_length = 6" >> $MSFraggerparam
+    echo "digest_max_length = 25" >> $MSFraggerparam
+    echo "digest_mass_range = 600.0 3000.0" >> $MSFraggerparam
+    echo "max_fragment_charge = 2" >> $MSFraggerparam
+
+#open search parameters
+    echo "track_zero_topN = 0" >> $MSFraggerparam
+    echo "zero_bin_accept_expect = 0" >> $MSFraggerparam
+    echo "zero_bin_mult_expect = 1" >> $MSFraggerparam
+    echo "add_topN_complementary = 0" >> $MSFraggerparam
+
+# spectral processing
+
+    echo "minimum_peaks = 15" >> $MSFraggerparam
+    echo "use_topN_peaks = 100" >> $MSFraggerparam
+    echo "min_fragments_modelling = 3" >> $MSFraggerparam
+    echo "min_matched_fragments = 6" >> $MSFraggerparam
+    echo "minimum_ratio = 0.01" >> $MSFraggerparam
+    echo "clear_mz_range = 0.0 0.0" >> $MSFraggerparam
+
+# additional modifications
+
+    echo "add_Cterm_peptide = 0.0" >> $MSFraggerparam
+    echo "add_Nterm_peptide = 0.0" >> $MSFraggerparam
+    echo "add_Cterm_protein = 0.0" >> $MSFraggerparam
+    echo "add_Nterm_protein = 0.0" >> $MSFraggerparam
+    echo "add_G_glycine = 0.0000" >> $MSFraggerparam
+    echo "add_A_alanine = 0.0000" >> $MSFraggerparam
+    echo "add_S_serine = 0.0000" >> $MSFraggerparam
+    echo "add_P_proline = 0.0000" >> $MSFraggerparam
+    echo "add_V_valine = 0.0000" >> $MSFraggerparam
+    echo "add_T_threonine = 0.0000" >> $MSFraggerparam
+    echo "add_C_cysteine = 0.0000" >> $MSFraggerparam
+    echo "add_L_leucine = 0.0000" >> $MSFraggerparam
+    echo "add_I_isoleucine = 0.0000" >> $MSFraggerparam
+    echo "add_N_asparagine = 0.0000" >> $MSFraggerparam
+    echo "add_D_aspartic_acid = 0.0000" >> $MSFraggerparam
+    echo "add_Q_glutamine = 0.0000" >> $MSFraggerparam
+    echo "add_K_lysine = 0.0000" >> $MSFraggerparam
+    echo "add_E_glutamic_acid = 0.0000" >> $MSFraggerparam
+    echo "add_M_methionine = 0.0000" >> $MSFraggerparam
+    echo "add_O_ornithine = 0.0000" >> $MSFraggerparam
+    echo "add_H_histidine = 0.0000" >> $MSFraggerparam
+    echo "add_F_phenylalanine = 0.0000" >> $MSFraggerparam
+    echo "add_U_selenocysteine = 0.0000" >> $MSFraggerparam
+    echo "add_R_arginine = 0.0000" >> $MSFraggerparam
+    echo "add_Y_tyrosine = 0.0000" >> $MSFraggerparam
+    echo "add_W_tryptophan = 0.0000" >> $MSFraggerparam
+    echo "add_B_user_amino_acid = 0.0000" >> $MSFraggerparam
+    echo "add_J_user_amino_acid = 0.0000" >> $MSFraggerparam
+    echo "add_X_user_amino_acid = 0.0000" >> $MSFraggerparam
+    echo -e "add_Z_user_amino_acid = 0.0000\n" >> $MSFraggerparam
 
 }
 
