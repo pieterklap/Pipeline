@@ -34,18 +34,12 @@ Seperate ()
 
 Comet_mods ()
 {
-#    cp $cometparam $output_dir/cometparam
-#    local cometparam=$output_dir/
-    local temp_comet=$output_dir/.temp.comet
-
 #   reset fixed comet params
     for AA in $aminoacids
     do
         fixmod_old=$(grep "add_""${AA}""_" $cometparam | awk '{print $1,$2,$3}') 
         fixmod=$(grep "add_""${AA}""_" $cometparam | awk '{print $1,$2}')
-        sed "s/$fixmod_old/$fixmod 0.0000/" $cometparam > $temp_comet
-        cat $temp_comet > $cometparam
-        rm $temp_comet
+        sed -i "s/$fixmod_old/$fixmod 0.0000/" $cometparam
     done
 
 #   TODO: reset the fixed and variable modifications
@@ -59,18 +53,14 @@ Comet_mods ()
         if [[ $mod04 == fix ]]; then
             fixmod_old=$(grep "add_""$mod03""_" $cometparam | awk '{print $1,$2,$3}')
             fixmod=$(grep "add_""$mod03""_" $cometparam | awk '{print $1,$2}')
-            sed "s/$fixmod_old/$fixmod $mod02/" $cometparam > $temp_comet
-            cat $temp_comet > $cometparam
-            rm $temp_comet
+            sed -i "s/$fixmod_old/$fixmod $mod02/" $cometparam
         fi
     #   Swaps the old variable mod with a new one
         if [[ $mod04 == opt ]] && (( $NUM <= 9 )); then
             optmod_old=$(grep "variable_mod0""$NUM" $cometparam | awk '{print $0}')
             optmod=$(grep "variable_mod0""$NUM" $cometparam | awk '{print $1,$2}')
             comet_order=$(echo "$optmod $mod02 $mod03 0 $Max_mods $mod06 $mod05 $mod07")
-            sed "s/$optmod_old/$comet_order/" $cometparam > $temp_comet
-            cat $temp_comet > $cometparam
-            rm $temp_comet
+            sed -i "s/$optmod_old/$comet_order/" $cometparam
             NUM=$(($NUM+1))
         fi
         if (( $NUM >= 10 )) && [[ $mod04 == opt ]]; then
@@ -121,9 +111,7 @@ MSGFPlus_mods ()
 
 Tandem_mods ()
 {
-    local temp_tandem=$output_dir/.temp.tandem
     local tandemparam=$Tandemparam
-
 
     for mod in $MODS
     do
@@ -138,7 +126,6 @@ Tandem_mods ()
             if (( $residue_amount > 2 )); then
             #   Adds speces inbetween the residues
                 Residues=$(echo $mod03 | sed "s/./& /g")
-
                 for res in $Residues
                 do
                 #   Puts the fixed modifications in the variable fix and the variable modifications in the variable opt
@@ -181,45 +168,28 @@ Tandem_mods ()
             PepCterm=0.0
         fi
 
-        sed "s/modification mass\">.*<\/note>/modification mass\"><\/note>/" $tandemparam > $temp_tandem
-        cat $temp_tandem > $tandemparam
-        rm $temp_tandem
+        sed -i "s/modification mass\">.*<\/note>/modification mass\"><\/note>/" $tandemparam
 
-        sed "s/residue, modification mass\">/&$fix/" $tandemparam > $temp_tandem
-        cat $temp_tandem > $tandemparam
-        rm $temp_tandem
+        sed -i "s/residue, modification mass\">/&$fix/" $tandemparam
 
-        sed "s/residue, potential modification mass\">/&$opt/" $tandemparam > $temp_tandem
-        cat $temp_tandem > $tandemparam
-        rm $temp_tandem
+        sed -i "s/residue, potential modification mass\">/&$opt/" $tandemparam
 
-        sed "s/N-terminal residue modification mass\">/&$ProtNterm/" $tandemparam > $temp_tandem
-        cat $temp_tandem > $tandemparam
-        rm $temp_tandem
+        sed -i "s/N-terminal residue modification mass\">/&$ProtNterm/" $tandemparam
 
-        sed "s/C-terminal residue modification mass\">/&$ProtCterm/" $tandemparam > $temp_tandem
-        cat $temp_tandem > $tandemparam
-        rm $temp_tandem
+        sed -i "s/C-terminal residue modification mass\">/&$ProtCterm/" $tandemparam
 
     #   TODO:  find out where the peptide N/C term modifications should go
 }
 
 MSFragger_mods ()
 {
-
-
-    local temp_MSFragger=$output_dir/.temp.MSFragger
-
 #   reset fixed comet params
     for AA in $aminoacids
     do
         fixmod_old=$(grep "add_""${AA}""_" $MSFraggerparam | awk '{print $1,$2,$3}') 
         fixmod=$(grep "add_""${AA}""_" $MSFraggerparam | awk '{print $1,$2}')
-        sed "s/$fixmod_old/$fixmod 0.0000/" $MSFraggerparam > $temp_MSFragger
-        cat $temp_MSFragger > $MSFraggerparam
-        rm $temp_MSFragger
+        sed -i "s/$fixmod_old/$fixmod 0.0000/" $MSFraggerparam
     done
-
 
     local NUM=1
     for mod in $MODS
@@ -231,9 +201,7 @@ MSFragger_mods ()
         if [[ $mod04 == fix ]]; then
             fixmod_old=$(grep "add_""$mod03""_" $MSFraggerparam | awk '{print $1,$2,$3}')
             fixmod=$(grep "add_""$mod03""_" $MSFraggerparam | awk '{print $1,$2}')
-            sed "s/$fixmod_old/$fixmod $mod02/" $MSFraggerparam > $temp_MSFragger
-            cat $temp_MSFragger > $MSFraggerparam
-            rm $temp_MSFragger
+            sed -i "s/$fixmod_old/$fixmod $mod02/" $MSFraggerparam
         fi
 
     #   maximum of 7 mods - amino acid codes, * for any amino acid, ^ for termini, [ and ] specifies protein termini, n and c specifies peptide termini

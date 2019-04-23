@@ -104,9 +104,7 @@ do
             sedProg=${LOCprog//\//\\/}               # sets backslashes in front of forward slashes for use with sed
             sedEXProg=${EXProg//\//\\/}
 
-            sed "s/$sedEXProg/$sedProg/" install_locations > .install_locations
-            cat .install_locations > install_locations
-            rm .install_locations
+            sed -i "s/$sedEXProg/$sedProg/" install_locations
         fi
 #       If more than one program has been found report to the user the amount and which programs
         if [[ "$NUMprog" > "1" ]]; then

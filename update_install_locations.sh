@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 while [ "$1" != "" ]; do
 
     case ${1,,} in
@@ -66,8 +65,6 @@ do
 	    sedProg=${Prog//\//\\/}               # sets backslashes in front of forward slashes for use with sed
         sedEXProg=${EXProg//\//\\/}
 
-        sed "s/$sedEXProg/${prog} $sedProg/" install_locations > .install_locations
-        cat .install_locations > install_locations
-        rm .install_locations
+        sed -i "s/$sedEXProg/${prog} $sedProg/" install_locations
     fi
 done

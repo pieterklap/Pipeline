@@ -16,6 +16,40 @@ if [[ "$Header_ver" != "$Header_file_ver" ]]; then
     exit
 fi
 
+Default_check ()
+{
+    local Shared_param_file=$(grep -v "^#" $LOC_Shared_param_file | sed 's/ //g' | tr "[" "=[")
+    for param in $Shared_param_file
+    do
+    #   Notes the parameter name and value
+        local param_name=$(echo ${param} | awk -F\= '{print $1}')
+        local param_value=$(echo ${param} | awk -F\= '{print $2}')
+    #   Set the parameter value in a variable with the parameter name
+        declare local "$param_name"="$param_value"
+    #   Exit if any of the file locations are not valid
+        if [[ $(echo $param_name | awk -F_ '{print $NF}') == "file" ]]; then
+            if [ ! -f $param_value ]; then
+                echo "Error: $param_value is not a file"
+                exit
+            fi
+        fi
+    #   if the parameter is left empty add the default value to it
+        if [[ $param_value == "[*]" ]] || [[ $param_value == "" ]] ; then
+        #   The line where the Default value is stored
+            LOC_Default=$(grep -n "^$param_name" $LOC_Shared_param_file | awk -F\: '{print ($1+1)}')
+
+        #   Checks if the default value is there
+            if [[ $(head -n"$LOC_Default" $LOC_Shared_param_file | tail -n1 | awk '{print $2}') != "Default:" ]]; then
+                    echo "Default not found. The parameter \"$param_name\" will be left empty"
+            else
+        #   adds the default value to the shared parameter file
+                default_value=$(head -n"$LOC_Default" $LOC_Shared_param_file | tail -n1 | awk '{print $3}')
+                sed -i "s/$param_name =/& $default_value/g" $LOC_Shared_param_file
+            fi
+        fi
+    done
+}
+
 
 Comet ()
 {
@@ -44,7 +78,7 @@ Comet ()
     fi
 
 #   echos all the comet parameters into a parameter file named cometparam_PPG
-#   There probaly is a better way of doing this but it works.  TODO: fix it
+#   There probaly is a better way of doing this but it works.
     echo "# comet_version 2017.01 rev. 1 " > $cometparam                # Start of the comet parameterfile
     echo "# Comet MS/MS search engine parameters file." >> $cometparam  # Start of the comet parameterfile
 
@@ -66,7 +100,7 @@ Comet ()
     echo "num_enzyme_termini = $Tolerable_Termini" >> $cometparam
     echo "allowed_missed_cleavage = $allowed_missed_cleavage" >> $cometparam
 
-    echo "fragment_bin_tol = $fragment_ion_tolerance" >> $cometparam
+    echo "fragment_bin_tol = $fragment_bin_tol " >> $cometparam
     echo "fragment_bin_offset = $fragment_bin_offset" >> $cometparam
     echo "theoretical_fragment_ions = $theoretical_fragment_ions" >> $cometparam
     echo "use_A_ions = $use_A_ions" >> $cometparam
@@ -113,7 +147,7 @@ Comet ()
     echo "output_suffix =" >> $cometparam
     echo "mass_offsets = " >> $cometparam
 
-    echo "minimum_peaks = 10" >> $cometparam
+    echo "minimum_peaks = $Min_Peaks" >> $cometparam
     echo "minimum_intensity = 0" >> $cometparam
     echo "remove_precursor_peak = 0" >> $cometparam
     echo "remove_precursor_tolerance = 1.5" >> $cometparam
@@ -217,7 +251,7 @@ MSGFPlus ()
     echo "NumThreads -thread $NumThreads" >> $MSGFPlusparam
     echo "NumTasks -tasks $NumTasks" >> $MSGFPlusparam
 
-    if [[ $Mem_Use == "" ]]; then
+    if [[ $MemUse == "" ]]; then
         Mem_Use="4G"
     fi
     echo "Mem_Use $Mem_Use" >> $MSGFPlusparam
@@ -248,9 +282,7 @@ MSGFPlus ()
         local MSGFparam=$(echo ${parameter} | sed 's/=/ /g')
         MSGFparam_column3=$(echo $MSGFparam | awk '{print $3}')
         if [[ "$MSGFparam_column3" == "" ]]; then
-            sed "s/$MSGFparam/#&/g" $MSGFPlusparam > $temp_MSGFPlusparam
-            cat $temp_MSGFPlusparam > $MSGFPlusparam
-            rm $temp_MSGFPlusparam
+            sed -i "s/$MSGFparam/#&/g" $MSGFPlusparam
         fi
     done
 #   End of MS-GF+ parameter generation
@@ -261,7 +293,7 @@ MSGFPlus ()
 Tandem ()
 {
 
-    Tandemparam=$(grep "tandem_default_input.xml" $LOC_Shared_param_file | awk '{print $3}')
+    Tandemparam=$(grep "tandem_default_input" $LOC_Shared_param_file | awk '{print $3}')
     cp "$Tandemparam" "$output_dir"Tandemparam_PPG.xml
 
     Tandemparam_input="$output_dir"Tandem_input_PPG.xml
@@ -308,42 +340,39 @@ Tandem ()
 #   start of the main parameter file (default_input.xml)
 
 #   spectrum parameters
-    sed "s/label=\"spectrum, fragment monoisotopic mass error\">.*</label=\"spectrum, fragment monoisotopic mass error\">$fragment_ion_tolerance</g" $Tandemparam > $temp_Tandemparam
-    sed "s/label=\"spectrum, parent monoisotopic mass error plus\">.*</label=\"spectrum, parent monoisotopic mass error plus\">$PrecursorMassTolerance</g" $temp_Tandemparam > $Tandemparam
-    sed "s/label=\"spectrum, parent monoisotopic mass error minus\">.*</label=\"spectrum, parent monoisotopic mass error minus\">$PrecursorMassTolerance</g" $Tandemparam > $temp_Tandemparam
+    sed -i "s/label=\"spectrum, fragment monoisotopic mass error\">.*</label=\"spectrum, fragment monoisotopic mass error\">$FragmentMassTolerance</g" $Tandemparam
+    sed -i "s/label=\"spectrum, parent monoisotopic mass error plus\">.*</label=\"spectrum, parent monoisotopic mass error plus\">$PrecursorMassTolerance</g" $Tandemparam
+    sed -i "s/label=\"spectrum, parent monoisotopic mass error minus\">.*</label=\"spectrum, parent monoisotopic mass error minus\">$PrecursorMassTolerance</g" $Tandemparam
 
     if [[ $IsotopeErrorRange == "0" ]]; then
         local IsotopeErrorRange="no"
     else
         local IsotopeErrorRange="yes"
     fi
-    sed "s/label=\"spectrum, parent monoisotopic mass isotope error\">.*</label=\"spectrum, parent monoisotopic mass isotope error\">$IsotopeErrorRange</g" $temp_Tandemparam > $Tandemparam
-    sed "s/label=\"spectrum, fragment monoisotopic mass error units\">.*</label=\"spectrum, fragment monoisotopic mass error units\">$Fragment_MassUnit</g" $Tandemparam > $temp_Tandemparam
-    sed "s/label=\"spectrum, parent monoisotopic mass error units\">.*</label=\"spectrum, parent monoisotopic mass error units\">$MassUnit</g" $temp_Tandemparam > $Tandemparam
+    sed -i "s/label=\"spectrum, parent monoisotopic mass isotope error\">.*</label=\"spectrum, parent monoisotopic mass isotope error\">$IsotopeErrorRange</g" $Tandemparam
+    sed -i "s/label=\"spectrum, fragment monoisotopic mass error units\">.*</label=\"spectrum, fragment monoisotopic mass error units\">$Fragment_MassUnit</g" $Tandemparam > $temp_Tandemparam
+    sed -i "s/label=\"spectrum, parent monoisotopic mass error units\">.*</label=\"spectrum, parent monoisotopic mass error units\">$MassUnit</g" $Tandemparam
     if [[ $mass_type_fragment == "0" ]]; then
         mass_type_fragment="average"
     else
         mass_type_fragment="monoisotopic"
     fi
-    sed "s/label=\"spectrum, fragment mass type\">.*</label=\"spectrum, fragment mass type\">$mass_type_fragment</g" $Tandemparam > $temp_Tandemparam
-#   end of spectrum parameters put the changes in $Tandemparam allows for a line to be added in the middle.
-    cat $temp_Tandemparam > $Tandemparam
+    sed -i "s/label=\"spectrum, fragment mass type\">.*</label=\"spectrum, fragment mass type\">$mass_type_fragment</g" $Tandemparam
 
 #   spectrum conditioning parameters
 #    label="spectrum, dynamic range">100.0<
 #    label="spectrum, total peaks">50<
-#    sed "s/label=\"spectrum, maximum parent charge\">.*</label=\"spectrum, maximum parent charge\">$MaxCharge</g" $Tandemparam > $temp_Tandemparam
+    sed -i "s/label=\"spectrum, maximum parent charge\">.*</label=\"spectrum, maximum parent charge\">$MaxCharge</g" $Tandemparam
 
 #    label="spectrum, use noise suppression">yes<
 
-#    sed "s/label=\"spectrum, minimum parent m+h\">.*</label=\"spectrum, minimum parent m+h\">$MinPepMass</g" $temp_Tandemparam > $Tandemparam
-#    sed "s/label=\"spectrum, minimum fragment mz\">.*</label=\"spectrum, minimum fragment mz\"></g" $Tandemparam > $temp_Tandemparam
+    sed -i "s/label=\"spectrum, minimum parent m+h\">.*</label=\"spectrum, minimum parent m+h\">$MinPepMass</g" $Tandemparam
+    sed -i "s/label=\"spectrum, minimum fragment mz\">.*</label=\"spectrum, minimum fragment mz\"></g" $Tandemparam
 
-#    label="spectrum, minimum peaks">10<
-#    sed "s/label=\"spectrum, threads\">.*</label=\"spectrum, threads\">$NumThreads</g" $temp_Tandemparam > $Tandemparam
-#    sed "s/label=\"spectrum, sequence batch size\">.*</label=\"spectrum, sequence batch size\">$spectrum_batch_size</g" $Tandemparam > $temp_Tandemparam
+    sed -i "s/label=\"spectrum, minimum peaks\">.*</label=\"spectrum, minimum peaks\">$Min_Peaks</g" $Tandemparam
+    sed -i "s/label=\"spectrum, threads\">.*</label=\"spectrum, threads\">$NumThreads</g" $Tandemparam
+    sed -i "s/label=\"spectrum, sequence batch size\">.*</label=\"spectrum, sequence batch size\">$spectrum_batch_size</g" $Tandemparam
 
-    cat $temp_Tandemparam > $Tandemparam
 #   model refinement parameters
 
 #   label="refine">yes</note>
@@ -379,11 +408,10 @@ Tandem ()
 
 #   protein parameters
 #   label=\"protein, taxon\">.*<
-    sed "s/label=\"protein, cleavage site\">.*</label=\"protein, cleavage site\">$search_enzyme_number</g" $Tandemparam > $temp_Tandemparam 
+    sed -i "s/label=\"protein, cleavage site\">.*</label=\"protein, cleavage site\">$search_enzyme_number</g" $Tandemparam
 #   label="protein, modified residue mass file"></note>
 #   label="protein, homolog management">no</note>
 
-    cat $temp_Tandemparam > $Tandemparam
 #   scoring parameters
 
 #   label="scoring, minimum ion count">4</note>
@@ -402,12 +430,12 @@ Tandem ()
         fi
     done
 
-    sed "s/label=\"scoring, a ions\">.*</label=\"scoring, a ions\">$use_A_ions</g" $Tandemparam > $temp_Tandemparam
-    sed "s/label=\"scoring, b ions\">.*</label=\"scoring, b ions\">$use_B_ions</g" $temp_Tandemparam > $Tandemparam
-    sed "s/label=\"scoring, c ions\">.*</label=\"scoring, c ions\">$use_C_ions</g" $Tandemparam > $temp_Tandemparam
-    sed "s/label=\"scoring, x ions\">.*</label=\"scoring, x ions\">$use_X_ions</g" $temp_Tandemparam > $Tandemparam
-    sed "s/label=\"scoring, y ions\">.*</label=\"scoring, y ions\">$use_Y_ions</g" $Tandemparam > $temp_Tandemparam
-    sed "s/label=\"scoring, z ions\">.*</label=\"scoring, z ions\">$use_Z_ions</g" $temp_Tandemparam > $Tandemparam
+    sed -i "s/label=\"scoring, a ions\">.*</label=\"scoring, a ions\">$use_A_ions</g" $Tandemparam
+    sed -i "s/label=\"scoring, b ions\">.*</label=\"scoring, b ions\">$use_B_ions</g" $Tandemparam
+    sed -i "s/label=\"scoring, c ions\">.*</label=\"scoring, c ions\">$use_C_ions</g" $Tandemparam
+    sed -i "s/label=\"scoring, x ions\">.*</label=\"scoring, x ions\">$use_X_ions</g" $Tandemparam
+    sed -i "s/label=\"scoring, y ions\">.*</label=\"scoring, y ions\">$use_Y_ions</g" $Tandemparam
+    sed -i "s/label=\"scoring, z ions\">.*</label=\"scoring, z ions\">$use_Z_ions</g" $Tandemparam
 
 #   label="scoring, cyclic permutation">no</note>
 #   label="scoring, include reverse">no</note>
@@ -447,19 +475,34 @@ MSFragger ()
         Mem_Use="4G"
     fi
     echo "#Mem_Use $Mem_Use" >> $MSFraggerparam
+    if [[ $MassUnit == "ppm" ]]; then
+        MassUnit="1"
+    else
+        MassUnit="0"
+    fi
+    if [[ $Fragment_MassUnit == "ppm" ]]; then
+        Fragment_MassUnit="1"
+    else
+        Fragment_MassUnit="0"
+    fi
 
-    echo "precursor_mass_tolerance = 500.00" >> $MSFraggerparam
-    echo "precursor_mass_units = 0" >> $MSFraggerparam
-    echo "precursor_true_tolerance = 20.00" >> $MSFraggerparam
-    echo "precursor_true_units = 1" >> $MSFraggerparam
-    echo "fragment_mass_tolerance = 20.00" >> $MSFraggerparam
-    echo "fragment_mass_units = 1" >> $MSFraggerparam
+
+    echo "precursor_mass_tolerance = $PrecursorMassTolerance " >> $MSFraggerparam
+    echo "precursor_mass_units = $MassUnit" >> $MSFraggerparam
+    echo "precursor_true_tolerance = 0" >> $MSFraggerparam
+    echo "precursor_true_units = $MassUnit" >> $MSFraggerparam
+    echo "fragment_mass_tolerance = $fragment_ion_tolerance" >> $MSFraggerparam
+    echo "fragment_mass_units = $Fragment_MassUnit" >> $MSFraggerparam
 
     echo "isotope_error = 0" >> $MSFraggerparam
 
-    echo "search_enzyme_name = NoEnzyme" >> $MSFraggerparam
-    echo "search_enzyme_cutafter = X" >> $MSFraggerparam
-    echo "search_enzyme_butnotafter = X" >> $MSFraggerparam
+    local Enzyme_name=$(grep "^#enzyme: $search_enzyme_number" | awk '{print $3}')
+    local Enzyme_cutafter=$(grep "^#enzyme: $search_enzyme_number" | awk '{print $5}')
+    local Enzyme_butnotafter=$(grep "^#enzyme: $search_enzyme_number" | awk '{print $6}')
+
+    echo "search_enzyme_name = $Enzyme_name" >> $MSFraggerparam
+    echo "search_enzyme_cutafter = $Enzyme_cutafter" >> $MSFraggerparam
+    echo "search_enzyme_butnotafter = $Enzyme_butnotafter" >> $MSFraggerparam
 
     echo "num_enzyme_termini = 0" >> $MSFraggerparam
     echo "allowed_missed_cleavage = 1" >> $MSFraggerparam
@@ -491,7 +534,7 @@ MSFragger ()
 
 # spectral processing
 
-    echo "minimum_peaks = 15" >> $MSFraggerparam
+    echo "minimum_peaks = $Min_Peaks" >> $MSFraggerparam
     echo "use_topN_peaks = 100" >> $MSFraggerparam
     echo "min_fragments_modelling = 3" >> $MSFraggerparam
     echo "min_matched_fragments = 6" >> $MSFraggerparam
