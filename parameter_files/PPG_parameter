@@ -1,19 +1,42 @@
 #	Parameter file to be used with the Proteomic Pipeline Generator. (v0.x)
+#   DO NOT change the header
 #	Everything following a "#" is a comment
-#	Some options may not be avalible in this file 
+#   if you comment out the options they will remain empty and each program will use their own default parameter
+#	Some options may not be avalible in this file
+#   for more information see the websites of each program
+ 
+tandem_default_input_file = /path/to/default_input.xml
+#   Enter the locations of the tandem parameter files 
+PeptideProphet_parameter_file = /path/to/peptideprophet/parameter
+Percolator_parameter_file = /path/to/percolator/parameter
 
-
-fasta_file = /home/pieter/pipeline/fasta/up000005640.fasta [comet,tandem,MSGFPlus]
+fasta_file = /path/to/target.fasta [comet,tandem,MSGFPlus,MSFragger]
 #	Sets the path to the fasta file that all the programs use
+decoy_fasta_file = /path/to/decoy.fasta [tandem,MSGFPlus]
 
-Decoy_Database = 0 [comet,MSGFPlus] 
-#   (0: don't search decoy database (Default), 1: search decoy database)
+Taxon = human [tandem]
+#   Default: human
+#   the Taxon tandem thinks it's working with 
 
-NumThreads = 1 [comet,tandem,MSGFPlus]
+Modification_file = /path/to/modifications [comet,tandem,MSGFPlus]
+#   location of the modification file
+
+Decoy_Database = 1 [comet,MSGFPlus] 
+#   Default: 1
+#   (0: don't search decoy database, 1: search decoy database)
+
+NumThreads = 0 [comet,tandem,MSGFPlus]
+#   Default: 0
 #   (Number of concurrent threads to be executed, Default: Number of available cores (0)(comet,MSGFPlus) or 1 (tandem))
 #   It is recommended that this is set to the number of cores avalible, this way all database search programs use the same amount of cores.
 
-NumTasks = [MSGFPlus]
+Mem_Use = 3G  [MSGFPlus,MSFragger]
+#   Default: 4G
+#   Set the amount of memory avalible for java to use (M=MB,G=GB) 
+
+
+NumTasks = 0 [MSGFPlus]
+#   Default: 0
 #   (Override the number of tasks to use on the threads, Default: (internally calculated based on inputs))
 #   More tasks than threads will reduce the memory requirements of the search, but will be slower (how much depends on the inputs).
 #   1<=tasks<=numThreads: will create one task per thread, which is the original behavior.
@@ -23,6 +46,7 @@ NumTasks = [MSGFPlus]
 #   2-3 tasks per thread will use comparably less memory, but may cause the search to take 1.5 to 2 times as long.
 
 spectrum_batch_size = 0 [comet,tandem]
+#   Default: 0
 #   max. # of spectra to search at a time; for comet if set to 0 it searches the entire scan range in one loop
 #                                        ; for tandem it sets the value to default (1000)
 #   The larger the number is the more memory the program needs
@@ -31,44 +55,57 @@ spectrum_batch_size = 0 [comet,tandem]
 ##  Masses
 #
 
-PrecursorMassTolerance = 0.4 [comet,tandem.MSGFPlus]
+PrecursorMassTolerance = 20 [comet,tandem.MSGFPlus,MSFragger]
 #   Default: 20
+FragmentMassTolerance = 0.4 [tandem.MSFragger]
+#   Default: 1
 
-MassUnit = Daltons [comet,tandem,MSGFPlus]
+MassUnit = ppm [comet,tandem,MSGFPlus,MSFragger]
 #   Default: ppm (value may be Daltons or ppm)
+Fragment_MassUnit = Daltons [tandem,MSFragger]
+#   Default: Daltons (value may be Daltons or ppm)
 
-IsotopeErrorRange = 0,1 [comet,tandem,MSGFPlus]
-#   0=(off/0), 0,1=(C13 error/0,1), 0,2 (0,1,2), 0,3(0,1,2,3), 0,4=(-8/-4/0/4/8 (for +4/+8 labeling)(comet))or(0,1,2,3,4(MSGFPlus))
+IsotopeErrorRange = 0,0 [comet,tandem,MSGFPlus,MSFragger]
+#   Default: 0,0
+#   0,0=(off/0), 0,1=(C13 error/0,1), 0,2 (0,1,2), 0,3(0,1,2,3), 0,4=(-8/-4/0/4/8 (for +4/+8 labeling)(comet))or(0,1,2,3,4(MSGFPlus))
 #   Tandem can only use 0,1 any value other than 0 or 0,1 will be set to 0,1.
 #	(Range of allowed isotope peak errors, Default:0,1)
 #	Takes into account of the error introduced by chooosing a non-monoisotopic peak for fragmentation.
 #	The combination of PrecursorMassTolerance and IsotopeErrorRange determines the precursor mass tolerance.
 
-mass_type_precursor = 1 [comet,tandem]
-mass_type_fragment = 1 [comet,tandem]
+mass_type_precursor = 1 [comet,tandem,MSFragger]
+#   Default: 1
+mass_type_fragment = 1 [comet,tandem,MSFragger]
+#   Default: 1
 # 0=average masses, 1=monoisotopic masses
 
-fragment_ion_tolerance = 0.4 [comet,tandem]
+fragment_bin_tol = 0.4 [comet]
+#   Default: 1.0005
 # enter a value >0.01 the lower the value the more precise the data has to be.
 # Fragment ion tolerance
 
-fragment_bin_offset = 0.2 [comet]
+fragment_bin_offset = 0.1 [comet]
+#   Default: 0.4
 # this setting should be scaled with the fragment ion tolerance
 # For ion trap data with a fragment_ion_tolerance of 1.0005, it is recommended to set fragment_bin_offset to 0.4.
 # For high-res MS/MS data, one might use a fragment_ion_tolerance of 0.02 and a corresponding fragment_bin_offset of 0.0. 
 # offset position to start the binning (0.0 to 1.0)
 
-theoretical_fragment_ions = 0 [comet]
+theoretical_fragment_ions = 1 [comet]
+#   Default: 0
 # 0=use flanking peaks, 1=M peak only
 # for high resolution data it is recommended to use 0 an for low resolution data it is recommended to use 1.
 
-FragmentMethodID = 1 [comet,MSGFPlus]
+FragmentMethodID = 3 [comet,MSGFPlus]
+#   Default: 0
 #   (0: As written in the spectrum or CID if no info (Default), 1: CID, 2: ETD, 3: HCD)
 
-MS2DetectorID = 0 [MSGFPlus]
+MS2DetectorID = 1 [MSGFPlus]
+#   Default: 0
 #   (0: Low-res LCQ/LTQ (Default), 1: Orbitrap/FTICR, 2: TOF, 3: Q-Exactive)
 
 ProtocolID = 0 [MSGFPlus]
+#   Default: 0
 #   (0: Automatic (Default), 1: Phosphorylation, 2: iTRAQ, 3: iTRAQPhospho, 4: TMT, 5: Standard)
 
 
@@ -76,75 +113,96 @@ ProtocolID = 0 [MSGFPlus]
 # Enzymes
 #
 
-search_enzyme_number = 0 [comet,tandem,MSGFPlus]               
+search_enzyme_number = 0 [comet,tandem,MSGFPlus,MSFragger]               
+#   Default: 1
 # choose from list at end of this parameter file
-num_enzyme_termini = 2 [comet,tandem,MSGFPlus]                
+num_enzyme_termini = 2 [comet,tandem,MSGFPlus,MSFragger]
+#   Default: 2
 # 1 (semi-digested), 2 (fully digested, default), 8 C-term unspecific , 9 N-term unspecific
-allowed_missed_cleavage = 5 [comet,tandem,MSGFPlus]           
+allowed_missed_cleavage = 5 [comet,tandem,MSGFPlus,MSFragger]
+#   Default: 2
 # maximum value is 5; for enzyme search
 
-
-
 verbose = 0 [MSGFPlus]
-#	Used by: MSGFPlus
+#   Default: 0
 #	(0: report total progress only (Default), 1: report total and per-thread progress/status)
 
-FragmentMethodID = 0 [comet,MSGFPlus]
-#	(0: As written in the spectrum or CID if no info (Default), 1: CID, 2: ETD, 3: HCD, 4: UVPD)
+Max_Missed_cleavage = 50 [tandem]
+#   Default: 5
+#   The maximum number of missed cleavage sites allowed within a peptide
+#   
 
-MS2DetectorID = 0 [MSGFPlus]
-#	(0: Low-res LCQ/LTQ (Default), 1: Orbitrap/FTICR, 2: TOF, 3: Q-Exactive)
+MinPepLength = 6 [MSGFPlus,MSFragger]
+#   Default: 6
+#	(Minimum peptide length to consider)
+MinPepMass = 600.0 [comet,MSFragger]
+#   Default: 600.0
+#   (Minimum peptide mass to consider)
 
-ProtocolID = 0 [MSGFPlus]
-#	0: Automatic (Default), 1: Phosphorylation, 2: iTRAQ, 3: iTRAQPhospho, 4: TMT, 5: Standard)
+MaxPepLength = 25 [MSGFPlus,MSFragger]
+#   Default: = 40
+#	(Maximum peptide length to consider)
+MaxPepMass = 3000.0 [comet,MSFragger]
+#   Default: 5000.0
+#   (Maximum peptide mass to consider)
 
-Tolerable_Termini = 2 [comet,MSGFPlus]
-#	(Number of Tolerable Termini, Default: 2)
-#	E.g. For trypsin, 0: non-tryptic, 1: semi-tryptic, 2: fully-tryptic peptides only.
-
-
-MinPepLength = 6 [MSGFPlus]
-#	(Minimum peptide length to consider, Default: 6)
-MinPepMass = 600.0 [comet]
-#   (Minimum peptide mass to consider, Default: 600)
-
-MaxPepLength = 40 [MSGFPlus]
-#	(Maximum peptide length to consider, Default: 40)
-MaxPepMass = 5000.0 [comet]
-#   (Maximum peptide mass to consider, Default: 5000)
+minimum_ratio = 0.01 [tandem,MSFragger]
+#   Default: 0.01
+#   filter peaks below this fraction of strongest peak
+minimum_intensity = 0 [comet]
+#   Default: 0
+#   minimum intensity value to read in
 
 MinCharge = 2 [MSGFPlus]
-#	(Minimum precursor charge to consider if charges are not specified in the spectrum file, Default: 2)
-	
+#   Default: 2
+#	(Minimum precursor charge to consider if charges are not specified in the spectrum file)
 MaxCharge = 3 [MSGFPlus]
-#	(Maximum precursor charge to consider if charges are not specified in the spectrum file, Default: 3)
+#   Default: 3
+#	(Maximum precursor charge to consider if charges are not specified in the spectrum file)
+
+Min_Peaks = 10 [comet,tandem,MSFragger]
+#   Default: 10
+#   The minimum number of peaks required for a spectrum to be considered
 
 NumMatchesPerSpec = 1 [comet,MSGFPlus]
+#   Default: 1
 #	(Number of matches per spectrum to be reported, Default: 1)
 
 use_A_ions = 0 [comet,tandem]
-use_B_ions = 1 [comet,tandem]
-use_C_ions = 0 [comet,tandem]
-use_X_ions = 0 [comet,tandem]
-use_Y_ions = 1 [comet,tandem]
-use_Z_ions = 0 [comet,tandem]
-use_NL_ions = 0 [comet]
+#   Default: 0
 
+use_B_ions = 1 [comet,tandem]
+#   Default: 1
+
+use_C_ions = 0 [comet,tandem]
+#   Default: 0
+
+use_X_ions = 0 [comet,tandem]
+#   Default: 0
+
+use_Y_ions = 1 [comet,tandem]
+#   Default: 1
+
+use_Z_ions = 0 [comet,tandem]
+#   Default: 0
+
+use_NL_ions = 0 [comet]
+#   Default: 0
 	
-ChargeCarrierMass = 1.00727649 [MSGFPlus]
-#	(Mass of charge carrier, Default: mass of proton (1.00727649))
+#ChargeCarrierMass = 1.00727649 [MSGFPlus]
+#   Default: 1.00727649 (mass of proton)
+#	(Mass of charge carrier)
 
 # X=any/none
-#[ENZYME_INFO]              0=nt 1=ct   cleave at   except after [MSGF+]
-#enzyme: 0  NoEnzyme            0       X           X            9
-#enzyme: 1  Trypsin             1       KR          P            1
-#enzyme: 2  Trypsin/P           1       KR          X            1
-#enzyme: 3  Lys_C               1       K           P            3
-#enzyme: 4  Lys_N               0       K           X            4
-#enzyme: 5  Arg_C               1       R           P            6
-#enzyme: 6  Asp_N               0       D           X            7
+#[ENZYME_INFO]              0=nt 1=ct   cleave at   except before [MSGF+]
+#enzyme: 0  NoEnzyme            0       X           X             9
+#enzyme: 1  Trypsin             1       KR          P             1
+#enzyme: 2  Trypsin/P           1       KR          X             1
+#enzyme: 3  Lys_C               1       K           P             3
+#enzyme: 4  Lys_N               0       K           X             4
+#enzyme: 5  Arg_C               1       R           P             6
+#enzyme: 6  Asp_N               0       D           X             7
 #enzyme: 7  CNBr                1       M           X
-#enzyme: 8  Glu_C               1       DE          P            5
+#enzyme: 8  Glu_C               1       DE          P             5
 #enzyme: 9  PepsinA             1       FL          P
-#enzyme: 10 Chymotrypsin        1       FWYL        P            2
-
+#enzyme: 10 Chymotrypsin        1       FWYL        P             2
