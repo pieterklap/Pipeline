@@ -7,7 +7,7 @@ IDCONVoutput=$(echo $PIDoutput | awk -F/ '{$NF="";print $0}' | tr " " "/")
 $idconvert $PIDoutput --pepXML -o $IDCONVoutput |& tee -a "$datelog"
 
 PIDoutput=$(echo $PIDoutput | sed "s/$EXTENTION//")
-mv $PIDoutput"pepXML" $PIDoutput"pep.xml"
-PIDoutput=$PIDoutput"pep.xml"
+#mv $PIDoutput"pepXML" $PIDoutput"pep.xml"
+PIDoutput=$PIDoutput"pepXML"
 
 ##End## "idconvert"

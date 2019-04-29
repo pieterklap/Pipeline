@@ -16,6 +16,10 @@ if [[ "$Header_ver" != "$Header_file_ver" ]]; then
     exit
 fi
 
+#   the letters representing amino acids needed for enzyme digestion in MSFragger
+aminoacids="G A S P V T C L I N D Q K E M O H F U R Y W"
+
+
 Default_check ()
 {
     local Shared_param_file=$(grep -v "^#" $LOC_Shared_param_file | sed 's/ //g' | tr "[" "=[")
@@ -116,8 +120,8 @@ Comet ()
     echo "show_fragment_ions = 0" >> $cometparam
     echo "sample_enzyme_number = $search_enzyme_number" >> $cometparam
 
-    echo "scan_range = 0" >> $cometparam
-    echo "precursor_charge = 0" >> $cometparam
+    echo "scan_range = 0 0" >> $cometparam
+    echo "precursor_charge = 0 0" >> $cometparam
     echo "override_charge = 0" >> $cometparam
     echo "ms_level = 2" >> $cometparam
     if [[ $FragmentMethodID == 0 ]]; then
@@ -148,7 +152,7 @@ Comet ()
     echo "mass_offsets = " >> $cometparam
 
     echo "minimum_peaks = $Min_Peaks" >> $cometparam
-    echo "minimum_intensity = 0" >> $cometparam
+    echo "minimum_intensity = $minimum_intensity" >> $cometparam
     echo "remove_precursor_peak = 0" >> $cometparam
     echo "remove_precursor_tolerance = 1.5" >> $cometparam
     echo "clear_mz_range = 0.0" >> $cometparam
@@ -220,6 +224,7 @@ Comet ()
 
 #   End of Comet parameter generation
     echo "Comet parameter file has been generated. located at: $cometparam"
+
 }
 
 
@@ -360,7 +365,8 @@ Tandem ()
     sed -i "s/label=\"spectrum, fragment mass type\">.*</label=\"spectrum, fragment mass type\">$mass_type_fragment</g" $Tandemparam
 
 #   spectrum conditioning parameters
-#    label="spectrum, dynamic range">100.0<
+    minimum_ratio=$(echo $minimum_ratio | awk '{print (1/$1)}')
+    sed -i "s/label=\"spectrum, dynamic range\">.*</label=\"spectrum, dynamic range\">$minimum_ratio</g" $Tandemparam
 #    label="spectrum, total peaks">50<
     sed -i "s/label=\"spectrum, maximum parent charge\">.*</label=\"spectrum, maximum parent charge\">$MaxCharge</g" $Tandemparam
 
@@ -388,7 +394,7 @@ Tandem ()
 
 #   Enzyme
 #   Takes the cleavage info from the Shared parameter file and puts it in the correct format
-    local Cleaveinfo=$(grep "^#enzyme: $search_enzyme_number" $LOC_Shared_param_file | awk '{print $4,$5,$6}')
+    local Cleaveinfo=$(grep "^#enzyme: $search_enzyme_number " $LOC_Shared_param_file | awk '{print $4,$5,$6}')
     local Cleaveinfo1=$(echo $Cleaveinfo | awk '{print $1}')
     local Cleaveinfo2=$(echo $Cleaveinfo | awk '{print $2}')
     local Cleaveinfo3=$(echo $Cleaveinfo | awk '{print $3}')
@@ -415,7 +421,7 @@ Tandem ()
 #   scoring parameters
 
 #   label="scoring, minimum ion count">4</note>
-#   label="scoring, maximum missed cleavage sites">50</note>
+    sed -i "s/label=\"scoring, maximum missed cleavage sites\">.*</label=\"scoring, maximum missed cleavage sites\">$allowed_missed_cleavage</"
 #   Changes the 1 to yes and everything else to no (e.g. 0).
     ions="use_A_ions use_B_ions use_C_ions use_X_ions use_Y_ions use_Z_ions"
     value="$use_A_ions $use_B_ions $use_C_ions $use_X_ions $use_Y_ions $use_Z_ions"
@@ -494,18 +500,26 @@ MSFragger ()
     echo "fragment_mass_tolerance = $fragment_ion_tolerance" >> $MSFraggerparam
     echo "fragment_mass_units = $Fragment_MassUnit" >> $MSFraggerparam
 
-    echo "isotope_error = 0" >> $MSFraggerparam
+    local IsotopeErrorRange=$(echo $IsotopeErrorRange | awk -F, '{print $NF}')
+    echo "isotope_error = $IsotopeErrorRange" >> $MSFraggerparam
 
-    local Enzyme_name=$(grep "^#enzyme: $search_enzyme_number" | awk '{print $3}')
-    local Enzyme_cutafter=$(grep "^#enzyme: $search_enzyme_number" | awk '{print $5}')
-    local Enzyme_butnotafter=$(grep "^#enzyme: $search_enzyme_number" | awk '{print $6}')
+    local Enzyme_name=$(grep "^#enzyme: $search_enzyme_number " $LOC_Shared_param_file | awk '{print $3}')
+    local Enzyme_cutafter=$(grep "^#enzyme: $search_enzyme_number " $LOC_Shared_param_file | awk '{print $5}')
+    local Enzyme_butnotafter=$(grep "^#enzyme: $search_enzyme_number " $LOC_Shared_param_file | awk '{print $6}')
+
+    if [[ $Enzyme_butnotafter == "X" ]]; then
+        if [[ $Enzyme_cutafter == "X" ]]; then
+            Enzyme_cutafter=$(echo $aminoacids | sed 's/ //g')
+        fi
+        Enzyme_butnotafter=""
+    fi
 
     echo "search_enzyme_name = $Enzyme_name" >> $MSFraggerparam
     echo "search_enzyme_cutafter = $Enzyme_cutafter" >> $MSFraggerparam
     echo "search_enzyme_butnotafter = $Enzyme_butnotafter" >> $MSFraggerparam
 
-    echo "num_enzyme_termini = 0" >> $MSFraggerparam
-    echo "allowed_missed_cleavage = 1" >> $MSFraggerparam
+    echo "num_enzyme_termini = $num_enzyme_termini" >> $MSFraggerparam
+    echo "allowed_missed_cleavage = $allowed_missed_cleavage" >> $MSFraggerparam
 
     echo "clip_nTerm_M = 1" >> $MSFraggerparam
 
@@ -521,9 +535,9 @@ MSFragger ()
     echo "precursor_charge = 0 0" >> $MSFraggerparam
     echo "override_charge = 0" >> $MSFraggerparam
 
-    echo "digest_min_length = 6" >> $MSFraggerparam
-    echo "digest_max_length = 25" >> $MSFraggerparam
-    echo "digest_mass_range = 600.0 3000.0" >> $MSFraggerparam
+    echo "digest_min_length = $MinPepLength" >> $MSFraggerparam
+    echo "digest_max_length = $MaxPepLength" >> $MSFraggerparam
+    echo "digest_mass_range = $MinPepMass $MaxPepMass" >> $MSFraggerparam
     echo "max_fragment_charge = 2" >> $MSFraggerparam
 
 #open search parameters
@@ -538,7 +552,7 @@ MSFragger ()
     echo "use_topN_peaks = 100" >> $MSFraggerparam
     echo "min_fragments_modelling = 3" >> $MSFraggerparam
     echo "min_matched_fragments = 6" >> $MSFraggerparam
-    echo "minimum_ratio = 0.01" >> $MSFraggerparam
+    echo "minimum_ratio = $minimum_ratio" >> $MSFraggerparam
     echo "clear_mz_range = 0.0 0.0" >> $MSFraggerparam
 
 # additional modifications
@@ -573,6 +587,9 @@ MSFragger ()
     echo "add_J_user_amino_acid = 0.0000" >> $MSFraggerparam
     echo "add_X_user_amino_acid = 0.0000" >> $MSFraggerparam
     echo -e "add_Z_user_amino_acid = 0.0000\n" >> $MSFraggerparam
+
+#   End of MSFragger parameter generation
+    echo "MSFragger parameter file has been generated. located at: $MSFraggerparam"
 
 }
 

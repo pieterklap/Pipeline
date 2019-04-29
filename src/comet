@@ -12,12 +12,12 @@ fi
 "$PIDcomet" -P"$PIDparam" "$PIDinput" |& tee -a "$datelog"
 
 if [[ $COMEToutput == "" ]]; then
-    COMEToutput=$(echo $STout*.xml)
-    VALinput=$(echo $STout*.xml | awk -F/ '{print $NF}')
+EXTENTION=$(echo "$PIDinput" |awk -F. '{print $NF}')
+COMEToutput=$(echo $PIDinput | sed "s/\.$EXTENTION/\.pep\.xml/")
+NAME_Cometoutput=$(echo $COMEToutput | awk -F/ '{print $NF}')
 fi
-
+PIDoutput="$PIDoutput/$NAME_Cometoutput"
 mv "$COMEToutput" "$PIDoutput"
 
-PIDoutput=$(echo $PIDoutput/$VALinput)
 
 ##End## "comet"

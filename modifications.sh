@@ -15,7 +15,8 @@ aminoacids="G A S P V T C L I N D Q K E M O H F U R Y W"
 
 if [[ $output_dir == "" ]]; then
     output_dir=$PWD/
-    echo "ERROR: This sould never happen"
+    echo "ERROR: Do not run this script by itself"
+    exit
 fi
 
 
@@ -35,14 +36,13 @@ Seperate ()
 Comet_mods ()
 {
 #   reset fixed comet params
-    for AA in $aminoacids
-    do
-        fixmod_old=$(grep "add_""${AA}""_" $cometparam | awk '{print $1,$2,$3}') 
-        fixmod=$(grep "add_""${AA}""_" $cometparam | awk '{print $1,$2}')
-        sed -i "s/$fixmod_old/$fixmod 0.0000/" $cometparam
-    done
+#    for AA in $aminoacids
+#    do
+#        fixmod_old=$(grep "add_""${AA}""_" $cometparam | awk '{print $1,$2,$3}') 
+#        fixmod=$(grep "add_""${AA}""_" $cometparam | awk '{print $1,$2}')
+#        sed -i "s/$fixmod_old/$fixmod 0.0000/" $cometparam
+#    done
 
-#   TODO: reset the fixed and variable modifications
     local NUM=1
     for mod in $MODS
     do

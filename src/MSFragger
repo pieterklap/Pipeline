@@ -2,7 +2,8 @@
 
 #input:     mzML
 Extention=$(echo $PIDinput | awk -F. '{print $NF}')
-Fraggerout=$(echo $PIDinput | sed "s/$Extention/pep.xml/")   # might be pepXMl
+Fraggerout=$(echo $PIDinput | sed "s/$Extention/pepXML/")
+PIDMSFragger=$(grep MSFragger "$LOC"install_locations | awk '{print $2}')
 
 MemUse=$(grep "^#Mem_Use" $PIDparam | awk '{print $2}')
 
@@ -11,7 +12,10 @@ if [[ $MemUse == "" ]]; then
 fi
 
 
-java -Xmx"$MemUse" -jar $MSFragger $PIDparam $PIDinput
+java -Xmx"$MemUse" -jar $PIDMSFragger $PIDparam $PIDinput
+
+NAMEfragerout=$(echo $Fraggerout | awk -F/ '{print NF}' | sed "s/pepXML/pep.xml/")
+PIDoutput="$PIDoutput/$NAMEfraggerout
 
 mv $Fraggerout $PIDoutput 
 

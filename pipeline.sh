@@ -1,15 +1,16 @@
 #!/bin/bash
 
-if [[ $1 == "" ]]; then
-    cat README.md
-    exit
-fi
 
 # $LOC is the directory of the pipeline
 LOC=$(echo "$0" |awk -F/ '{$NF="";print $0}' | tr " " "/")
 
 if [[ $LOC == "./" ]]; then
     LOC="$PWD/"
+fi
+
+if [[ $1 == "" ]]; then
+    cat "$LOC"README.md
+    exit
 fi
 
 valid="comet tandem msgfplus msfragger peptideprophet percolator gprofiler"
@@ -92,6 +93,21 @@ if [[ $Exitcode = 2 ]]; then
     exit
 fi
 
+for prog in $Programs
+do
+#   Check if the entered programs are a part of the pipeline
+    avalible=0
+    for name in $valid
+    do
+        if [[ ${name} == ${prog} ]]; then
+            avalible=1
+        fi
+    done
+    if [[ $avalible != 1 ]]; then
+        echo "ERROR: ${prog} is not a valid name"
+        exit
+    fi
+done
 
 # if only one parameter file was entered but multiple programs the pipeline assumes the parameter file is the Shared parameter file.
 if (($NUMprog > 1)) && [[ $NUMparam == "1" ]]; then
@@ -101,9 +117,6 @@ if (($NUMprog > 1)) && [[ $NUMparam == "1" ]]; then
     LOC_Shared_param_file="$paramsProg"
     echo "Shared param file"
 
-#   removes the spaces between the parameter name and value and makes sure there is one space between each parameter
-    Shared_param_file=$(grep -v "^#" $LOC_Shared_param_file | sed "s/ //g" | tr "\n" " " | tr "\t" " " | sed "s/ \+/ /g" |tr " " "\n" )
-
 #   if no output directory is given set the outputdirectory to the working directory
     LOC_param=$(echo $LOC_Shared_param_file | awk -F/ '{$NF="";print $0}' | tr " " "/")
     output_dir=$LOC_param
@@ -111,6 +124,10 @@ if (($NUMprog > 1)) && [[ $NUMparam == "1" ]]; then
     NUMparam="0"
 #   uses the functions in the following bash scripts
     source "$LOC"Shared_parameter_maker.sh
+    Default_check
+#   removes the spaces between the parameter name and value and makes sure there is one space between each parameter
+    Shared_param_file=$(grep -v "^#" $LOC_Shared_param_file | sed "s/ //g" | tr "\n" " " | tr "\t" " " | sed "s/ \+/ /g" |tr " " "\n" )
+
     source "$LOC"modifications.sh
     if [[ $Programs == *"comet"* ]]; then
         Comet                   #   generates the main bulk of the parameter file
@@ -130,6 +147,12 @@ if (($NUMprog > 1)) && [[ $NUMparam == "1" ]]; then
         msgfplus="$MSGFPlusparam"
         NUMparam=$[$NUMparam+1]
     fi
+    if [[ $Programs == *"msfragger"* ]]; then
+        MSFragger
+        MSFragger_mods
+        msfragger="$MSFraggerparam"
+        NUMparam=$[$NUMparam+1]
+    fi
     if [[ $Programs == *"peptideprophet"* ]]; then
         PeptideProphet                  #   For use later if peptideprophet gets added to the shared parameter file
         peptideprophet="$PepProphParam" #
@@ -147,18 +170,6 @@ else
 # sets the parameter files to be used for each peptide identifier
     for prog in $Programs
     do
-#   Check if the entered programs are a part of the pipeline
-        avalible=0
-        for name in $valid
-        do
-            if [[ ${name} == ${prog} ]]; then
-                avalible=1
-            fi
-        done
-        if [[ $avalible != 1 ]]; then
-            echo "ERROR: ${prog} is not a valid name"
-            exit
-        fi
 #   Puts the parameter location into a variable with the programs name and removes the location from the string of locations
         paramloc=$(echo $paramsProg | awk '{print $1}')
         declare "${prog}"="$paramloc"
@@ -454,4 +465,5 @@ if [[ "$RUNscripts" == "" ]] && [[ "$SHARK" == "1" ]]; then
 fi
 
 #END of pipeline generator
+
 exit
