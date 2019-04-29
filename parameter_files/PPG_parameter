@@ -1,21 +1,10 @@
 #	Parameter file to be used with the Proteomic Pipeline Generator. (v0.x)
 #	Everything following a "#" is a comment
-#	Some options may not be avalible in this file
- 
-tandem_default_input.xml = /path/to/tandem/default_input.xml
-#   Enter the locations of the tandem parameter files 
-PeptideProphet_parameter = /path/to/peptideprophet/parameter
-Percolator_parameter = /path/to/percolator/parameter
+#	Some options may not be avalible in this file 
 
-fasta_file = /path/to/file.fasta [comet,tandem,MSGFPlus]
+
+fasta_file = /home/pieter/pipeline/fasta/up000005640.fasta [comet,tandem,MSGFPlus]
 #	Sets the path to the fasta file that all the programs use
-decoy_fasta_file = /path/to/file.decoy.fasta [tandem,MSGFPlus]
-
-Taxon = human [tandem]
-#   the Taxon tandem thinks it's working with 
-
-Modification_file = /path/to/modification_file [comet,tandem,MSGFPlus]
-#   location of the modification file
 
 Decoy_Database = 0 [comet,MSGFPlus] 
 #   (0: don't search decoy database (Default), 1: search decoy database)
@@ -42,7 +31,7 @@ spectrum_batch_size = 0 [comet,tandem]
 ##  Masses
 #
 
-PrecursorMassTolerance = 2.5 [comet,tandem.MSGFPlus]
+PrecursorMassTolerance = 0.4 [comet,tandem.MSGFPlus]
 #   Default: 20
 
 MassUnit = Daltons [comet,tandem,MSGFPlus]
@@ -59,7 +48,7 @@ mass_type_precursor = 1 [comet,tandem]
 mass_type_fragment = 1 [comet,tandem]
 # 0=average masses, 1=monoisotopic masses
 
-fragment_ion_tolerance = 1.0 [comet,tandem]
+fragment_ion_tolerance = 0.4 [comet,tandem]
 # enter a value >0.01 the lower the value the more precise the data has to be.
 # Fragment ion tolerance
 
@@ -87,7 +76,7 @@ ProtocolID = 0 [MSGFPlus]
 # Enzymes
 #
 
-search_enzyme_number = 1 [comet,tandem,MSGFPlus]               
+search_enzyme_number = 0 [comet,tandem,MSGFPlus]               
 # choose from list at end of this parameter file
 num_enzyme_termini = 2 [comet,tandem,MSGFPlus]                
 # 1 (semi-digested), 2 (fully digested, default), 8 C-term unspecific , 9 N-term unspecific
@@ -109,10 +98,10 @@ MS2DetectorID = 0 [MSGFPlus]
 ProtocolID = 0 [MSGFPlus]
 #	0: Automatic (Default), 1: Phosphorylation, 2: iTRAQ, 3: iTRAQPhospho, 4: TMT, 5: Standard)
 
+Tolerable_Termini = 2 [comet,MSGFPlus]
+#	(Number of Tolerable Termini, Default: 2)
+#	E.g. For trypsin, 0: non-tryptic, 1: semi-tryptic, 2: fully-tryptic peptides only.
 
-Max_Missed_cleavage = 50 [tandem]
-#   The maximum number of missed cleavage sites allowed within a peptide
-#   
 
 MinPepLength = 6 [MSGFPlus]
 #	(Minimum peptide length to consider, Default: 6)
@@ -158,3 +147,4 @@ ChargeCarrierMass = 1.00727649 [MSGFPlus]
 #enzyme: 8  Glu_C               1       DE          P            5
 #enzyme: 9  PepsinA             1       FL          P
 #enzyme: 10 Chymotrypsin        1       FWYL        P            2
+
