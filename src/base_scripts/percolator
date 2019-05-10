@@ -3,7 +3,17 @@
 
 #	run Percolator
 
-percolator=$(grep percolator "$LOC"install_locations | awk '{print $2}')
+VALprog=$(grep percolator "$LOC"install_locations | awk '{print $2}')
+if [[ $VALprog == "" ]] || [ ! -f $VALprog ]; then
+    echo -e "\e[93mWARNING:\e[0m The location of percolator is not given or does not exist"
+    VALprog=$(command -v percolator)
+    if [[ $VALprog == "" ]]; then
+        echo -e "\e[91ERROR:\e[0m percolator was not found. \nexiting"
+        exit
+    else
+        echo -e "\e[92m running\e[0m $VALprog"
+    fi
+fi
 
 EXTENTION=$(echo $PIDoutput | awk -F. '{print $NF}')
 VALoutput=$(echo $PIDoutput | sed "s/$EXTENTION/put.xml/")
@@ -11,7 +21,7 @@ TSVoutput=$(echo $PIDoutput | sed "s/$EXTENTION/put.tsv/")
 
 VALparam=$(grep -v "^#" $VALparam | awk '{print $1, $2}' | tr "\n" " ")
 
-$percolator -X $VALoutput $VALparam $PIDoutput > $TSVoutput 2> >(tee -a $datelog >&2)
+$VALprog -X $VALoutput $VALparam $PIDoutput > $TSVoutput 2> >(tee -a $datelog >&2)
 
 
 

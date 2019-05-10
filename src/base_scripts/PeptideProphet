@@ -2,6 +2,19 @@
 
 # sets the location of peptideprophet into variable VALprog
 VALprog=$(grep PeptideProphet "$LOC"install_locations | awk '{print $2}')
+
+if [[ $VALprog == "" ]] || [ ! -f $VALprog ]; then
+    echo -e "\e[93mWARNING:\e[0m The location of PeptideProphet is not given or does not exist"
+    VALprog=$(command -v PeptideProphetParser)
+    if [[ $VALprog == "" ]]; then
+        echo -e "\e[91ERROR:\e[0m PeptideProphet was not found. \nexiting"
+        exit
+    else
+        echo -e "\e[92m running\e[0m $VALprog"
+    fi
+fi
+
+
 EXTENTION=$(echo $PIDoutput | awk -F. '{print $(NF-1)"."$NF}')
 
 if [[ $EXTENTION == "pep.xml" ]]; then

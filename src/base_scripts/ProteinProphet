@@ -2,6 +2,17 @@
 
 # sets the location of peptideprophet into variable VALprog
 ANAprog=$(grep ProteinProphet "$LOC"install_locations | awk '{print $2}')
+if [[ $ANAprog == "" ]] || [ ! -f $ANAprog ]; then
+    echo -e "\e[93mWARNING:\e[0m The location of ProteinProphet is not given or does not exist"
+    ANAprog=$(command -v ProteinProphetParser)
+    if [[ $ANAprog == "" ]]; then
+        echo -e "\e[91ERROR:\e[0m ProteinProphet was not found. \nexiting"
+        exit
+    else
+        echo -e "\e[92m running\e[0m $VALprog"
+    fi
+fi
+
 EXTENTION=$(echo $VALoutput | awk -F. '{print $(NF-1)"."$NF}')
 
 

@@ -8,17 +8,28 @@ MSGFoutput_decoy=$(echo "$PIDoutput" | sed "s/.$EXTENTION/.decoy.mzid/")
 
 MSGFparam=$(grep -v "^#" $PIDparam_decoy |awk '{print $2,$3}' |tr "\n" " ")
 
-java -Xmx"$MemUse" -jar $PIDMSGF -s $PIDinput -o $MSGFoutput_decoy $MSGFparam |tee -a $datelog
+java -Xmx"$MemUse" -jar $PIDprog -s $PIDinput -o $MSGFoutput_decoy $MSGFparam |tee -a $datelog
 
 PIDoutput_decoy="$MSGFoutput_decoy"
 
 
-msgf2pin=$(grep msgf2pin "$LOC"install_locations | awk '{print $2}')
+CONVprog=$(grep msgf2pin "$LOC"install_locations | awk '{print $2}')
+if [[ $CONVprog == "" ]] || [ ! -f $CONVprog ]; then
+    echo -e "\e[93mWARNING:\e[0m The location of msgf2pin is not given or does not exist"
+    CONVprog=$(command -v msgf2pin)
+    if [[ $CONVprog == "" ]]; then
+        echo -e "\e[91mERROR:\e[0m msgf2pin was not found. \nexiting"
+        exit
+    else
+        echo -e "\e[92m running\e[0m $CONVprog"
+    fi
+fi
+
 EXTENTION=$(echo "$PIDoutput" |awk -F. '{print $NF}')
 VALinput=$(echo "$PIDoutput" | sed "s/.$EXTENTION/.pin/")
 
 
-$msgf2pin -o $VALinput $PIDoutput $PIDoutput_decoy |& tee -a $datelog
+$CONVprog -o $VALinput $PIDoutput $PIDoutput_decoy |& tee -a $datelog
 
 PIDoutput=$VALinput
 ##End## "msgf2pin"

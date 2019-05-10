@@ -4,10 +4,21 @@
 VALinput=${PIDoutput//.xml/.pep.xml}
 
 # Location of Tandem2XMl
-T2XML=$(grep Tandem2XML "$LOC"install_locations | awk '{print $2}')
+CONVprog=$(grep Tandem2XML "$LOC"install_locations | awk '{print $2}')
+if [[ $CONVprog == "" ]] || [ ! -f $CONVprog ]; then
+    echo -e "\e[93mWARNING:\e[0m The location of Tandem2XML is not given or does not exist"
+    CONVprog=$(command -v Tandem2XML)
+    if [[ $CONVprog == "" ]]; then
+        echo -e "\e[91mERROR:\e[0m Tandem2XML was not found. \nexiting"
+        exit
+    else
+        echo -e "\e[92m running\e[0m $CONVprog"
+    fi
+fi
+
 
 # runs Tandem2XML
-$T2XML $PIDoutput $VALinput |& tee -a $datelog
+$CONVprog $PIDoutput $VALinput |& tee -a $datelog
 
 # sets PIDoutput to be used in peptideprophet
 PIDoutput="$VALinput"

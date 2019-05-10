@@ -7,18 +7,30 @@ sed 's/taxon">human/taxon">human_decoy/' $PIDparam > $PIDparam_decoy
 
 # run tandem with the decoy
 
-$XTprog $PIDparam_decoy |& tee -a $datelog
+$PIDprog $PIDparam_decoy |& tee -a $datelog
 
 PIDoutput_decoy=$(ls -t "$STout""$NAME"/* |head -n1)
 
 
 # t.xml to tab delimited file with tandem2pin
 
-tandem2pin=$(grep tandem2pin "$LOC"install_locations | awk '{print $2}')
+CONVprog=$(grep tandem2pin "$LOC"install_locations | awk '{print $2}')
+if [[ $CONVprog == "" ]] || [ ! -f $CONVprog ]; then
+    echo -e "\e[93mWARNING:\e[0m The location of tandem2pin is not given or does not exist"
+    CONVprog=$(command -v tandem2pin)
+    if [[ $CONVprog == "" ]]; then
+        echo -e "\e[91mERROR:\e[0m tandem2pin was not found. \nexiting"
+        exit
+    else
+        echo -e "\e[92m running\e[0m $CONVprog"
+    fi
+fi
+
+
 EXTENTION=$(echo $PIDoutput |awk -F\. '{print $NF}')
 VALinput=$(echo $PIDoutput | sed "s/$EXTENTION/pin/")
 
-$tandem2pin -o $VALinput $PIDoutput $PIDoutput_decoy |& tee -a $datelog
+$CONVprog -o $VALinput $PIDoutput $PIDoutput_decoy |& tee -a $datelog
 
 PIDoutput=$VALinput
 

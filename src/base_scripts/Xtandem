@@ -1,18 +1,21 @@
 ##Start## "Xtandem"
 
 # Stes the location of tandem into a variable
-XTloc=$(grep "Tandem " "$LOC"install_locations | awk '{print $2}')
+PIDprog=$(grep "Tandem " "$LOC"install_locations | awk '{print $2}')
 # if the given location isn't a file try to find tandem.
-if [ ! -f $XTloc ]; then
-	XTloc=$(locate -n1 tandem.exe | head -c-15)
-	if [ ! -f $XTloc ]; then
-		echo $XTloc is not a file
-		exit
-	fi
+if [[ $PIDprog == "" ]] || [ ! -f $PIDprog ]; then
+    echo -e "\e[93mWARNING:\e[0m The location of Tandem is not given or does not exist"
+    PIDprog=$(command -v tandem.exe)
+    if [[ $PIDprog == "" ]]; then
+        echo -e "\e[91mERROR:\e[0m Tandem was not found. \nexiting"
+        exit
+    else
+        echo -e "\e[92m running\e[0m $PIDprog"
+    fi
 fi
 
 # sets the program location to XTloc
-XTprog=$XTloc
+XTloc=$PIDprog
 # changes XTloc to the directory of tandem.exe
 XTloc=$(echo "$XTloc" |awk -F/ '{$NF="";print $0}' | tr " " "/")
 
@@ -35,7 +38,7 @@ sed "s/\"spectrum, path\".*/\"spectrum, path\">$inputXT<\/note>/" "$PIDparam" > 
 sed "s/\"output, path\".*/\"output, path\">$outputXT\/output.xml<\/note>/" "$LOC".tandemtemp/input.xml > "$PIDparam"  # Changes the output path to$
 
 # run Xtandem
-$XTprog $PIDparam |& tee -a $datelog
+$PIDprog $PIDparam |& tee -a $datelog
 
 # remove the temporary directory
 rm -fr "$LOC".tandemtemp/

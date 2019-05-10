@@ -1,15 +1,22 @@
 ##Start## "comet"
 
 # check where comet is installed
-PIDcomet=$(grep Comet "$LOC"install_locations | awk '{print $2}')
+PIDprog=$(grep Comet "$LOC"install_locations | awk '{print $2}')
 
-if [ ! -f $PIDcomet ]; then
-    echo -e "\n Error " $PIDcomet " is not a file  \n" | tee -a $datelog
-    exit 1
+if [[ $PIDprog == "" ]] || [ ! -f $PIDprog ]; then
+    echo -e "\e[93mWARNING:\e[0m The location of comet is not given or does not exist"
+    PIDprog=$(command -v comet.exe)
+    if [[ $PIDprog == "" ]]; then
+        echo -e "\e[91mERROR:\e[0m comet was not found. \nexiting"
+        exit
+    else
+        echo -e "\e[92m running\e[0m $PIDprog"
+    fi
 fi
 
+
 # run comet 
-"$PIDcomet" -P"$PIDparam" "$PIDinput" |& tee -a $datelog
+"$PIDprog" -P"$PIDparam" "$PIDinput" |& tee -a $datelog
 
 if [[ $COMEToutput == "" ]]; then
 EXTENTION=$(echo "$PIDinput" |awk -F. '{print $NF}')
