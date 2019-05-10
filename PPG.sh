@@ -12,12 +12,13 @@ if [[ $LOC == "./" ]]; then
     LOC="$PWD/"
 fi
 
+# All the programs that are compatible with the PPG
 valid="comet tandem msgfplus msfragger peptideprophet percolator gprofiler reactome"
+
 
 NUMprog="0"
 NUMparam="0"
 
-#echo $LOC
 # allows the options to work
 while [ "$1" != "" ]; do
 
@@ -80,6 +81,24 @@ if [[ $LOCscripts == "" ]]; then
     LOCscripts="$LOC"Scripts/
 fi
 
+# The names of the required converters
+if [[ $Programs == *"tandem"* ]]; then
+    if [[ $Programs == *"peptideprophet"* ]]; then
+        converters+="tandem2xml "
+    fi
+    if [[ $Programs == *"percolator"* ]]; then
+        converters+="tandem2pin "
+    fi
+fi
+if [[ $Programs == *"msgfplus"* ]]; then
+    if [[ $Programs == *"peptideprophet"* ]]; then
+        converters+="idconvert "
+    fi
+    if [[ $Programs == *"percolator"* ]]; then
+        converters+="msgf2pin "
+    fi
+fi
+
 # Check if install_locations is a file
 if [ ! -f $LOC/install_locations ] && [[ $RUNscripts != "n" ]]; then
     echo -e "\n\e[93mWARNING:\e[0m "$LOC"install_locations not found"
@@ -106,7 +125,16 @@ done
 
 # adds all file locations to a variable to test if they are direct references i.e. start with /
 if [[ $RUNscripts == "" ]]; then
-    DirectTest=$(grep -v "^#" $LOC/install_locations | awk '{print $2" "}')
+#   Only check for programs that are being used
+    for prog in $Programs
+    do
+        DirectTest+=$(grep -i "${prog} " $LOC/install_locations | awk '{print $2" "}')
+    done
+#   also check the converters
+    for prog in $converters
+    do
+        DirectTest+=$(grep -i "${prog} " $LOC/install_locations | awk '{print $2" "}')
+    done
     DirectTest+=$(echo $input | awk '{print $2" "}')
     DirectTest+=$(echo $output | awk '{print $2" "}')
     DirectTest+=$(echo $logfile | awk '{print $2" "}')
