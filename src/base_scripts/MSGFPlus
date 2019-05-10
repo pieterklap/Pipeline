@@ -15,7 +15,7 @@ if [[ $PIDprog == "" ]] || [ ! -f $PIDprog ]; then
         echo -e "\e[91mERROR:\e[0m MSGFPlus was not found. \nexiting"
         exit
     else
-        echo -e "\e[92m running\e[0m $PIDprog"
+        echo -e "\e[92mRunning:\e[0m $PIDprog"
     fi
 fi
 

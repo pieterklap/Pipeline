@@ -11,7 +11,7 @@ if [[ $VALprog == "" ]] || [ ! -f $VALprog ]; then
         echo -e "\e[91ERROR:\e[0m percolator was not found. \nexiting"
         exit
     else
-        echo -e "\e[92m running\e[0m $VALprog"
+        echo -e "\e[92mRunning:\e[0m $VALprog"
     fi
 fi
 

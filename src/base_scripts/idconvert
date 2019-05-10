@@ -8,7 +8,7 @@ if [[ $CONVprog == "" ]] || [ ! -f $CONVprog ]; then
         echo -e "\e[91mERROR:\e[0m idconvert was not found. \nexiting"
         exit
     else
-        echo -e "\e[92m running\e[0m $CONVprog"
+        echo -e "\e[92mRunning:\e[0m $CONVprog"
     fi
 fi
 
