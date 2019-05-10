@@ -69,7 +69,7 @@ while [ "$1" != "" ]; do
                             shift                        # Allows Shark options to be entered
                             SHARKoptions=$1             # Allows Shark options to be entered
                             ;;
-        * )                 echo "Unknown parameter ""$1"
+        * )                 echo -e "\e[91mERROR:\e[0m Unknown parameter ""$1"
                             exit
                             ;;
     esac
@@ -80,10 +80,28 @@ if [[ $LOCscripts == "" ]]; then
     LOCscripts="$LOC"Scripts/
 fi
 
-if [ ! -f $LOC/install_locations ]; then
-    echo "install_locations not found"
-    exit
+# Check if install_locations is a file
+if [ ! -f $LOC/install_locations ] && [[ $RUNscripts != "n" ]]; then
+    echo -e "\n\e[93mWARNING:\e[0m "$LOC"install_locations not found"
+    echo -e "Programs may not be able to be run without knowing where they are located"
+    echo -e "create a file named install_locations in same directory as PPG.sh with the locations of the installed programs\n"
 fi
+
+for prog in $Programs
+do
+#   Check if the entered programs are a part of the pipeline
+    avalible=0
+    for name in $valid
+    do
+        if [[ ${name} == ${prog} ]]; then
+            avalible=1
+        fi
+    done
+    if [[ $avalible != 1 ]]; then
+        echo -e "\e[91mERROR:\e[0m ${prog} is not a valid name"
+        exit
+    fi
+done
 
 
 # adds all file locations to a variable to test if they are direct references i.e. start with /
@@ -94,13 +112,15 @@ if [[ $RUNscripts == "" ]]; then
     DirectTest+=$(echo $logfile | awk '{print $2" "}')
     DirectTest+=$paramsProg
     DirectTest+=$(echo $GPparams | awk '{print $2" "}')
+    DirectTest+=$(echo $location | awk '{print $2" "}')
 fi
+
 # Tests if each file is a direct reference
 for file in $DirectTest
 do
     Direct=$(echo ${file} | cut -c 1-1)
     if [[ $Direct != "/" ]] && [[ $Direct != "" ]]; then
-        echo "ERROR: ${file} is not a direct reference"
+        echo -e "\e[91mERROR:\e[0m ${file} is not a direct reference"
         Exitcode=2
     fi
 done
@@ -178,18 +198,6 @@ else
 # sets the parameter files to be used for each peptide identifier
     for prog in $Programs
     do
-#   Check if the entered programs are a part of the pipeline
-        avalible=0
-        for name in $valid
-        do
-            if [[ ${name} == ${prog} ]]; then
-                avalible=1
-            fi
-        done
-        if [[ $avalible != 1 ]]; then
-            echo "ERROR: ${prog} is not a valid name"
-            exit
-        fi
 #   Puts the parameter location into a variable with the programs name and removes the location from the string of locations
         paramloc=$(echo $paramsProg | awk '{print $1}')
         declare "${prog}"="$paramloc"
