@@ -2,8 +2,8 @@
 
 echo "$0 is done runnig"
 
-echo -e "\nEnd time: " >> "$datelog"
-date -I'seconds' >> "$datelog"
+echo -e "\nEnd time: " | tee -a $datelog
+date -I'seconds' | tee -a $datelog
 
 End_Seconds=$(date +%s)
 

@@ -148,7 +148,7 @@ Comet ()
     echo "clip_nterm_methionine = 0" >> $cometparam
     echo "spectrum_batch_size = $spectrum_batch_size" >> $cometparam
     echo "decoy_prefix = DECOY_" >> $cometparam
-    echo "output_suffix =" >> $cometparam
+    echo "output_suffix = $Output_suffix" >> $cometparam
     echo "mass_offsets = " >> $cometparam
 
     echo "minimum_peaks = $Min_Peaks" >> $cometparam
@@ -279,6 +279,7 @@ MSGFPlus ()
     echo "NumMatchesPerSpec -n $NumMatchesPerSpec" >> $MSGFPlusparam
     echo "AddFeatures -addFeatures 1" >> $MSGFPlusparam
     echo "ChargeCarrierMass -ccm $ChargeCarrierMass" >> $MSGFPlusparam
+    echo "Output_suffix $Output_suffix" >> $MSGFPlusparam
 
 #   If any parameters are left empty they wil be commented out in the parameter file
     local MSGFPlus_paramlist=$(sed 's/ /=/g' $MSGFPlusparam)
@@ -340,7 +341,6 @@ Tandem ()
             "    <note type=\"input\" label=\"output, path\">/path/to/output</note>\n"\
             "</bioml>" > $Tandemparam_input
 # The spectrum, path and output, path will be edited by the pipeline.
-
 
 #   start of the main parameter file (default_input.xml)
 
@@ -414,14 +414,15 @@ Tandem ()
 
 #   protein parameters
 #   label=\"protein, taxon\">.*<
-    sed -i "s/label=\"protein, cleavage site\">.*</label=\"protein, cleavage site\">$search_enzyme_number</g" $Tandemparam
+    sed -i "s/label=\"protein, cleavage site\">.*</label=\"protein, cleavage site\">$search_enzyme_number</" $Tandemparam
 #   label="protein, modified residue mass file"></note>
 #   label="protein, homolog management">no</note>
 
 #   scoring parameters
 
 #   label="scoring, minimum ion count">4</note>
-    sed -i "s/label=\"scoring, maximum missed cleavage sites\">.*</label=\"scoring, maximum missed cleavage sites\">$allowed_missed_cleavage</"
+       sed -i "s/label=\"scoring, maximum missed cleavage sites\">.*</label=\"scoring, maximum missed cleavage sites\">$allowed_missed_cleavage</" $Tandemparam
+
 #   Changes the 1 to yes and everything else to no (e.g. 0).
     ions="use_A_ions use_B_ions use_C_ions use_X_ions use_Y_ions use_Z_ions"
     value="$use_A_ions $use_B_ions $use_C_ions $use_X_ions $use_Y_ions $use_Z_ions"
@@ -605,4 +606,14 @@ Percolator ()
 #   for possible use later currently need input in the Shared parameter file
 PercolatorParam=$(grep "^Percolator_parameter" $LOC_Shared_param_file | awk '{print $3}')
 
+}
+
+Gprofiler ()
+{
+gprofilerParam=$(grep "^gprofiler_parameter" $LOC_Shared_param_file | awk '{print $3}')
+}
+
+Reactome ()
+{
+ReactomeParam=$(grep "^Reactome_parameter" $LOC_Shared_param_file | awk '{print $3}')
 }

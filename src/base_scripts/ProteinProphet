@@ -1,0 +1,16 @@
+##Start## "ProteinProphet"
+
+# sets the location of peptideprophet into variable VALprog
+ANAprog=$(grep ProteinProphet "$LOC"install_locations | awk '{print $2}')
+EXTENTION=$(echo $VALoutput | awk -F. '{print $(NF-1)"."$NF}')
+
+
+ANAparam=$(grep -v "^#" $ANAparam | awk '{print $1}' | tr "\n" " ")
+
+ANAoutput=$(echo $VALoutput | sed "s/$EXTENTION/prot.xml/")
+
+# runs Proteinprophet
+$ANAprog $VALoutput $ANAoutput $ANAparam |& tee -a $datelog
+
+
+##End## "ProteinProphet"

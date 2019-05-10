@@ -1,0 +1,62 @@
+##Start## "Reactome"
+
+EXTENTION=$(echo $VALoutput | awk -F\. '{print $(NF-1)"."$NF}')
+NAMEfile=${VALoutput//.$EXTENTION/_Reactome}
+
+#   checks the extention so it knows where the protein names are located and prints all the proteins in a sring
+if [[ $EXTENTION == pep.xml ]]; then
+    # takes the protein names out of the pep.xml file (peptideprophet)
+    PROTEIN=$(cat $VALoutput | grep "<search_hit" | awk -F\| '{print $2 }')
+fi
+if [[ $EXTENTION == put.xml ]]; then
+    #takes the protein names out of the put.xml file (percolator)
+    PROTEIN=$(cat $VALoutput | grep "<protein_id>" | awk -F\| '{print $2 }')
+fi
+
+PROTEIN=$(echo $PROTEIN | tr " " "\n" | sort -u | tr "\n" " ")
+#saves the protein list
+echo $PROTEIN > $NAMEfile.prot
+
+#   Base URL for Reactome
+baseURL="https://reactome.org/AnalysisService"
+
+Datainput="\"$PROTEIN\""
+
+#   parameter for annalysis with Reactome
+interactors="interactors=false"
+species="species=Homo sapiens"
+#pageSize="pageSize=50"
+#page="page=1"
+sortBy="sortBy=ENTITIES_PVALUE"
+#order="order=ASC"
+resource="resource=TOTAL"
+pValue="pValue=1"
+includeDisease="includeDisease=true"
+
+#   Changes the spaces to %20 to be used in a url
+species=${species// /%20}
+
+#   Runs the identifiers tool
+curl -X POST \
+"$baseURL/identifiers/?$interactors&$species&$pageSize&$page&$sortBy&$order&$resource&$pValue&$includeDisease" \
+-H  "accept: application/json" \
+-H  "content-type: text/plain" \
+-d "$Datainput" \
+--output $NAMEfile.json |& tee -a $datelog
+
+#   takes the token from the .json file and replaces any % with %25 so that it can be used in a url
+Token=$(cat $NAMEfile.json | awk -F\" '{print $6}')
+Token=${Token//%/%25}
+
+# parameters for downloading the pdf
+number="number=25"
+diagramProfile="diagramProfile=Modern"
+analysisProfile="analysisProfile=Standard"
+fireworksProfile="fireworksProfile=Barium%20Lithium"
+
+curl -X GET \
+"$baseURL/report/$Token/${species//species=/}/report.pdf?$number&$recource&$diagramProfile&$analysisProfile&$fireworksProfile" \
+-H  "accept: application/pdf" \
+--output $NAMEfile.pdf |& tee -a $datelog
+
+##End## "Reactome"

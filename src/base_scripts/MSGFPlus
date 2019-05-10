@@ -3,7 +3,9 @@
 MSGFoutput=$(echo "$PIDinput" |awk -F/ '{print $NF}' | tr " " "/")
 EXTENTION=$(echo "$MSGFoutput" |awk -F. '{print $NF}')
 
-MSGFoutput=$(echo "$MSGFoutput" | sed "s/.$EXTENTION/.mzid/")
+output_suffix=$(grep "^#Output_suffix" $PIDparam | awk '{print $2}')
+
+MSGFoutput=$(echo "$MSGFoutput" | sed "s/\.$EXTENTION/$output_suffix\.mzid/")
 
 
 PIDMSGF=$(grep MSGFPlus "$LOC"install_locations | awk '{print $2}')
@@ -15,7 +17,7 @@ if [[ $MemUse == "" ]]; then
     MemUse="4G"
 fi
 
-java -Xmx$MemUse -jar $PIDMSGF -s $PIDinput -o $PIDoutput/$MSGFoutput $MSGFparam |& tee -a "$datelog"
+java -Xmx$MemUse -jar $PIDMSGF -s $PIDinput -o $PIDoutput/$MSGFoutput $MSGFparam |& tee -a $datelog
 
 PIDoutput="$PIDoutput/$MSGFoutput"
 

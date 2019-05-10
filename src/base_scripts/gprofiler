@@ -1,8 +1,7 @@
 ##Start## "gprofiler"
 
 EXTENTION=$(echo $VALoutput | awk -F\. '{print $(NF-1)"."$NF}')
-NAMEfile=$(echo $VALoutput | sed "s/$EXTENTION/json/")
-#NAMEfile=$(echo "$VALoutput"".json")
+NAMEfile=${VALoutput//.$EXTENTION/_gprofiler}
 
 if [[ $EXTENTION == pep.xml ]]; then
     # takes the protein names out of the pep.xml file (peptideprophet)
@@ -10,11 +9,11 @@ if [[ $EXTENTION == pep.xml ]]; then
 fi
 if [[ $EXTENTION == put.xml ]]; then
     #takes the protein names out of the put.xml file (percolator)
-    PROTEIN=$(cat $VALoutput | grep "<protein_id>" | awk -F"|" '{print "\"" $2 "\"""\,"}')
+    PROTEIN=$(cat $VALoutput | grep "<protein_id>" | awk -F\| '{print "\"" $2 "\"""\,"}')
 fi
 
 #removes the last "," from $PROTEIN
-PROTEIN=$(echo $PROTEIN | head -c-2)
+PROTEIN=$(echo $PROTEIN | tr " " "\n" | sort -u | tr "\n" " " | head -c-2) 
 #saves the protein list
 echo $PROTEIN > $NAMEfile.prot
 
@@ -33,8 +32,8 @@ GPparams=$(echo "{$GPparams \"query\": [$PROTEIN]}")
 
 
 # calls the gost API
-curl -v \
--o "$NAMEfile" \
+curl  \
+-o "$NAMEfile.json" \
 -X 'POST' \
 -H 'Content-Type: application/json' \
 -d  "$GPparams" 'https://biit.cs.ut.ee/gprofiler_beta/api/gost/profile/' |& tee -a $datelog

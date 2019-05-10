@@ -1,6 +1,5 @@
-##Start## "options"
 #!/bin/bash
-
+##Start## "options"
 
 # notes the location of the pipeline
 LOC=$(echo "$0" |awk -F/ '{$NF="";print $0}' | tr " " "/")
@@ -32,6 +31,12 @@ while [ "$1" != "" ]; do
         -o | --output )         shift               # Enter -o to specify the output location
                                 PIDoutput=$1        # Enter -o to specify the output location
                                 ;;
+        -I | --multinput )      while [[ ${2:0:1} != "-" ]] && [[ "$2" != "" ]]; do
+                                    shift
+                                    PIDinput+=$1" "         # Puts the input locations in a variable
+                                    NUMinput=$[$NUMinput+1]     # Counts the amount of input files entered
+                                done
+                                ;;
         -i | --input )          shift               # Enter -i to specify the input location
                                 PIDinput=$1         # Enter -i to specify the input location
                                 ;;
@@ -57,9 +62,16 @@ while [ "$1" != "" ]; do
         -L | --location )       shift
                                 LOC="$1"
                                 ;;
-        -I | --installer )      shift
-                                ./installer.sh $@
-                                exit 1              # Exit after the installer han ran
+        -r | --rerunMT )        shift
+                                MassTolerance=$1
+                                ;;
+        -m | --mode )           shift
+                                if [[ ${1,,} == "parralel" ]]; then
+                                    Parallel_Run="1"
+                                fi
+                                if [[ ${1,,} == "series" ]]; then
+                                    Series_Run="1"
+                                fi
                                 ;;
         * )                     echo " "            # Requires you to anounce input with a - option
                                 echo "Error invalid paramater $1"
@@ -71,31 +83,32 @@ while [ "$1" != "" ]; do
 done
 
 # Create a log file with the date and time
-datelog=$(date -I'seconds')
-datelog=${datelog//":"/"_"}     #changes the ":" to "_" for easier file management
-dateout="$datelog"
-datelog="$logfile"logfile_"$NAME"_"$datelog"    #sets the name of the logfile, default is logfile_(start time)
+if [[ $logfile != "" ]]; then
+    datelog=$(date -I'seconds')
+    datelog=${datelog//":"/"_"}     #changes the ":" to "_" for easier file management
+    dateout=$datelog
+    datelog="$logfile"logfile_"$NAME"_$datelog    #sets the name of the logfile, default is logfile_(start time)
+    datelog_tee="\| tee -a datelog"
+fi
 
 # adds the start time to the log file
-echo "Start time: " > "$datelog"
-date -I'seconds' >> "$datelog"
-echo " " >> "$datelog"
+echo "Start time: " | tee  $datelog
+date -I'seconds' | tee -a $datelog
+echo " " | tee -a $datelog
 Start_Seconds=$(date +%s)
 
 # Tells the user where the logfile is located
-if [[ $logfile == "" ]]; then
-    echo -e "\nlogfile is located at $PWD/$datelog\n"
-else
+if [[ $datelog != "" ]]; then
     echo -e "\nlogfile is located at $datelog\n"
 fi
 
 # checks if a parameter file and/or an input file were passed to the script
 if [[ $PIDparam == "" ]]; then
-    echo -e "No parameter file given, please enter a parameter file" | tee -a "$datelog"
+    echo -e "No parameter file given, please enter a parameter file" | tee -a $datelog
     EXITstatus="1"
 fi
 if [[ $PIDinput == "" ]]; then
-    echo -e  "No input file given, please enter an input file" | tee -a "$datelog"
+    echo -e  "No input file given, please enter an input file" | tee -a $datelog
     EXITstatus="1"
 fi
 # if eiter a parameter file or an input file weren't passed to the script it exits
@@ -111,7 +124,9 @@ else
     STout=$PIDoutput
 fi
 
-mkdir "$STout""$NAME" | tee -a "$datelog"   # Will create a directory for the output in the input directory
+if [ ! -d "$STout""$NAME" ]; then
+    mkdir -v "$STout""$NAME" | tee -a $datelog   # Will create a directory for the output in the input directory
+fi
 PIDoutput="$STout""$NAME"                   # Default output location for the PID
 VALoutput="$STout""$NAME"                   # Default output location for the validator
 

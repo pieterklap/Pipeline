@@ -1,0 +1,6 @@
+##Start## "Triqler"
+# check where Triqler is installed
+PIDtriqler=$(grep Triqler "$LOC"install_locations | awk '{print $2}')
+
+$PIDtriqler
+##End## "Triqler"

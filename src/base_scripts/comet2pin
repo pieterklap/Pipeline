@@ -6,7 +6,7 @@ sed -i 's/output_percolatorfile = 0/output_percolatorfile = 1/' "$PIDparam"".per
 PIDparam="$PIDparam"".percolator"
 
 EXTENTION=$(echo "$PIDinput" |awk -F. '{print $NF}')
-COMEToutput=$(echo $PIDinput | sed "s/\.$EXTENTION/\.pin/")
+COMEToutput=$(echo $PIDinput | sed "s/\.$EXTENTION/$MassTolerance\.pin/")
 NAME_Cometoutput=$(echo $COMEToutput | awk -F/ '{print $NF}')
 
 ##End## "comet2pin"

@@ -4,16 +4,16 @@
 PIDcomet=$(grep Comet "$LOC"install_locations | awk '{print $2}')
 
 if [ ! -f $PIDcomet ]; then
-    echo -e "\n Error " $PIDcomet " is not a file  \n" | tee -a "$datelog"
+    echo -e "\n Error " $PIDcomet " is not a file  \n" | tee -a $datelog
     exit 1
 fi
 
 # run comet 
-"$PIDcomet" -P"$PIDparam" "$PIDinput" |& tee -a "$datelog"
+"$PIDcomet" -P"$PIDparam" "$PIDinput" |& tee -a $datelog
 
 if [[ $COMEToutput == "" ]]; then
 EXTENTION=$(echo "$PIDinput" |awk -F. '{print $NF}')
-COMEToutput=$(echo $PIDinput | sed "s/\.$EXTENTION/\.pep\.xml/")
+COMEToutput=$(echo $PIDinput | sed "s/\.$EXTENTION/$MassTolerance\.pep\.xml/")
 NAME_Cometoutput=$(echo $COMEToutput | awk -F/ '{print $NF}')
 fi
 PIDoutput="$PIDoutput/$NAME_Cometoutput"

@@ -105,7 +105,7 @@ MSGFPlus_mods ()
     #   Add it to the modification_parameter file
         echo $msgf_order >> $msgfparam_mods
     done
-
+#   Add the location of the modification file to the MSGFPlus parameter file
     echo "ModificationFileName -mod $msgfparam_mods" >> $MSGFPlusparam
 }
 
