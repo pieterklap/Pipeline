@@ -4,7 +4,7 @@ Proteomic Pipeline Generator
 Proteomic Pipeline generator is a command line script that generates multiple pipelines for use with proteomics data.
 
 ## Programs
-The PPG currently uses two types of software: database search software, and statistical validation software. It also offers statistical enrichment analysis with g:profiler
+The PPG currently uses two types of software: database search software, and statistical validation software. It also offers statistical enrichment analysis with g:profiler and pathway analysis with Reactome.
 
 ### Database search
   * [Comet](http://comet-ms.sourceforge.net/)
