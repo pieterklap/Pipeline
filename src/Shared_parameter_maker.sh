@@ -147,7 +147,7 @@ Comet ()
     echo "nucleotide_reading_frame = 0" >> $cometparam
     echo "clip_nterm_methionine = 0" >> $cometparam
     echo "spectrum_batch_size = $spectrum_batch_size" >> $cometparam
-    echo "decoy_prefix = DECOY_" >> $cometparam
+    echo "decoy_prefix = decoy_" >> $cometparam
     echo "output_suffix = $Output_suffix" >> $cometparam
     echo "mass_offsets = " >> $cometparam
 
@@ -616,4 +616,7 @@ gprofilerParam=$(grep "^gprofiler_parameter" $LOC_Shared_param_file | awk '{prin
 Reactome ()
 {
 ReactomeParam=$(grep "^Reactome_parameter" $LOC_Shared_param_file | awk '{print $3}')
+if [[ $ReactomeParam == "" ]]; then
+    ReactomeParam="/empty"
+fi
 }

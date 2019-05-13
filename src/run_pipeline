@@ -6,15 +6,15 @@ if [[ $RUNscripts == "" ]]; then
         echo "Error no input file given"
         exit
     fi
-    if [[ $NUMprog > $NUMparam ]]; then
+    if (($NUMprog>$NUMparam)); then
         echo "too few parameter files given"
         exit
     fi
-    if [[ $NUMprog < $NUMparam ]]; then
+    if (($NUMprog<$NUMparam)); then
         echo "too many parameter files given"
         exit
     fi
-    if [[ $NUMparam == 0 ]]; then
+    if (($NUMparam == 0)); then
         echo "No parameter files given"
         exit
     fi

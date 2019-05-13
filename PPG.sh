@@ -13,19 +13,17 @@ if [[ $LOC == "./" ]]; then
 fi
 
 # All the programs that are compatible with the PPG
-valid="comet tandem msgfplus msfragger peptideprophet percolator gprofiler reactome"
-
+valid=" comet tandem msgfplus msfragger peptideprophet percolator gprofiler reactome "
 
 NUMprog="0"
 NUMparam="0"
 
 # allows the options to work
 while [ "$1" != "" ]; do
-
     case $1 in
         -P | --Programs )   while [[ ${2:0:1} != "-" ]] && [[ "$2" != "" ]]; do
                                 shift
-                                Programs+=${1,,}" "     # Puts the program names in a variable
+                                Programs+=$1" "     # Puts the program names in a variable
                                 NUMprog=$[$NUMprog+1]   # Counts the amount of programs entered
                             done
                             ;;
@@ -81,7 +79,17 @@ if [[ $LOCscripts == "" ]]; then
     LOCscripts="$LOC"Scripts/
 fi
 
-# The names of the required converters
+for prog in $Programs
+do
+    if [[ $valid != *" ${prog,,} "* ]]; then
+        echo -e "\n\e[91mERROR:\e[0m ${prog} is not a valid name"
+        exit
+    fi
+done
+
+Programs=${Programs,,}
+
+# Add the names of the required converters to a variable to check if they are direct references
 if [[ $Programs == *"tandem"* ]]; then
     if [[ $Programs == *"peptideprophet"* ]]; then
         converters+="tandem2xml "
@@ -98,6 +106,11 @@ if [[ $Programs == *"msgfplus"* ]]; then
         converters+="msgf2pin "
     fi
 fi
+if [[ $Programs == *"msfragger"* ]]; then
+    if [[ $Programs == *"msfragger"* ]]; then
+        converters+="crux "
+    fi
+fi
 
 # Check if install_locations is a file
 if [ ! -f $LOC/install_locations ] && [[ $RUNscripts != "n" ]]; then
@@ -105,23 +118,6 @@ if [ ! -f $LOC/install_locations ] && [[ $RUNscripts != "n" ]]; then
     echo -e "Programs may not be able to be run without knowing where they are located"
     echo -e "create a file named install_locations in same directory as PPG.sh with the locations of the installed programs\n"
 fi
-
-for prog in $Programs
-do
-#   Check if the entered programs are a part of the pipeline
-    avalible=0
-    for name in $valid
-    do
-        if [[ ${name} == ${prog} ]]; then
-            avalible=1
-        fi
-    done
-    if [[ $avalible != 1 ]]; then
-        echo -e "\e[91mERROR:\e[0m ${prog} is not a valid name"
-        exit
-    fi
-done
-
 
 # adds all file locations to a variable to test if they are direct references i.e. start with /
 if [[ $RUNscripts == "" ]]; then
@@ -197,6 +193,12 @@ if (($NUMprog > 1)) && [[ $NUMparam == "1" ]]; then
         msgfplus="$MSGFPlusparam"
         NUMparam=$[$NUMparam+1]
     fi
+    if [[ $Programs == *"msfragger"* ]]; then
+        MSFragger
+        MSFragger_mods
+        msfragger="$MSFraggerparam"
+        NUMparam=$[$NUMparam+1]
+    fi
     if [[ $Programs == *"peptideprophet"* ]]; then
         PeptideProphet                  #   For use later if peptideprophet gets added to the shared parameter file
         peptideprophet="$PepProphParam" #
@@ -209,17 +211,17 @@ if (($NUMprog > 1)) && [[ $NUMparam == "1" ]]; then
     fi
     if [[ $Programs == *"gprofiler"* ]]; then
         Gprofiler                       #   For use later if gprofiler gets added to the shared parameter file
-        gprofiler="$gprofilerParam"   #
+        gprofiler="$gprofilerParam"     #
         NUMparam=$[$NUMparam+1]
     fi
     if [[ $Programs == *"reactome"* ]]; then
-        Reactome                         #   For use later if Reactome gets added to the shared parameter file
-        reactome="$ReactomeParam"   #
+        Reactome                        #   For use later if Reactome gets added to the shared parameter file
+        reactome="$ReactomeParam"       #
         NUMparam=$[$NUMparam+1]
     fi
 
 
-else
+elif (($NUMparam==$NUMprog)); then
 #   use the parameter files the user entered
     echo "idividual parameter files"
 
@@ -231,7 +233,9 @@ else
         declare "${prog}"="$paramloc"
         paramsProg=$(echo $paramsProg | awk '{$1="";print}')
     done
-
+else
+    echo -e "\e[91mERROR:\e[0m number of programs($NUMprog) is not equal to the number of parameter files($NUMparam) given"
+    exit
 fi
 
 # Exits if only the parameterfiles were required
@@ -384,6 +388,10 @@ for file in "$LOCscripts"*MSGFPlus_percolator*
 do
     cat "$LOC"src/base_scripts/msgf2pin >> ${file}
 done
+for file in "$LOCscripts"*MSFragger_percolator*
+do
+    cat "$LOC""src/base_scripts/make-pin" >> ${file}
+done
 
 #done adding converters to the scripts
 
@@ -441,9 +449,13 @@ else
     echo "$NUM scripts have been generated"
 fi
 
-if [[ $NOVAL == "1" ]] && [[ $gprofiler != "" ]]; then
-    echo "g:profiler isn't added to the script because it requires at least one validator"
+if [[ $NOVAL == "1" ]] && [[ $Programs == *"gprofiler"* ]]; then
+    echo -e "\e[93mWARNING:\e[0m g:profiler isn't added to the script because it requires at least one validator"
 fi
+if [[ $NOVAL == "1" ]] && [[ $Programs == *"reactome"* ]]; then
+    echo -e "\e[93mWARNING:\e[0m Reactome isn't added to the script because it requires at least one validator"
+fi
+
 
 source $LOC/src/run_pipeline
 
