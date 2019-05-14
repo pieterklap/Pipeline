@@ -50,7 +50,7 @@ while [ "$3" != "" ]; do
     shift
 done
 
-source $LOC/src/parameter_repeat
+source $LOC/src/parameter_repeat.sh
 
 if [[ $PID == "comet" ]]; then
     Rerun_Comet_Parameters

@@ -77,7 +77,7 @@ Shark_Run ()
 
 Repeat_Run_Shark ()
 {
-    source $LOC/src/parameter_repeat
+    source $LOC/src/parameter_repeat.sh
 
     for file in "$LOCscripts"*.sh
     do
@@ -99,7 +99,7 @@ Repeat_Run_Shark ()
         fi
         if [[ $Series_Run == "1" ]]; then
             Run_Script="${file} $PIDparam $VALparam $input $output $logfile $location $GPparams"
-            qsub $SHARKoptions $LOC/src/series_run $PrecursorMassToleranceRange $PrecursorMassToleranceIncrement $Run_Script $PID $LOC
+            qsub $SHARKoptions $LOC/src/series_run.sh $PrecursorMassToleranceRange $PrecursorMassToleranceIncrement $Run_Script $PID $LOC
         fi
     done
 
@@ -119,7 +119,7 @@ Repeat_Run_Local ()
     do
         Set_corect_parameter
         Run_Script="${file} $PIDparam $VALparam $input $output $logfile $location $GPparams"
-        $LOC/src/series_run $PrecursorMassToleranceRange $PrecursorMassToleranceIncrement $Run_Script $PID $LOC
+        $LOC/src/series_run.sh $PrecursorMassToleranceRange $PrecursorMassToleranceIncrement $Run_Script $PID $LOC
     done
 
 }

@@ -17,34 +17,26 @@ if [[ $PIDprog == "" ]] || [ ! -f $PIDprog ]; then
     fi
 fi
 
-# sets the program location to XTloc
-XTloc=$PIDprog
-# changes XTloc to the directory of tandem.exe
-XTloc=$(echo "$XTloc" |awk -F/ '{$NF="";print $0}' | tr " " "/")
-
-#XTfasta=$(echo "$XTloc""fasta/" )
-#TAXON=$(head -n1 $XTfasta |awk '{print $1}'| awk -F_ '{print $2}')
-
 # input.xml
 # creates varable to be able t be used in sed
-mkdir "$LOC".tandemtemp
 inputXT=${PIDinput//\//\\/}        # sets backslashes in front of forward slashes for use with sed
 outputXT=${PIDoutput//\//\\/}      # sets backslashes in front of forward slashes for use with sed
 
-XTbin=$(echo "$PIDparam" |awk -F/ '{$NF="";print $0}' | tr " " "/")
-
-
 # Changes the paths in the input.xml file
-
-sed "s/\"spectrum, path\".*/\"spectrum, path\">$inputXT<\/note>/" "$PIDparam" > "$LOC".tandemtemp/input.xml # Changes the input path to the reque$
-
-sed "s/\"output, path\".*/\"output, path\">$outputXT\/output.xml<\/note>/" "$LOC".tandemtemp/input.xml > "$PIDparam"  # Changes the output path to$
+# Sets the input path 
+sed -i "s/\"spectrum, path\">.*</\"spectrum, path\">$inputXT</" "$PIDparam"
+# Sets the output path/name
+NAME_input=$(echo $PIDinput | awk -F\/ '{print $NF}' | awk -F\. '{$NF="t.xml";print $0}' | tr " " ".")
+sed -i "s/\"output, path\">.*</\"output, path\">$outputXT\/$NAME_input</" "$PIDparam"
 
 # run Xtandem
 $PIDprog $PIDparam |& tee -a $datelog
 
-# remove the temporary directory
-rm -fr "$LOC".tandemtemp/
-
 PIDoutput=$(ls -t $PIDoutput/* |head -n1)
+
+if [[ $output_suffix != "" ]]; then
+    mv $PIDoutput ${PIDoutput//.t.xml/$output_suffix.t.xml}
+fi
+
+PIDoutput=${PIDoutput//.t.xml/$output_suffix\.t.xml}
 ##End## "Xtandem"

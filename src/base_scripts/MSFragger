@@ -30,7 +30,7 @@ fi
 
 java -Xmx"$MemUse" -jar $PIDprog $PIDparam $PIDinput
 
-NAMEfraggerout=$(echo $Fraggerout | awk -F/ '{print $NF}' | sed "s/pepXML/pep.xml/")
+NAMEfraggerout=$(echo $Fraggerout | awk -F/ '{print $NF}' | sed "s/\.pepXML/$output_suffix\.pep.xml/")
 PIDoutput=$PIDoutput/$NAMEfraggerout
 
 mv $Fraggerout $PIDoutput 

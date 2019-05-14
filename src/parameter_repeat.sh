@@ -89,7 +89,7 @@ Run_Repeated_pipeline ()
 
         echo "$PrecursorMassTolerence1.$PrecursorMassTolerence2 $MassUnit"
     #   Run the database search software
-        $Run_Script_Repeat "-r" "_$PrecursorMassTolerence1""_$PrecursorMassTolerence2$MassUnit"
+        $Run_Script_Repeat "-s" "_$PrecursorMassTolerence1""_$PrecursorMassTolerence2$MassUnit"
 }
 
 Rerun_Comet_Parameters ()
@@ -109,12 +109,16 @@ Rerun_Comet_Parameters ()
 #   Do this while PrecursorMassTolerence is lower than the maximum value
     while (($PrecursorMassTolerence1 <= $PrecursorMassToleranceMax1)); do
 
+#   Start editing the parameter files
+
     #   creates a file which includes the mass tolerance in the name
         PIDparam_Repeat="$PIDparam""_$PrecursorMassTolerence1""_$PrecursorMassTolerence2""$MassUnit"
     #   changes the peptide mass tolerance
         sed  "s/peptide_mass_tolerance = .*/peptide_mass_tolerance = $PrecursorMassTolerence1.$PrecursorMassTolerence2/" $PIDparam > $PIDparam_Repeat
     #   changes the name of the output to inculde the ppm/daltons
         sed -i "s/output_suffix =.*/output_suffix = _$PrecursorMassTolerence1\_$PrecursorMassTolerence2$MassUnit/" $PIDparam_Repeat
+
+#   Done editing the parameter files
 
         Run_Repeated_pipeline
 
@@ -184,7 +188,6 @@ Rerun_MSGFPlus_Parameters ()
         sed "s/PrecursorMassTolerance -t .*/PrecursorMassTolerance -t $PrecursorMassTolerence1.$PrecursorMassTolerence2$MassUnit/" $PIDparam > $PIDparam_Repeat
         sed -i "s/#Output_suffix .*/#Output_suffix _$PrecursorMassTolerence1\_$PrecursorMassTolerence2$MassUnit/" $PIDparam_Repeat
 
-
 #   Done editing the parameter files
 
         Run_Repeated_pipeline
@@ -217,7 +220,6 @@ Rerun_MSFragger_Parameters ()
     #   changes the peptide mass tolerance and the unit
         sed "s/precursor_mass_tolerance = .*/precursor_mass_tolerance = $PrecursorMassTolerence1.$PrecursorMassTolerence2/" $PIDparam > $PIDparam_repeat
         sed -i "s/#Output_suffix .*/#Output_suffix _$PrecursorMassTolerence1\_$PrecursorMassTolerence2$MassUnit/" $PIDparam_Repeat
-
 
 #   Done editing the parameter files
 

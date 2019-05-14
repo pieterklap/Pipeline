@@ -456,7 +456,7 @@ if [[ $NOVAL == "1" ]] && [[ $Programs == *"reactome"* ]]; then
 fi
 
 
-source $LOC/src/run_pipeline
+source $LOC/src/run_pipeline.sh
 
 # runs the scripts with the correct parameter files for the PIDs
 if [[ "$RUNscripts" == "" ]] && [[ "$SHARK" != "1" ]]; then
