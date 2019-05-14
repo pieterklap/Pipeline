@@ -21,7 +21,7 @@ The PPG currently uses two types of software: database search software, and stat
 
 ## Instalation
 Add the location of the programs that you have installed to second collumn of the install_locations file.  
-If no programs are added the script will check if the program is installed in`PATH`.  
+If no programs are added the script will check `PATH` for installation.  
 
 ## Options
 The PPG is issued with multiple variables some are required.  
