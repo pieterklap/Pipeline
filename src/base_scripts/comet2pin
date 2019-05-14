@@ -1,9 +1,9 @@
 ##Start## "comet2pin"
 
-sed 's/output_pepxmlfile = 1/output_pepxmlfile = 0/' "$PIDparam" > "$PIDparam"".percolator"
-sed -i 's/output_percolatorfile = 0/output_percolatorfile = 1/' "$PIDparam"".percolator"
+sed 's/output_pepxmlfile = 1/output_pepxmlfile = 0/' "$PIDparam" > "$PIDparam""_percolator"
+sed -i 's/output_percolatorfile = 0/output_percolatorfile = 1/' "$PIDparam""_percolator"
 
-PIDparam="$PIDparam"".percolator"
+PIDparam="$PIDparam""_percolator"
 
 EXTENTION=$(echo "$PIDinput" |awk -F. '{print $NF}')
 COMEToutput=$(echo $PIDinput | sed "s/\.$EXTENTION/$MassTolerance\.pin/")

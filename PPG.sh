@@ -167,9 +167,8 @@ if (($NUMprog > 1)) && [[ $NUMparam == "1" ]]; then
 #   removes the spaces between the parameter name and value and makes sure there is one space between each parameter
     Shared_param_file=$(grep -v "^#" $LOC_Shared_param_file | sed "s/ //g" | tr "\n" " " | tr "\t" " " | sed "s/ \+/ /g" |tr " " "\n" )
 
-#   if no output directory is given set the outputdirectory to the working directory
+#   notes the output directory of the shared parameter file
     LOC_param=$(echo $LOC_Shared_param_file | awk -F/ '{$NF="";print $0}' | tr " " "/")
-    output_dir=$LOC_param
 #   resets the parameter counter
     NUMparam="0"
 #   uses the functions in the following bash scripts
@@ -246,7 +245,7 @@ fi
 
 # Creates the files for the PIDs
 mkdir -vp "$LOC".PIDs
-rm -vf "$LOC".PIDs/*
+rm -f "$LOC".PIDs/*
 # Creates the files that will use comet
 if [[ $Programs == *"comet"* ]]; then
     touch "$LOC".PIDs/comet
@@ -268,7 +267,7 @@ fi
 
 # Adds the validator to the name of the scripts
 mkdir -vp "$LOC".VALs
-rm -vf "$LOC".VALs/*
+rm -f "$LOC".VALs/*
 # Creates the files that will use PeptideProphet
 if [[ $Programs == *"peptideprophet"* ]];then
     for file in "$LOC".PIDs/*
@@ -308,7 +307,7 @@ NUM=$(ls "$LOC".VALs/ | wc -l)
 # adds .sh to the files
 
 mkdir -vp "$LOC".END
-rm -vf "$LOC".END/*
+rm -f "$LOC".END/*
 for file in "$LOC".VALs/*
 do
     cp -v ${file} ${file}.sh
@@ -317,11 +316,11 @@ do
 done
 
 # Creates the directory scripts and copies the scripts to it and makes them executable and removes the files in the temp folders
-rm -v "$LOCscripts"*
+rm  "$LOCscripts"*
 mkdir -vp "$LOCscripts"
 cp -v "$LOC".END/* "$LOCscripts"
 chmod 750 "$LOCscripts"*
-rm -vf "$LOC".PIDs/* "$LOC".VALs/*
+rm -f "$LOC".PIDs/* "$LOC".VALs/*
 rm -f "$LOC".END/*
 
 # TODO a variable that is "$LOC/src/base_scripts/"

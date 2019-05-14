@@ -5,6 +5,9 @@ Header_ver="(v0.x)"
 Header_file_ver=$(head -n1 $LOC_Shared_param_file | awk '{print $NF}')
 Header_file=$(head -n1 $LOC_Shared_param_file | awk '{$NF="";print $0}')
 
+# Spf=Shared parameter file
+NAME_Spf=$(echo $LOC_Shared_param_file | awk -F\/ '{print $NF}')
+dir_Spf=$(echo $LOC_Shared_param_file | awk -F\/ '{$NF="";print $0}' | tr " " "/")
 
 if [[ "$Header" != "$Header_file" ]]; then
     echo "Shared parameter file is in the incorrect format"
@@ -58,8 +61,7 @@ Default_check ()
 Comet ()
 {
     #input needed is $LOC_Shared_param_file and $output_dir
-
-    cometparam="$output_dir"cometparam_PPG
+    cometparam="$LOC_param""$NAME_Spf"_comet
     local Shared_param_file=$(echo $Shared_param_file | tr "[" "=")
     for param in $Shared_param_file
     do
@@ -230,7 +232,7 @@ Comet ()
 
 MSGFPlus ()
 {
-    MSGFPlusparam="$output_dir"MSGFPlusparam_PPG
+    MSGFPlusparam="$LOC_param""$NAME_Spf"_MSGFPlus
     local temp_MSGFPlusparam=$output_dir/.temp_MSGFPlusparam_PPG
     local Shared_param_file=$(echo $Shared_param_file | tr "[" "=")
     for param in $Shared_param_file
@@ -300,13 +302,13 @@ Tandem ()
 {
 
     Tandemparam=$(grep "tandem_default_input" $LOC_Shared_param_file | awk '{print $3}')
-    cp "$Tandemparam" "$output_dir"Tandemparam_PPG.xml
+    cp "$Tandemparam" "$LOC_param""$NAME_Spf"_Tandemparam.xml
 
-    Tandemparam_input="$output_dir"Tandem_input_PPG.xml
-    Tandem_taxonomy="$output_dir"Tandem_taxonomy_PPG.xml
+    Tandemparam_input="$LOC_param""$NAME_Spf"_Tandem_input.xml
+    Tandem_taxonomy="$LOC_param""$NAME_Spf"_Tandem_taxonomy.xml
 
-    Tandemparam="$output_dir"Tandemparam_PPG.xml
-    local temp_Tandemparam=$output_dir/.temp_Tandemparam_PPG
+    Tandemparam="$LOC_param""$NAME_Spf"_Tandemparam.xml
+    local temp_Tandemparam="$LOC_param"."$NAME_spf"_temp_Tandemparam_PPG
     local Shared_param_file=$(echo $Shared_param_file | tr "[" "=")
     for param in $Shared_param_file
     do
@@ -355,7 +357,7 @@ Tandem ()
         local IsotopeErrorRange="yes"
     fi
     sed -i "s/label=\"spectrum, parent monoisotopic mass isotope error\">.*</label=\"spectrum, parent monoisotopic mass isotope error\">$IsotopeErrorRange</g" $Tandemparam
-    sed -i "s/label=\"spectrum, fragment monoisotopic mass error units\">.*</label=\"spectrum, fragment monoisotopic mass error units\">$Fragment_MassUnit</g" $Tandemparam > $temp_Tandemparam
+    sed -i "s/label=\"spectrum, fragment monoisotopic mass error units\">.*</label=\"spectrum, fragment monoisotopic mass error units\">$Fragment_MassUnit</g" $Tandemparam
     sed -i "s/label=\"spectrum, parent monoisotopic mass error units\">.*</label=\"spectrum, parent monoisotopic mass error units\">$MassUnit</g" $Tandemparam
     if [[ $mass_type_fragment == "0" ]]; then
         mass_type_fragment="average"
@@ -460,7 +462,7 @@ Tandem ()
 MSFragger ()
 {
 
-    MSFraggerparam="$output_dir"fraggerparam_PPG
+    MSFraggerparam="$LOC_param""$NAME_Spf"_MSFraggerparam
     local Shared_param_file=$(echo $Shared_param_file | tr "[" "=")
     for param in $Shared_param_file
     do

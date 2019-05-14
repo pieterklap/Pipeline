@@ -193,3 +193,39 @@ Rerun_MSGFPlus_Parameters ()
     done
 
 }
+
+Rerun_MSFragger_Parameters ()
+{
+    SET_Tollerance_values
+
+#   Notes the mass unit (ppm or Daltons)
+    MassUnit=$(grep "precursor_mass_units = " $PIDparam | awk '{print $3}')
+#   Translates the number in the parameter file to the corresponding unit
+    if [[ $MassUnit == "2" ]]; then
+        MassUnit="ppm"
+    else
+        MassUnit="Daltons"
+    fi
+
+#   Do this while PrecursorMassTolerence is lower than the maximum value
+    while (($PrecursorMassTolerence1 <= $PrecursorMassToleranceMax1)); do
+
+#   Start editing the parameter files
+
+    #   creates a file which includes the mass tolerance in the name
+        PIDparam_Repeat="$PIDparam""_$PrecursorMassTolerence1""_$PrecursorMassTolerence2""$MassUnit"
+    #   changes the peptide mass tolerance and the unit
+        sed "s/precursor_mass_tolerance = .*/precursor_mass_tolerance = $PrecursorMassTolerence1.$PrecursorMassTolerence2/" $PIDparam > $PIDparam_repeat
+        sed -i "s/#Output_suffix .*/#Output_suffix _$PrecursorMassTolerence1\_$PrecursorMassTolerence2$MassUnit/" $PIDparam_Repeat
+
+
+#   Done editing the parameter files
+
+        Run_Repeated_pipeline
+
+        Increment_Tolerance_values
+    done
+
+
+
+}

@@ -13,7 +13,7 @@ MODS=$(grep "^mod" $Shared_mod_file | awk -F= '{print $2}')
 aminoacids="G A S P V T C L I N D Q K E M O H F U R Y W"
 
 
-if [[ $output_dir == "" ]]; then
+if [[ $LOC_param == "" ]]; then
     output_dir=$PWD/
     echo "ERROR: Do not run this script by itself"
     exit
@@ -74,7 +74,7 @@ MSGFPlus_mods ()
 {
     #   1.mass 2.residues 3.fixed/variable 4.N/C-term 5.Unimod_PSI-MS_name
     #   [Name]:[mass]:[residue(s)]:[fix/opt]:[n/c-term]:[distance]:[forced]
-    msgfparam_mods="$output_dir"msgfparam_mods
+    msgfparam_mods="$LOC_param""$NAME_Spf"_MSGFPlus_mods
     echo -e "NumMods=$Max_mods \n" > $msgfparam_mods
 
     for mod in $MODS
