@@ -31,8 +31,7 @@ The PPG is issued with multiple variables some are required.
 
 **Options required to automaticaly run the pipelines**  
 `-i [input file]`  
-`-p [parameterfiles]` `(in the same order as the programs)`    
-`-g [g:profiler parameter file]`  
+`-p [parameterfiles]` `(in the same order as the programs)`      
 
 **Optional variables**  
 `-l [logfile location]`   
