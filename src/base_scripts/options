@@ -62,8 +62,8 @@ while [ "$1" != "" ]; do
         -L | --location )       shift
                                 LOC="$1"
                                 ;;
-        -r | --rerunMT )        shift
-                                MassTolerance=$1
+        -s | --output_suffix )  shift
+                                output_suffix=$1
                                 ;;
         -m | --mode )           shift
                                 if [[ ${1,,} == "parralel" ]]; then

@@ -1,7 +1,7 @@
 ##Start## "tandem2pin"
 
 # create an extra parameter file with the decoy fasta
-PIDparam_decoy=$PIDparam".decoy"
+PIDparam_decoy=$PIDparam"_decoy"
 
 sed 's/taxon">human/taxon">human_decoy/' $PIDparam > $PIDparam_decoy
 
