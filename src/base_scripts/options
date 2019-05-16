@@ -8,22 +8,14 @@ LOC=$(echo "$0" |awk -F/ '{$NF="";print $0}' | tr " " "/")
 NAME=$(echo "$0" |awk -F/ '{print $NF}' | tr " " "/")
 NAME=$(echo "$NAME" |awk -F. '{print $1}')
 
-# Shows the help files of the programs in the particular pipeline if no options are given
-# The files are located in scripts/info/
-if [[ $1 == "" ]]; then
-    PIDhelp=$(echo $NAME | awk -F_ '{print $1}')
-    VALhelp=$(echo $NAME | awk -F_ '{print $2}')
-
-    cat "$LOC""info/""$PIDhelp"
-    cat "$LOC""info/""$VALhelp"
-    exit
-fi
-
 # If the working directory of the user is the directory of the script LOC is $PWD/
 if [[ $LOC == "./" ]]; then
     LOC=$PWD/
 fi
 
+if [[ $1 == "" ]]; then
+    Start_Help="yes"
+fi
 
 while [ "$1" != "" ]; do
     Help="0"
@@ -52,12 +44,7 @@ while [ "$1" != "" ]; do
         -l | --logfile )        shift
                                 logfile=$1
                                 ;;
-        -h | --help )           PIDhelp=$(echo $NAME | awk -F_ '{print $1}')
-                                VALhelp=$(echo $NAME | awk -F_ '{print $2}')
-
-                                cat "$LOC""info/""$PIDhelp"
-                                cat "$LOC""info/""$VALhelp"
-                                exit
+        -h | --help )           Start_Help="yes"
                                 ;;
         -L | --location )       shift
                                 LOC="$1"
@@ -81,6 +68,22 @@ while [ "$1" != "" ]; do
     esac
     shift
 done
+
+# Shows the help files of the programs in the particular pipeline if no options are given
+if [[ $Start_Help == "yes" ]]; then
+
+    LOC_Help_Functions=LOChelp_to_be_replacedsrc/help_functions.sh
+
+    PIDhelp=PIDhelp_to_be_replaced_Help
+    VALhelp=VALhelp_to_be_replaced_Help
+
+    source $LOC_Help_Functions
+
+    $PIDhelp
+    $VALhelp
+    exit
+fi
+
 
 # Create a log file with the date and time
 if [[ $logfile != "" ]]; then
@@ -111,7 +114,7 @@ if [[ $PIDinput == "" ]]; then
     echo -e  "No input file given, please enter an input file" | tee -a $datelog
     EXITstatus="1"
 fi
-# if eiter a parameter file or an input file weren't passed to the script it exits
+# if either a parameter file or an input file were not passed to the script it exits
 if [[ $EXITstatus == "1" ]]; then
     echo -e "$0 \n"
     exit

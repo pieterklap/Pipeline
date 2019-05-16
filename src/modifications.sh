@@ -12,7 +12,7 @@ MODS=$(grep "^mod" $Shared_mod_file | awk -F= '{print $2}')
 #   the letters representing amino acids needed fo fixed mods of comet
 aminoacids="G A S P V T C L I N D Q K E M O H F U R Y W"
 
-
+# the script should not be run by itself.
 if [[ $LOC_param == "" ]]; then
     output_dir=$PWD/
     echo "ERROR: Do not run this script by itself"
@@ -35,13 +35,6 @@ Seperate ()
 
 Comet_mods ()
 {
-#   reset fixed comet params
-#    for AA in $aminoacids
-#    do
-#        fixmod_old=$(grep "add_""${AA}""_" $cometparam | awk '{print $1,$2,$3}') 
-#        fixmod=$(grep "add_""${AA}""_" $cometparam | awk '{print $1,$2}')
-#        sed -i "s/$fixmod_old/$fixmod 0.0000/" $cometparam
-#    done
 
     local NUM=1
     for mod in $MODS

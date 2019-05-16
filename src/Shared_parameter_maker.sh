@@ -1,7 +1,9 @@
 #!/bin/bash
 
+#   What the header should be
 Header="# Parameter file to be used with the Proteomic Pipeline Generator. "
 Header_ver="(v0.x)"
+#   What the header is
 Header_file_ver=$(head -n1 $LOC_Shared_param_file | awk '{print $NF}')
 Header_file=$(head -n1 $LOC_Shared_param_file | awk '{$NF="";print $0}')
 
@@ -9,20 +11,21 @@ Header_file=$(head -n1 $LOC_Shared_param_file | awk '{$NF="";print $0}')
 NAME_Spf=$(echo $LOC_Shared_param_file | awk -F\/ '{print $NF}')
 dir_Spf=$(echo $LOC_Shared_param_file | awk -F\/ '{$NF="";print $0}' | tr " " "/")
 
+#   if the main part of the header does not match the standard header exit
 if [[ "$Header" != "$Header_file" ]]; then
-    echo "Shared parameter file is in the incorrect format"
+    echo -e "\e[91mERROR:\e[0m Shared parameter file is in the incorrect format"
     exit
 fi
-
+#   if the version number does not match the current version exit
 if [[ "$Header_ver" != "$Header_file_ver" ]]; then
-    echo "Wrong version used. Version used: $Header_file_ver; version needed: $Header_ver"
+    echo -e "\e[91mERROR:\e[0m Wrong version used. Version used: $Header_file_ver; version needed: $Header_ver"
     exit
 fi
 
 #   the letters representing amino acids needed for enzyme digestion in MSFragger
 aminoacids="G A S P V T C L I N D Q K E M O H F U R Y W"
 
-
+#   Checks if each parameter has a value and if they do not enter the default value
 Default_check ()
 {
     local Shared_param_file=$(grep -v "^#" $LOC_Shared_param_file | sed 's/ //g' | tr "[" "=[")
@@ -36,7 +39,7 @@ Default_check ()
     #   Exit if any of the file locations are not valid
         if [[ $(echo $param_name | awk -F_ '{print $NF}') == "file" ]]; then
             if [ ! -f $param_value ]; then
-                echo "Error: $param_value is not a file"
+                echo -e "\e[91mERROR:\e[0m $param_value is not a file"
                 exit
             fi
         fi
@@ -47,7 +50,7 @@ Default_check ()
 
         #   Checks if the default value is there
             if [[ $(head -n"$LOC_Default" $LOC_Shared_param_file | tail -n1 | awk '{print $2}') != "Default:" ]]; then
-                    echo "Default not found. The parameter \"$param_name\" will be left empty"
+                    echo -e "\e[93mWARNING:\e[0m Default not found. The parameter \"$param_name\" will be left empty"
             else
         #   adds the default value to the shared parameter file
                 default_value=$(head -n"$LOC_Default" $LOC_Shared_param_file | tail -n1 | awk '{print $3}')
@@ -300,15 +303,18 @@ MSGFPlus ()
 
 Tandem ()
 {
-
+#   copies the default parameter file to the location of the Sharedparameter file and gives each tandem parameter file a name
     Tandemparam=$(grep "tandem_default_input" $LOC_Shared_param_file | awk '{print $3}')
     cp "$Tandemparam" "$LOC_param""$NAME_Spf"_Tandemparam.xml
 
     Tandemparam_input="$LOC_param""$NAME_Spf"_Tandem_input.xml
     Tandem_taxonomy="$LOC_param""$NAME_Spf"_Tandem_taxonomy.xml
-
     Tandemparam="$LOC_param""$NAME_Spf"_Tandemparam.xml
+
+#   should be redundent
     local temp_Tandemparam="$LOC_param"."$NAME_spf"_temp_Tandemparam_PPG
+
+#   puts the parameters in the shared parameter file into local variables
     local Shared_param_file=$(echo $Shared_param_file | tr "[" "=")
     for param in $Shared_param_file
     do
@@ -596,6 +602,8 @@ MSFragger ()
     echo "MSFragger parameter file has been generated. located at: $MSFraggerparam"
 
 }
+
+#   The following functions are mostly placeholder that currently just set a variable
 
 PeptideProphet ()
 {

@@ -39,7 +39,7 @@ Set_corect_parameter ()
     if [[ $PID == "MSGFPlus" ]]; then
         PIDparam="-p $msgfplus"
     fi
-    if [[ $VAL == "peptideprophet" ]]; then
+    if [[ $VAL == "PeptideProphet" ]]; then
         VALparam="-v $peptideprophet"
     fi
     if [[ $VAL == "percolator" ]]; then

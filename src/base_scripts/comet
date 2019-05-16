@@ -16,15 +16,23 @@ if [[ $PIDprog == "" ]] || [ ! -f $PIDprog ]; then
         echo -e "\e[92mRunning:\e[0m $PIDprog"
     fi
 fi
+#   if the output_suffix is entered in the command line change it in the parameterfile
+if [[ $output_suffix != "" ]]; then
+    sed -i "s/output_suffix = .*/output_suffix = $output_suffix/" $PIDparam
+fi
 
-
-# run comet 
+# run comet
 "$PIDprog" -P"$PIDparam" "$PIDinput" |& tee -a $datelog
 
+#   if the output_suffix is NOT entered in the command line take the output suffix from the parameter file
+if [[ $output_suffix == "" ]]; then
+    output_suffix=$(grep "output_suffix =" $PIDparam | awk '{print $3}')
+fi
+#   Changes the Name of comet output (is also used in comet2pin)
 if [[ $COMEToutput == "" ]]; then
-EXTENTION=$(echo "$PIDinput" |awk -F. '{print $NF}')
-COMEToutput=$(echo $PIDinput | sed "s/\.$EXTENTION/$MassTolerance\.pep\.xml/")
-NAME_Cometoutput=$(echo $COMEToutput | awk -F/ '{print $NF}')
+    EXTENTION=$(echo "$PIDinput" |awk -F. '{print $NF}')
+    COMEToutput=$(echo $PIDinput | sed "s/\.$EXTENTION/$output_suffix\.pep\.xml/")
+    NAME_Cometoutput=$(echo $COMEToutput | awk -F/ '{print $NF}')
 fi
 PIDoutput="$PIDoutput/$NAME_Cometoutput"
 mv "$COMEToutput" "$PIDoutput"

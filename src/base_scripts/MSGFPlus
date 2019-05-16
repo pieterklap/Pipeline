@@ -1,13 +1,17 @@
 ##Start## "MSGFPlus"
 
-MSGFoutput=$(echo "$PIDinput" |awk -F/ '{print $NF}' | tr " " "/")
+#   notes the name and the extention 
+MSGFoutput=$(echo "$PIDinput" |awk -F/ '{print $NF}')
 EXTENTION=$(echo "$MSGFoutput" |awk -F. '{print $NF}')
 
-output_suffix=$(grep "^#Output_suffix" $PIDparam | awk '{print $2}')
+if [[ $output_suffix == "" ]]; then
+    output_suffix=$(grep "^#Output_suffix" $PIDparam | awk '{print $2}')
+fi
 MSGFoutput=$(echo "$MSGFoutput" | sed "s/\.$EXTENTION/$output_suffix\.mzid/")
 
 PIDprog=$(grep MSGFPlus "$LOC"install_locations | awk '{print $2}')
 
+#   If the program was not in the install_locations file it tries to find it.
 if [[ $PIDprog == "" ]] || [ ! -f $PIDprog ]; then
     echo -e "\e[93mWARNING:\e[0m The location of MSGFPlus is not given or does not exist"
     PIDprog=$(command -v MSGFPlus.jar)
@@ -22,14 +26,15 @@ if [[ $PIDprog == "" ]] || [ ! -f $PIDprog ]; then
     fi
 fi
 
-
+#   Puts the parameters into variables
 MSGFparam=$(grep -v "^#" $PIDparam |awk '{print $2,$3}' |tr "\n" " ")
 MemUse=$(grep "^#Mem_Use" $PIDparam | awk '{print $2}')
-
+#   if the amount of allowcated memory was not given set it to the default value (4G)
 if [[ $MemUse == "" ]]; then
     MemUse="4G"
 fi
 
+#   runnig MSGFPlus
 java -Xmx$MemUse -jar $PIDprog -s $PIDinput -o $PIDoutput/$MSGFoutput $MSGFparam |& tee -a $datelog
 
 PIDoutput="$PIDoutput/$MSGFoutput"

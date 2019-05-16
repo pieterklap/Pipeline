@@ -5,8 +5,11 @@ sed -i 's/output_percolatorfile = 0/output_percolatorfile = 1/' "$PIDparam""_per
 
 PIDparam="$PIDparam""_percolator"
 
+if [[ $output_suffix == "" ]]; then
+    output_suffix=$(grep "output_suffix =" $PIDparam | awk '{print $3}')
+fi
 EXTENTION=$(echo "$PIDinput" |awk -F. '{print $NF}')
-COMEToutput=$(echo $PIDinput | sed "s/\.$EXTENTION/$MassTolerance\.pin/")
+COMEToutput=$(echo $PIDinput | sed "s/\.$EXTENTION/$output_suffix\.pin/")
 NAME_Cometoutput=$(echo $COMEToutput | awk -F/ '{print $NF}')
 
 ##End## "comet2pin"

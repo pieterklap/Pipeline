@@ -1,5 +1,6 @@
 #!/bin/bash
 
+#   if nothing has been entered output the README.md to the terminal
 if [[ $1 == "" ]]; then
     cat README.md
     exit
@@ -57,7 +58,6 @@ while [ "$1" != "" ]; do
                             fi
                             if [[ ${1,,} == "cores" ]]; then
                                 RepeatRun_cores="yes"
-                            #   shift
                             fi
                             ;;
         -n | --norun )      RUNscripts="n"
@@ -68,17 +68,20 @@ while [ "$1" != "" ]; do
                             shift                        # Allows Shark options to be entered
                             SHARKoptions=$1             # Allows Shark options to be entered
                             ;;
+        --auto-run )        RUN="y"
+                            ;;
         * )                 echo -e "\e[91mERROR:\e[0m Unknown parameter ""$1"
                             exit
                             ;;
     esac
     shift
 done
-
+#   If no Script location has been given set it to a directory named Scripts in the directory of the pipeline
 if [[ $LOCscripts == "" ]]; then
     LOCscripts="$LOC"Scripts/
 fi
 
+#   Check if the entered programs are a part of the PPG
 for prog in $Programs
 do
     if [[ $valid != *" ${prog,,} "* ]]; then
@@ -87,6 +90,7 @@ do
     fi
 done
 
+# changes the given name to lowercase to make the entering of the program names case insensitive
 Programs=${Programs,,}
 
 # Add the names of the required converters to a variable to check if they are direct references
@@ -139,7 +143,7 @@ if [[ $RUNscripts == "" ]]; then
     DirectTest+=$(echo $location | awk '{print $2" "}')
 fi
 
-# Tests if each file is a direct reference
+# Tests if each file is a direct reference or is not referenced
 for file in $DirectTest
 do
     Direct=$(echo ${file} | cut -c 1-1)
@@ -219,7 +223,7 @@ if (($NUMprog > 1)) && [[ $NUMparam == "1" ]]; then
         NUMparam=$[$NUMparam+1]
     fi
 
-
+#   if the number of parameter files is equal to the amount of programs run this
 elif (($NUMparam==$NUMprog)); then
 #   use the parameter files the user entered
     echo "idividual parameter files"
@@ -233,6 +237,7 @@ elif (($NUMparam==$NUMprog)); then
         paramsProg=$(echo $paramsProg | awk '{$1="";print}')
     done
 else
+    #   If all else fails exit
     echo -e "\e[91mERROR:\e[0m number of programs($NUMprog) is not equal to the number of parameter files($NUMparam) given"
     exit
 fi
@@ -242,6 +247,8 @@ if [[ $onlyparam == "1" ]] && [[ $LOC_Shared_param_file != "" ]]; then
     echo "the parameter files have been genegrated"
     exit
 fi
+
+#   End of asigning/generating parameter files
 
 # Creates the files for the PIDs
 mkdir -vp "$LOC".PIDs
@@ -268,27 +275,19 @@ fi
 # Adds the validator to the name of the scripts
 mkdir -vp "$LOC".VALs
 rm -f "$LOC".VALs/*
-# Creates the files that will use PeptideProphet
+# Creates the files that will use PeptideProphet or percolator
 if [[ $Programs == *"peptideprophet"* ]];then
     for file in "$LOC".PIDs/*
     do
-        cp -v ${file} ${file}_peptideprophet
-        cp "$LOC".PIDs/*_peptideprophet "$LOC".VALs/
-        rm -f "$LOC".PIDs/*_peptideprophet
-    done
-fi
-if [[ $Programs == *"triqler"* ]];then
-    for file in "$LOC".PIDs/*
-    do
-        cp -v ${file} ${file}_Triqler
-        cp "$LOC".PIDs/*_Triqler "$LOC".VALs/
-        rm -f "$LOC".PIDs/*_Triqler
+        cp ${file} ${file}_PeptideProphet
+        cp "$LOC".PIDs/*_PeptideProphet "$LOC".VALs/
+        rm -f "$LOC".PIDs/*_PeptideProphet
     done
 fi
 if [[ $Programs == *"percolator"* ]];then
     for file in "$LOC".PIDs/*
     do
-        cp -v ${file} ${file}_percolator
+        cp ${file} ${file}_percolator
         cp "$LOC".PIDs/*_percolator "$LOC".VALs/
         rm -f "$LOC".PIDs/*_percolator
     done
@@ -303,14 +302,15 @@ if [[ $VALcheck == "" ]]; then
 fi
 # done adding validators to the name of the scripts
 
+# Counts the amount of scripts that have been generated
 NUM=$(ls "$LOC".VALs/ | wc -l)
-# adds .sh to the files
 
+# adds .sh to the files
 mkdir -vp "$LOC".END
 rm -f "$LOC".END/*
 for file in "$LOC".VALs/*
 do
-    cp -v ${file} ${file}.sh
+    cp ${file} ${file}.sh
     cp "$LOC".VALs/*.sh "$LOC".END/
     rm -f "$LOC".VALs/*.sh
 done
@@ -318,7 +318,7 @@ done
 # Creates the directory scripts and copies the scripts to it and makes them executable and removes the files in the temp folders
 rm  "$LOCscripts"*
 mkdir -vp "$LOCscripts"
-cp -v "$LOC".END/* "$LOCscripts"
+cp "$LOC".END/* "$LOCscripts"
 chmod 750 "$LOCscripts"*
 rm -f "$LOC".PIDs/* "$LOC".VALs/*
 rm -f "$LOC".END/*
@@ -330,6 +330,13 @@ rm -f "$LOC".END/*
 for file in "$LOCscripts"*.sh
 do
     cat "$LOC"src/base_scripts/options > ${file}
+    #    changes PIDhelp_to_be_replaced and VALhelp_to_be_replaced to the name of the PID/VAL
+    PIDHELP=$(echo ${file} | awk -F\/ '{print $NF}' | awk -F_ '{print $1}')
+    VALHELP=$(echo ${file} | awk -F_ '{print $2}' | awk -F\. '{print $1}')
+    LOC_sed=${LOC//\//\\/}
+    sed -i "s/LOChelp_to_be_replaced/$LOC_sed/" ${file}
+    sed -i "s/PIDhelp_to_be_replaced/$PIDHELP/" ${file}
+    sed -i "s/VALhelp_to_be_replaced/$VALHELP/" ${file}
 done
 
 # Makes changes to the parameter files
@@ -371,11 +378,11 @@ done
 
 # starts adding converters to the scripts
 # Adds the Tandem2XML file to all the scripts that contain Xtandem and Peptideprophet
-for file in "$LOCscripts"*Xtandem_peptideprophet*
+for file in "$LOCscripts"*Xtandem_PeptideProphet*
 do
     cat "$LOC"src/base_scripts/Tandem2XML >> ${file}
 done
-for file in "$LOCscripts"*MSGFPlus_peptideprophet*
+for file in "$LOCscripts"*MSGFPlus_PeptideProphet*
 do
     cat "$LOC"src/base_scripts/idconvert >> ${file}
 done
@@ -396,14 +403,9 @@ done
 
 # starts adding validators to the scripts
 # Adds the PeptideProphet file to all the scripts containing peptideprophet
-for file in "$LOCscripts"*peptideprophet*
+for file in "$LOCscripts"*PeptideProphet*
 do
     cat "$LOC"src/base_scripts/PeptideProphet >> ${file}
-done
-# Adds the Triqler file to all the scripts containing Triqler
-for file in "$LOCscripts"*Triqler*
-do
-    cat "$LOC"src/base_scripts/Triqler >> ${file}
 done
 # Adds the percolator file to all the scripts containing percolator
 for file in "$LOCscripts"*percolator*
@@ -425,10 +427,11 @@ if [[ $Programs == *"reactome"* ]] && [[ $NOVAL != "1" ]]; then
     done
 fi
 
-
+#   add the ending part to the script needed to know how long it took to run the scripts
 for file in "$LOCscripts"*.sh
 do
     cat "$LOC"src/base_scripts/End >> ${file}
+    echo "Generated ${file}"
 done
 
 # The pipeline generates a file named *[program]* if the program was not selected
@@ -439,7 +442,8 @@ do
     rm "${file}"
 done
 
-cp "$LOC"install_locations "$LOCscripts"
+#   copies the install_locations to the locations of the scripts
+cp -v "$LOC"install_locations "$LOCscripts"
 
 # tells the user the scripts are generated
 if (($NUM == 1)); then
@@ -448,6 +452,7 @@ else
     echo "$NUM scripts have been generated"
 fi
 
+#   Tells the user if a program has not been added because a previous program was required
 if [[ $NOVAL == "1" ]] && [[ $Programs == *"gprofiler"* ]]; then
     echo -e "\e[93mWARNING:\e[0m g:profiler isn't added to the script because it requires at least one validator"
 fi
@@ -455,10 +460,10 @@ if [[ $NOVAL == "1" ]] && [[ $Programs == *"reactome"* ]]; then
     echo -e "\e[93mWARNING:\e[0m Reactome isn't added to the script because it requires at least one validator"
 fi
 
-
+#   Load the file that runs the scripts
 source $LOC/src/run_pipeline.sh
 
-# runs the scripts with the correct parameter files for the PIDs
+#   Run the scripts localy
 if [[ "$RUNscripts" == "" ]] && [[ "$SHARK" != "1" ]]; then
 
     if [[ "$RepeatRun_PMT" == "yes" ]]; then
@@ -468,6 +473,7 @@ if [[ "$RUNscripts" == "" ]] && [[ "$SHARK" != "1" ]]; then
     fi
 fi
 
+#   Run the scripts on the sharkcluster
 if [[ "$RUNscripts" == "" ]] && [[ "$SHARK" == "1" ]]; then
 
     if  [[ "$RepeatRun_PMT" == "yes" ]]; then

@@ -16,15 +16,15 @@ fi
 
 
 EXTENTION=$(echo $PIDoutput | awk -F. '{print $(NF-1)"."$NF}')
-
+#   Makes a copy of the pep.xml file before peptideprophet overwrites it
 if [[ $EXTENTION == "pep.xml" ]]; then
     copy_PIDoutput=$(echo $PIDoutput | sed "s/\.$EXTENTION/_database_search\.$EXTENTION/")
     cp $PIDoutput $copy_PIDoutput
 fi
-
-
-VALparam=$(grep -v "^#" $VALparam | awk '{print $1}' | tr "\n" " ")
-
+#   if no parameter file was given do not check the non existing file
+if [[ $VALparam != "" ]]; then
+    VALparam=$(grep -v "^#" $VALparam | awk '{print $1}' | tr "\n" " ")
+fi
 # runs peptideprophet
 $VALprog $PIDoutput $VALparam |& tee -a $datelog
 

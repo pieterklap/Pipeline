@@ -1,8 +1,5 @@
 ##Start## "percolator"
 
-
-#	run Percolator
-
 VALprog=$(grep percolator "$LOC"install_locations | awk '{print $2}')
 if [[ $VALprog == "" ]] || [ ! -f $VALprog ]; then
     echo -e "\e[93mWARNING:\e[0m The location of percolator is not given or does not exist"
@@ -19,13 +16,12 @@ EXTENTION=$(echo $PIDoutput | awk -F. '{print $NF}')
 VALoutput=$(echo $PIDoutput | sed "s/$EXTENTION/put.xml/")
 TSVoutput=$(echo $PIDoutput | sed "s/$EXTENTION/put.tsv/")
 
-VALparam=$(grep -v "^#" $VALparam | awk '{print $1, $2}' | tr "\n" " ")
+#   if no parameter file was given do not search the non existent parameter file
+if [[ $VALparam != "" ]]; then
+    VALparam=$(grep -v "^#" $VALparam | awk '{print $1, $2}' | tr "\n" " ")
+fi
 
-$VALprog -X $VALoutput $VALparam $PIDoutput > $TSVoutput 2> >(tee -a $datelog >&2)
+#   Run percolator
+$VALprog -X $VALoutput $VALparam $PIDoutput -r $TSVoutput |& tee -a $datelog 
 
-
-
-#	convert pin.xml to pep.xml with psmconvert
-
-# psmconvert $VALoutput
 ##End## "percolator"
