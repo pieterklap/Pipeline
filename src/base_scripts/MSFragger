@@ -6,7 +6,7 @@ Fraggerout=$(echo $PIDinput | sed "s/$Extention/pepXML/")
 
 #   Checks if/where MSFragger (version 20190222) is installed if it is not installed it will look for the .jar file.
 #   if more than 1 .jar files are found it will take the last one (the latest one if the location is the same).
-PIDprog=$(grep MSFragger "$LOC"install_locations | awk '{print $2}')
+PIDprog=$(grep "MSFragger " "$LOC"install_locations | awk '{print $2}')
 if [[ $PIDprog == "" ]] || [ ! -f $PIDprog ]; then
     echo -e "\e[93mWARNING:\e[0m The location of MSFragger is not given or does not exist"
     PIDprog=$(command -v MSFragger-20190222.jar)

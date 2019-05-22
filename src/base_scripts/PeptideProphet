@@ -1,7 +1,7 @@
 ##Start## "PeptideProphet"
 
 # sets the location of peptideprophet into variable VALprog
-VALprog=$(grep PeptideProphet "$LOC"install_locations | awk '{print $2}')
+VALprog=$(grep "PeptideProphet " "$LOC"install_locations | awk '{print $2}')
 
 if [[ $VALprog == "" ]] || [ ! -f $VALprog ]; then
     echo -e "\e[93mWARNING:\e[0m The location of PeptideProphet is not given or does not exist"

@@ -1,4 +1,7 @@
 #!/bin/bash
+
+#$ -N Script_Name_shark_cluster
+
 ##Start## "options"
 
 # notes the location of the pipeline

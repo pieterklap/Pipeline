@@ -434,6 +434,11 @@ do
     echo "Generated ${file}"
 done
 
+for file in "$LOCscripts"*.sh
+do
+    Script_Name=$(echo ${file} | awk -F\/ '{print $NF}' | awk -F. '{print $1}')
+    sed -i "s/Script_Name_shark_cluster/$Script_Name/" ${file}
+done
 # The pipeline generates a file named *[program]* if the program was not selected
 # the following code removes the files that were created when a program was not selected
 # All new programs in the pipeline should be added above this line of code

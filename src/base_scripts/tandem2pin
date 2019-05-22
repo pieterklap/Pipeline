@@ -4,6 +4,7 @@
 PIDparam_decoy=$PIDparam"_decoy"
 
 sed 's/taxon">human/taxon">human_decoy/' $PIDparam > $PIDparam_decoy
+sed -i "s/\"output, path\">.*</\"output, path\">$outputXT\/decoy_$NAME_input</" $PIDparam_decoy
 
 # run tandem with the decoy
 
@@ -14,7 +15,7 @@ PIDoutput_decoy=$(ls -t "$STout""$NAME"/* |head -n1)
 
 # t.xml to tab delimited file with tandem2pin
 
-CONVprog=$(grep tandem2pin "$LOC"install_locations | awk '{print $2}')
+CONVprog=$(grep "tandem2pin " "$LOC"install_locations | awk '{print $2}')
 if [[ $CONVprog == "" ]] || [ ! -f $CONVprog ]; then
     echo -e "\e[93mWARNING:\e[0m The location of tandem2pin is not given or does not exist"
     CONVprog=$(command -v tandem2pin)

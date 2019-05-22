@@ -153,9 +153,10 @@ Rerun_Tandem_Parameters ()
     #   changes the name of the output to inculde the ppm/daltons
         sed -i "s/label=\"spectrum, parent monoisotopic mass error minus\">.*</label=\"spectrum, parent monoisotopic mass error minus\">$PrecursorMassTolerence1.$PrecursorMassTolerence2</" $PIDparam_Default_Repeat
 
+    #   Escape the forward slash, that way sed can use it.
         PIDparam_Default_sed=${PIDparam_Default//\//\\/}
         PIDparam_Default_Repeat_sed=${PIDparam_Default_Repeat//\//\\/}
-
+    #   replace the location of the standard default parameter file with the repeat default parameter file
         sed -i "s/$PIDparam_Default_sed/$PIDparam_Default_Repeat_sed/"  $PIDparam_Repeat
 
 #   Done editing prameter files

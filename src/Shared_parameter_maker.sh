@@ -261,7 +261,7 @@ MSGFPlus ()
     echo "NumThreads -thread $NumThreads" >> $MSGFPlusparam
     echo "NumTasks -tasks $NumTasks" >> $MSGFPlusparam
 
-    if [[ $MemUse == "" ]]; then
+    if [[ $Mem_Use == "" ]]; then
         Mem_Use="4G"
     fi
     echo "Mem_Use $Mem_Use" >> $MSGFPlusparam
@@ -487,7 +487,7 @@ MSFragger ()
 
     echo "database_name =  $fasta_file " > $MSFraggerparam
     echo "num_threads = 0" >> $MSFraggerparam
-    if [[ $MemUse == "" ]]; then
+    if [[ $Mem_Use == "" ]]; then
         Mem_Use="4G"
     fi
     echo "#Mem_Use $Mem_Use" >> $MSFraggerparam

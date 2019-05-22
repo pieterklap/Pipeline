@@ -7,7 +7,7 @@ EXTENTION=$(echo "$MSGFoutput" |awk -F. '{print $NF}')
 if [[ $output_suffix == "" ]]; then
     output_suffix=$(grep "^#Output_suffix" $PIDparam | awk '{print $2}')
 fi
-MSGFoutput=$(echo "$MSGFoutput" | sed "s/\.$EXTENTION/$output_suffix\.mzid/")
+MSGFoutput=$(echo "$MSGFoutput " | sed "s/\.$EXTENTION/$output_suffix\.mzid/")
 
 PIDprog=$(grep MSGFPlus "$LOC"install_locations | awk '{print $2}')
 

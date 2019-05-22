@@ -1,8 +1,14 @@
-#!/bin/bash 
+#!/bin/bash
 
 comet_Help ()
 {
     echo "comet help file goes here"
+    Comet_location=$(grep "comet" $LOC/install_locations | awk '{print $2}' | awk -F\/ '{$NF="";print $0}' | tr " " "/")
+    echo "$Comet_location"README.txt
+    if [ -f "$Comet_location"README.txt ]; then
+        echo "$Comet_location"README.txt
+        cat  "$Comet_location"README.txt
+    fi
 }
 
 Xtandem_Help ()

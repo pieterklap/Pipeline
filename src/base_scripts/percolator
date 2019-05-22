@@ -1,6 +1,6 @@
 ##Start## "percolator"
 
-VALprog=$(grep percolator "$LOC"install_locations | awk '{print $2}')
+VALprog=$(grep "percolator " "$LOC"install_locations | awk '{print $2}')
 if [[ $VALprog == "" ]] || [ ! -f $VALprog ]; then
     echo -e "\e[93mWARNING:\e[0m The location of percolator is not given or does not exist"
     VALprog=$(command -v percolator)

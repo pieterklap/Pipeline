@@ -1,7 +1,7 @@
 ##Start## "comet"
 
 # check where comet is installed
-PIDprog=$(grep Comet "$LOC"install_locations | awk '{print $2}')
+PIDprog=$(grep "Comet " "$LOC"install_locations | awk '{print $2}')
 # looks if comet.exe is a command if it is it runs it and if not it exits
 if [[ $PIDprog == "" ]] || [ ! -f $PIDprog ]; then
     echo -e "\e[93mWARNING:\e[0m The location of comet is not given or does not exist"
