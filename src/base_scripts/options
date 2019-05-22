@@ -8,8 +8,7 @@
 LOC=$(echo "$0" |awk -F/ '{$NF="";print $0}' | tr " " "/")
 
 # notes the name of the program
-NAME=$(echo "$0" |awk -F/ '{print $NF}' | tr " " "/")
-NAME=$(echo "$NAME" |awk -F. '{print $1}')
+NAME="Script_Name_shark_cluster"
 
 # If the working directory of the user is the directory of the script LOC is $PWD/
 if [[ $LOC == "./" ]]; then
@@ -87,6 +86,11 @@ if [[ $Start_Help == "yes" ]]; then
     exit
 fi
 
+if [ ! -f $PIDinput ]; then
+    echo -e "\e[91mERROR:\e[0m $PIDinput is not a file."
+    exit
+fi
+
 
 # Create a log file with the date and time
 if [[ $logfile != "" ]]; then
@@ -135,5 +139,6 @@ if [ ! -d "$STout""$NAME" ]; then
 fi
 PIDoutput="$STout""$NAME"                   # Default output location for the PID
 VALoutput="$STout""$NAME"                   # Default output location for the validator
+
 
 ##End## "options"

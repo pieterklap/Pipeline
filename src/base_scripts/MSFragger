@@ -35,4 +35,15 @@ PIDoutput=$PIDoutput/$NAMEfraggerout
 
 mv $Fraggerout $PIDoutput 
 
+if [ -f $PIDoutput ]; then
+    if [ ! -s $PIDoutput ]; then
+        echo "$PIDoutput is empty"
+        echo "something went wrong running $PIDprog"
+    fi
+else
+    echo "$PIDoutput is not a file"
+    echo "something went wrong running $PIDprog"
+    exit
+fi
+
 ## End ## "MSFragger"

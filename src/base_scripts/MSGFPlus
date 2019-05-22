@@ -39,4 +39,13 @@ java -Xmx$MemUse -jar $PIDprog -s $PIDinput -o $PIDoutput/$MSGFoutput $MSGFparam
 
 PIDoutput="$PIDoutput/$MSGFoutput"
 
+if [ -f $PIDoutput ]; then
+    if [ ! -s $PIDoutput ]; then
+        echo -e "\e[91mERROR:\e[0m $PIDoutput is empty \nsomething went wrong running $PIDprog"
+    fi
+else
+    echo -e "\e[91mERROR:\e[0m $PIDoutput is not a file \nsomething went wrong running $PIDprog"
+    exit
+fi
+
 ##End## "MSGFPlus"

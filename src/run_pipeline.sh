@@ -1,6 +1,6 @@
 #!/bin/bash
 
-qsub="qsub"
+submit_command="qsub"
 
 # Checks if the required parameters have been passed to the script
 if [[ $RUNscripts == "" ]]; then
@@ -41,6 +41,9 @@ Set_corect_parameter ()
     if [[ $PID == "MSGFPlus" ]]; then
         PIDparam="-p $msgfplus"
     fi
+    if [[ $PID == "MSFragger" ]]; then
+        PIDparam="-p $msfragger"
+    fi
     if [[ $VAL == "PeptideProphet" ]]; then
         VALparam="-v $peptideprophet"
     fi
@@ -73,7 +76,7 @@ Shark_Run ()
     for file in "$LOCscripts"*.sh
     do
         Set_corect_parameter
-        $qsub $SHARKoptions ${file} $PIDparam $input $output $logfile $location $GPparams
+        $submit_command $SHARKoptions ${file} $PIDparam $input $output $logfile $location $GPparams
     done
 }
 
@@ -86,7 +89,7 @@ Repeat_Run_Shark ()
         Set_corect_parameter
 
         if [[ $Parallel_Run == "" ]]; then
-                Run_Script="$qsub $SHARKoptions ${file} $PIDparam $input $output $logfile $location $GPparams"
+                Run_Script="$submit_command $SHARKoptions ${file} $PIDparam $input $output $logfile $location $GPparams"
                 PIDparam=$(echo $PIDparam | awk '{print $2}')
             if [[ $PID == "comet" ]]; then
                 Rerun_Comet_Parameters
@@ -101,7 +104,7 @@ Repeat_Run_Shark ()
         fi
         if [[ $Series_Run == "1" ]]; then
             Run_Script="${file} $PIDparam $VALparam $input $output $logfile $location $GPparams"
-            $qsub $SHARKoptions $LOC/src/series_run.sh $PrecursorMassToleranceRange $PrecursorMassToleranceIncrement $Run_Script $PID $LOC
+            $submit_command $SHARKoptions $LOC/src/series_run.sh $PrecursorMassToleranceRange $PrecursorMassToleranceIncrement $Run_Script $PID $LOC
         fi
     done
 

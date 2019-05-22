@@ -30,4 +30,13 @@ $VALprog $PIDoutput $VALparam |& tee -a $datelog
 
 VALoutput=$PIDoutput
 
+if [ -f $VALoutput ]; then
+    if [ ! -s $VALoutput ]; then
+        echo -e "\e[91mERROR:\e[0m $VALoutput is empty"
+        exit
+    fi
+else
+    echo -e "\e[91mERROR:\e[0m $VALoutput is not a file"
+    exit
+fi
 ##End## "PeptideProphet"

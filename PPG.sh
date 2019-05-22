@@ -32,7 +32,12 @@ while [ "$1" != "" ]; do
                             LOCscripts="$2"
                             shift
                             ;;
-        -i | --input )      input="$1 $2"
+        -i | --input )      if [ -f $2 ]; then
+                                input="$1 $2"
+                            else
+                                echo -e "\e[91mERROR:\e[0m $2 is not a file"
+                                exit
+                            fi
                             shift
                             ;;
         -o | --output )     output="$1 $2"
@@ -89,9 +94,16 @@ do
         exit
     fi
 done
-
 # changes the given name to lowercase to make the entering of the program names case insensitive
 Programs=${Programs,,}
+
+for parameter_file in $paramsProg
+do
+    if [ ! -f ${paramsProg} ]; then
+        echo -e "\e[91mERROR:\e[0m ${paramsProg} is not a file"
+        exit
+    fi
+done
 
 # Add the names of the required converters to a variable to check if they are direct references
 if [[ $Programs == *"tandem"* ]]; then
@@ -434,6 +446,7 @@ do
     echo "Generated ${file}"
 done
 
+# puts the name of the script in the script (changes the name of the job on the shark cluster)
 for file in "$LOCscripts"*.sh
 do
     Script_Name=$(echo ${file} | awk -F\/ '{print $NF}' | awk -F. '{print $1}')

@@ -65,3 +65,6 @@ if [[ $PID == "MSGFPlus" ]]; then
 fi
 
 
+if [[ $PID == "MSFragger" ]]; then
+    Rerun_MSFragger_Parameters
+fi
