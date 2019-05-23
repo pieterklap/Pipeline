@@ -18,7 +18,7 @@ IDCONVoutput=$(echo $PIDoutput | awk -F/ '{$NF="";print $0}' | tr " " "/")
 
 $CONVprog $PIDoutput --pepXML -o $IDCONVoutput |& tee -a $datelog
 
-PIDoutput=$(echo "$PIDoutput " | sed "s/\.$EXTENTION//")
+PIDoutput=$(echo "$PIDoutput" | sed "s/\.$EXTENTION//")
 if [[ $output_suffix != "" ]]; then
     PIDoutput=$(echo $PIDoutput | sed "s/$output_suffix//")
 fi
