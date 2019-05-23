@@ -39,10 +39,10 @@ PIDoutput=$PIDoutput/$NAME_input
 
 if [ -f $PIDoutput ]; then
     if [ ! -s $PIDoutput ]; then
-        echo -e "\e[91mERROR:\e[0m $PIDoutput is empty \nsomething went wrong running $PIDprog"
+        echo -e "\e[91mERROR:\e[0m $PIDoutput is empty \nsomething went wrong running $PIDprog" | tee -a $datelog
     fi
 else
-    echo -e "\e[91mERROR:\e[0m $PIDoutput is not a file \nsomething went wrong running $PIDprog"
+    echo -e "\e[91mERROR:\e[0m $PIDoutput is not a file \nsomething went wrong running $PIDprog" | tee -a $datelog
     exit
 fi
 

@@ -32,11 +32,11 @@ VALoutput=$PIDoutput
 
 if [ -f $VALoutput ]; then
     if [ ! -s $VALoutput ]; then
-        echo -e "\e[91mERROR:\e[0m $VALoutput is empty"
+        echo -e "\e[91mERROR:\e[0m $VALoutput is empty \nThere was a problem running $VALprog" | tee -a $datelog
         exit
     fi
 else
-    echo -e "\e[91mERROR:\e[0m $VALoutput is not a file"
+    echo -e "\e[91mERROR:\e[0m $VALoutput is not a file \nThere was a problem running $VALprog" | tee -a $datelog
     exit
 fi
 ##End## "PeptideProphet"

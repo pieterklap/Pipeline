@@ -4,6 +4,8 @@
 
 ##Start## "options"
 
+echo -e "\nrunning $0 with the following arguments: \n$@\n"
+
 # notes the location of the pipeline
 LOC=$(echo "$0" |awk -F/ '{$NF="";print $0}' | tr " " "/")
 

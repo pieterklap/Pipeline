@@ -26,11 +26,11 @@ $VALprog -X $VALoutput $VALparam $PIDoutput -r $TSVoutput |& tee -a $datelog
 
 if [ -f $VALoutput ]; then
     if [ ! -s $VALoutput ]; then
-        echo -e "\e[91mERROR:\e[0m $VALoutput is empty"
+        echo -e "\e[91mERROR:\e[0m $VALoutput is empty" | tee -a $datelog
         exit
     fi
 else
-    echo -e "\e[91mERROR:\e[0m $VALoutput is not a file"
+    echo -e "\e[91mERROR:\e[0m $VALoutput is not a file" | tee -a $datelog
     exit
 fi
 
