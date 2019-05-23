@@ -12,13 +12,13 @@ if [[ $CONVprog == "" ]] || [ ! -f $CONVprog ]; then
     fi
 fi
 
-EXTENTION=$(echo "$PIDoutput" |awk -F. '{print $NF}')
+EXTENTION=$(echo "$PIDoutput" | awk -F. '{print $NF}')
 
 IDCONVoutput=$(echo $PIDoutput | awk -F/ '{$NF="";print $0}' | tr " " "/")
 
 $CONVprog $PIDoutput --pepXML -o $IDCONVoutput |& tee -a $datelog
 
-PIDoutput=$(echo $PIDoutput | sed "s/\.$EXTENTION//")
+PIDoutput=$(echo "$PIDoutput " | sed "s/\.$EXTENTION//")
 if [[ $output_suffix != "" ]]; then
     PIDoutput=$(echo $PIDoutput | sed "s/$output_suffix//")
 fi
@@ -26,6 +26,5 @@ fi
 mv $PIDoutput."pepXML" $PIDoutput$output_suffix".pep.xml"
 PIDoutput=$PIDoutput$output_suffix."pep.xml"
 
-echo $PIDoutput
 
 ##End## "idconvert"
