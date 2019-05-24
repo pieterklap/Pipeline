@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# the command used to submit the job on the shark cluster (change to sbatch for shark cluster with SLURM Workload Manager)
 submit_command="qsub"
 
 # Checks if the required parameters have been passed to the script

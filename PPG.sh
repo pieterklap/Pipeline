@@ -49,8 +49,12 @@ while [ "$1" != "" ]; do
                                 NUMparam=$[$NUMparam+1] # Counts the amount of parameter files entered
                             done
                             ;;
-        -l | --logfile )    logfile="$1 $2"
-                            shift
+        -l | --logfile )    if [[ $2 != "" ]] && [[ ${2:0:1} != "-" ]]; then    #   creates a log file at the given location
+                                logfile="$1 $2"                                 #   if no location was given it creates one in
+                                shift                                           #   the current working directory
+                            else
+                                logfile="$1 $PWD"
+                            fi
                             ;;
         -r | --repeatrun )  shift
                             if [[ ${1,,} == "mt" ]]; then
@@ -318,6 +322,8 @@ fi
 NUM=$(ls "$LOC".VALs/ | wc -l)
 
 # adds .sh to the files
+LOC=$(echo "$0" |awk -F/ '{$NF="";print $0}' | tr " " "/")
+
 mkdir -vp "$LOC".END
 rm -f "$LOC".END/*
 for file in "$LOC".VALs/*
@@ -328,8 +334,11 @@ do
 done
 
 # Creates the directory scripts and copies the scripts to it and makes them executable and removes the files in the temp folders
-rm  "$LOCscripts"*
-mkdir -vp "$LOCscripts"
+if [ ! -d "$LOCscripts" ]; then
+    mkdir -vp "$LOCscripts"
+else
+    rm  "$LOCscripts"*
+fi
 cp "$LOC".END/* "$LOCscripts"
 chmod 750 "$LOCscripts"*
 rm -f "$LOC".PIDs/* "$LOC".VALs/*
@@ -385,8 +394,14 @@ do
     cat "$LOC"src/base_scripts/MSFragger >> ${file}
 done
 
-
 # done with adding PIDs to the scripts
+
+# Add an intermediate time to the script
+for file in "$LOCscripts"*.sh
+do
+    cat "$LOC"src/base_scripts/"time" >> ${file}
+done
+
 
 # starts adding converters to the scripts
 # Adds the Tandem2XML file to all the scripts that contain Xtandem and Peptideprophet
@@ -425,6 +440,13 @@ do
     cat "$LOC"src/base_scripts/percolator >> ${file}
 done
 # done adding validators to the scripts
+
+# Add an intermediate time to the script
+for file in "$LOCscripts"*.sh
+do
+    cat "$LOC"src/base_scripts/"time" >> ${file}
+done
+
 # Adds analysis tools to the pipeline
 if [[ $Programs == *"gprofiler"* ]] && [[ $NOVAL != "1" ]]; then
     for file in "$LOCscripts"*.sh
@@ -471,11 +493,13 @@ else
 fi
 
 #   Tells the user if a program has not been added because a previous program was required
-if [[ $NOVAL == "1" ]] && [[ $Programs == *"gprofiler"* ]]; then
-    echo -e "\e[93mWARNING:\e[0m g:profiler isn't added to the script because it requires at least one validator"
-fi
-if [[ $NOVAL == "1" ]] && [[ $Programs == *"reactome"* ]]; then
-    echo -e "\e[93mWARNING:\e[0m Reactome isn't added to the script because it requires at least one validator"
+if [[ $NOVAL == "1" ]]; then
+    if [[ $Programs == *"gprofiler"* ]]; then
+        echo -e "\e[93mWARNING:\e[0m g:profiler isn't added to the script because it requires at least one validator"
+    fi
+    if [[ $Programs == *"reactome"* ]]; then
+        echo -e "\e[93mWARNING:\e[0m Reactome isn't added to the script because it requires at least one validator"
+    fi
 fi
 
 #   Load the file that runs the scripts

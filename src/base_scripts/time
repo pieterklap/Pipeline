@@ -1,0 +1,8 @@
+##Start## "time"
+
+Intermediate_Seconds=$(date +%s)
+Total_Time=$(($Intermediate_Seconds-$Start_Seconds))
+echo -e "\nTotal seconds: $Total_Time \n" | tee -a $datelog
+
+##End## "time"
+

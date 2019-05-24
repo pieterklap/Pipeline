@@ -5,7 +5,7 @@ NAMEfile=${VALoutput//.$EXTENTION/_gprofiler}
 
 if [[ $EXTENTION == pep.xml ]]; then
     # takes the protein names out of the pep.xml file (peptideprophet)
-    PROTEIN=$(cat $VALoutput | grep "<search_hit" | awk -F\| '{print "\"" $2 "\"""\,"}')
+    PROTEIN=$(cat $VALoutput | grep "<search_hit hit_rank=\"1\"" | awk -F\| '{print "\"" $2 "\"""\,"}')
 fi
 if [[ $EXTENTION == put.xml ]]; then
     #takes the protein names out of the put.xml file (percolator)

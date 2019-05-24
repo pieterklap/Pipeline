@@ -1,5 +1,6 @@
 #!/bin/bash
 
+#SBATCH -J Script_Name_shark_cluster
 #$ -N Script_Name_shark_cluster
 
 ##Start## "options"
