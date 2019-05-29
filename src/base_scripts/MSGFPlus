@@ -35,7 +35,7 @@ if [[ $MemUse == "" ]]; then
 fi
 
 #   runnig MSGFPlus
-java -Xmx$MemUse -jar $PIDprog -s $PIDinput -o $PIDoutput/$MSGFoutput $MSGFparam |& tee -a $datelog
+java -Xmx$MemUse $JavaOptions -jar $PIDprog -s $PIDinput -o $PIDoutput/$MSGFoutput $MSGFparam |& tee -a $datelog
 
 PIDoutput="$PIDoutput/$MSGFoutput"
 
