@@ -1,17 +1,23 @@
 #!/bin/bash
 
-#   if nothing has been entered output the README.md to the terminal
-if [[ $1 == "" ]]; then
-    cat README.md
-    exit
-fi
-
 # $LOC is the directory of the pipeline
 LOC=$(echo "$0" |awk -F/ '{$NF="";print $0}' | tr " " "/")
 
 if [[ $LOC == "./" ]]; then
     LOC="$PWD/"
 fi
+
+#   if nothing has been entered output the README.md to the terminal.
+if [[ $1 == "" ]]; then
+    if [ -f "$LOC"README.md ]; then
+        cat "$LOC"README.md
+        exit
+    else
+        echo -e "\e[91mERROR:\e[0m "$LOC"README.md: No such file or directory"
+        exit
+    fi
+fi
+
 
 # All the programs that are compatible with the PPG
 valid=" comet tandem msgfplus msfragger peptideprophet percolator gprofiler reactome "
@@ -57,7 +63,7 @@ while [ "$1" != "" ]; do
                             fi
                             ;;
         -r | --repeatrun )  shift
-                            if [[ ${1,,} == "mt" ]]; then
+                            if [[ ${1,,} == "pmt" ]]; then
                                 RepeatRun_PMT="yes"
                                 shift
                                 PrecursorMassToleranceIncrement="$1"
@@ -79,6 +85,14 @@ while [ "$1" != "" ]; do
                             ;;
         --auto-run )        RUN="y"
                             ;;
+        -h | --help )       if [ -f "$LOC"README.md ]; then
+                                cat "$LOC"README.md
+                                exit
+                            else
+                                echo -e "\e[91mERROR:\e[0m "$LOC"README.md: No such file or directory"
+                                exit
+                            fi
+                            ;;
         * )                 echo -e "\e[91mERROR:\e[0m Unknown parameter ""$1"
                             exit
                             ;;
@@ -90,14 +104,27 @@ if [[ $LOCscripts == "" ]]; then
     LOCscripts="$LOC"Scripts/
 fi
 
+#   makes the user enter one program
+if [[ $Programs == "" ]]; then
+    echo -e "\e[91mERROR:\e[0m please enter at least one program"
+    exit
+fi
+
+#   If all has been entered set Programs to include all the valid programs and skip the validation
+if [[ $Programs == *"all"* ]]; then
+    Programs=$valid
+    NUMprog=$(echo $valid | wc -w)
+else
 #   Check if the entered programs are a part of the PPG
-for prog in $Programs
-do
-    if [[ $valid != *" ${prog,,} "* ]]; then
-        echo -e "\n\e[91mERROR:\e[0m ${prog} is not a valid name"
-        exit
-    fi
-done
+    for prog in $Programs
+    do
+        if [[ $valid != *" ${prog,,} "* ]]; then
+            echo -e "\n\e[91mERROR:\e[0m ${prog} is not a valid name"
+            exit
+        fi
+    done
+fi
+
 # changes the given name to lowercase to make the entering of the program names case insensitive
 Programs=${Programs,,}
 
@@ -133,7 +160,7 @@ if [[ $Programs == *"msfragger"* ]]; then
 fi
 
 # Check if install_locations is a file
-if [ ! -f $LOC/install_locations ] && [[ $RUNscripts != "n" ]]; then
+if [ ! -f $LOC/install_locations ] && [[ $onlyparam != "1" ]]; then
     echo -e "\n\e[93mWARNING:\e[0m "$LOC"install_locations not found"
     echo -e "Programs may not be able to be run without knowing where they are located"
     echo -e "create a file named install_locations in same directory as PPG.sh with the locations of the installed programs\n"
@@ -181,8 +208,10 @@ if (($NUMprog > 1)) && [[ $NUMparam == "1" ]]; then
 #   Use the Shared parameter file
     echo "not fully implemented yet"
 
+    #   add the CPU_Use changes here and/or in the Shared_parameter_maker.sh
+
     LOC_Shared_param_file="$paramsProg"
-    echo "Shared param file"
+    echo "PPG parameter file"
 
 #   removes the spaces between the parameter name and value and makes sure there is one space between each parameter
     Shared_param_file=$(grep -v "^#" $LOC_Shared_param_file | sed "s/ //g" | tr "\n" " " | tr "\t" " " | sed "s/ \+/ /g" |tr " " "\n" )
@@ -193,6 +222,12 @@ if (($NUMprog > 1)) && [[ $NUMparam == "1" ]]; then
     NUMparam="0"
 #   uses the functions in the following bash scripts
     source "$LOC"src/Shared_parameter_maker.sh
+    Header_Check
+    Header_Exit
+    Default_check
+
+    #   Could add CPU check here
+
     source "$LOC"src/modifications.sh
     if [[ $Programs == *"comet"* ]]; then
         Comet                   #   generates the main bulk of the parameter file
@@ -243,7 +278,15 @@ if (($NUMprog > 1)) && [[ $NUMparam == "1" ]]; then
 elif (($NUMparam==$NUMprog)); then
 #   use the parameter files the user entered
     echo "idividual parameter files"
-
+    source "$LOC"src/Shared_parameter_maker.sh
+    if (($NUMprog == "1")); then
+        LOC_Shared_param_file="$paramsProg"
+        Header_Check
+        if [[ "$Header" == "$Header_file" ]]; then
+            echo -e "\e[91mERROR:\e[0mThe PPG parameter file only works with more than one program"
+            exit
+        fi
+    fi
 # sets the parameter files to be used for each peptide identifier
     for prog in $Programs
     do
@@ -252,10 +295,37 @@ elif (($NUMparam==$NUMprog)); then
         declare "${prog}"="$paramloc"
         paramsProg=$(echo $paramsProg | awk '{$1="";print}')
     done
+
+    if [[ $SHARK == "1" ]]; then
+        CPU_Use
+        if [[ $Programs == *"msgfplus"* ]]; then
+            MSGFPlus_Mem_Use=$(grep "^#Mem_Use" $msgfplus | awk '{print $2}')
+            if [[ $MSGFPlus_Mem_Use != "" ]]; then
+                if [[ $MSGFPlus_Mem_Use != $Mem_Use ]]; then
+                    sed -i "s/#Mem_Use .*/#Mem_Use $Mem_Use/" $msgfplus
+                    echo "The amount of memory availible to java has been adjusted to $Mem_Use from $MSGFPlus_Mem_Use"
+                fi
+            else
+                echo "#Mem_Use $Mem_Use" >> $msgfplus
+                echo "The amount of memory availible to java has been set to $Mem_Use"
+            fi
+        fi
+        if [[ $Programs == *"msfragger"* ]]; then
+            sed -i "s/#Mem_Use .*/#Mem_Use $Mem_Use/" $msfragger
+        fi
+    fi
+
 else
     #   If all else fails exit
-    echo -e "\e[91mERROR:\e[0m number of programs($NUMprog) is not equal to the number of parameter files($NUMparam) given"
-    exit
+    if [[ $RUNscripts != "n" ]]; then
+        if [[ $NUMparam == "0" ]]; then
+            RUNscripts="n"
+            echo -e "\e[93mWARNING:\e[0m No parameter file was given, only creating the scripts."
+        else
+            echo -e "\e[91mERROR:\e[0m number of programs($NUMprog) is not equal to the number of parameter files($NUMparam) given"
+            exit
+        fi
+    fi
 fi
 
 # Exits if only the parameterfiles were required
@@ -479,7 +549,7 @@ done
 # All new programs in the pipeline should be added above this line of code
 for file in "$LOCscripts"\**
 do
-    rm "${file}"
+    rm -f "${file}"
 done
 
 #   copies the install_locations to the locations of the scripts

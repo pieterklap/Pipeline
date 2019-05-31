@@ -22,8 +22,9 @@ if [[ $1 == "" ]]; then
     Start_Help="yes"
 fi
 
+#   -XX:CompressedClassSpaceSize=1G -XX:+UseCompressedOops -XX:+UseCompressedClassPointers
 #   Argument to pass to java except for Xmx, which is always used and taken from the parameter file.
-JavaOptions="-XX:CompressedClassSpaceSize=1G -XX:UseCompressedOops"
+JavaOptions="-XX:CompressedClassSpaceSize=1G -XX:+UseCompressedOops -XX:+UseCompressedClassPointers -XshowSettings:vm"
 
 while [ "$1" != "" ]; do
     Help="0"

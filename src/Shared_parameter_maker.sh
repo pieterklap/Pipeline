@@ -1,27 +1,32 @@
 #!/bin/bash
 
-#   What the header should be
-Header="# Parameter file to be used with the Proteomic Pipeline Generator. "
-Header_ver="(v0.x)"
-#   What the header is
-Header_file_ver=$(head -n1 $LOC_Shared_param_file | awk '{print $NF}')
-Header_file=$(head -n1 $LOC_Shared_param_file | awk '{$NF="";print $0}')
+Header_Check ()
+{
+    #   What the header should be
+    Header="# Parameter file to be used with the Proteomic Pipeline Generator. "
+    Header_ver="(v0.x)"
+    #   What the header is
+    Header_file_ver=$(head -n1 $LOC_Shared_param_file | awk '{print $NF}')
+    Header_file=$(head -n1 $LOC_Shared_param_file | awk '{$NF="";print $0}')
 
-# Spf=Shared parameter file
-NAME_Spf=$(echo $LOC_Shared_param_file | awk -F\/ '{print $NF}')
-dir_Spf=$(echo $LOC_Shared_param_file | awk -F\/ '{$NF="";print $0}' | tr " " "/")
+    # Spf=Shared parameter file
+    NAME_Spf=$(echo $LOC_Shared_param_file | awk -F\/ '{print $NF}')
+    dir_Spf=$(echo $LOC_Shared_param_file | awk -F\/ '{$NF="";print $0}' | tr " " "/")
+}
 
-#   if the main part of the header does not match the standard header exit
-if [[ "$Header" != "$Header_file" ]]; then
-    echo -e "\e[91mERROR:\e[0m Shared parameter file is in the incorrect format"
-    exit
-fi
-#   if the version number does not match the current version exit
-if [[ "$Header_ver" != "$Header_file_ver" ]]; then
-    echo -e "\e[91mERROR:\e[0m Wrong version used. Version used: $Header_file_ver; version needed: $Header_ver"
-    exit
-fi
-
+Header_Exit ()
+{
+    #   if the main part of the header does not match the standard header exit
+    if [[ "$Header" != "$Header_file" ]]; then
+        echo -e "\e[91mERROR:\e[0m PPG parameter file is in the incorrect format"
+        exit
+    fi
+    #   if the version number does not match the current version exit
+    if [[ "$Header_ver" != "$Header_file_ver" ]]; then
+        echo -e "\e[91mERROR:\e[0m Wrong version used. Version used: $Header_file_ver; version needed: $Header_ver"
+        exit
+    fi
+}
 #   the letters representing amino acids needed for enzyme digestion in MSFragger
 aminoacids="G A S P V T C L I N D Q K E M O H F U R Y W"
 
@@ -50,7 +55,11 @@ Default_check ()
 
         #   Checks if the default value is there
             if [[ $(head -n"$LOC_Default" $LOC_Shared_param_file | tail -n1 | awk '{print $2}') != "Default:" ]]; then
+                if [[ $param_name == *"_file" ]]; then
+                    echo -e "\e[93mWARNING:\e[0m \"$param_name\" was not found it will be left empty"
+                else
                     echo -e "\e[93mWARNING:\e[0m Default not found. The parameter \"$param_name\" will be left empty"
+                fi
             else
         #   adds the default value to the shared parameter file
                 default_value=$(head -n"$LOC_Default" $LOC_Shared_param_file | tail -n1 | awk '{print $3}')
@@ -58,6 +67,45 @@ Default_check ()
             fi
         fi
     done
+}
+
+#   only run the CPU_Use function if SHARK == 1
+CPU_Use ()
+{
+    local num=0
+
+    for option in $SHARKoptions
+    do
+        if [[ $num == "2" ]]; then
+            CPUuse=${option}
+            local num="0"
+        fi
+        if [[ ${option} == "BWA" ]] && [[ $num == "1" ]]; then
+            local num=$[$num+1]
+        fi
+        if [[ ${option} == "-pe" ]]; then
+            local num=$[$num+1]
+        fi
+        if [[ ${option} == "h_vmem="* ]] && [[ $num == "1" ]]; then
+            MemUse=$(echo ${option} | awk -F\= '{print $2}')
+            local num="0"
+        fi
+        if [[ ${option} == "-l" ]]; then
+            local num=$[$num+1]
+        fi
+    done
+
+    if [[ $CPUuse == "" ]]; then
+        CPUuse="1"
+    fi
+    if [[ $MemUse == "" ]]; then
+        MemUse="3G"
+    fi
+    #   Takes CPUuse and MemUse and puts it in Mem_Use and removes any decimal values
+    #   it also divides it by 3 to aviod errors while running on the shark cluster
+    if [[ $SHARK == "1" ]]; then
+        Mem_Use=$(echo "$CPUuse $MemUse" | sed 's/[[:alpha:]]/ &/g' | awk '{print ($1*$2/3)" "$3}' | awk -F\. '{if($2=="")print $0;else print $1" "$2}' | awk '{if($3=="")print $1$2;else print $1$3}')
+    fi
 }
 
 
@@ -235,6 +283,9 @@ Comet ()
 
 MSGFPlus ()
 {
+    if [[ $SHARK == "1" ]]; then
+        CPU_Use
+    fi
     MSGFPlusparam="$LOC_param""$NAME_Spf"_MSGFPlus
     local temp_MSGFPlusparam=$output_dir/.temp_MSGFPlusparam_PPG
     local Shared_param_file=$(echo $Shared_param_file | tr "[" "=")
@@ -246,8 +297,14 @@ MSGFPlus ()
         #   If the parameter is usable with MSGFPlus extract the parameter name and value from the file
             local param_name=$(echo ${param} | awk -F\= '{print $1}')
             local param_value=$(echo ${param} | awk -F\= '{print $2}')
-        #   Set the parameter value in a variable with the parameter name
-            declare local "$param_name"="$param_value"
+        #   Set the parameter value in a variable with the parameter name except if the Mem_use value has to be set to a certain value
+            if [[ $param_name == "Mem_Use" ]] && [[ $Mem_Use != "" ]]; then
+                if [[ $Mem_Use != $param_value ]]; then
+                    echo "The amount of memory availible to java has been adjusted to $Mem_Use from $param_value"
+                fi
+            else
+                declare local "$param_name"="$param_value"
+            fi
         fi
     done
 
@@ -468,7 +525,9 @@ Tandem ()
 
 MSFragger ()
 {
-
+    if [[ $SHARK == "1" ]]; then
+        CPU_Use
+    fi
     MSFraggerparam="$LOC_param""$NAME_Spf"_MSFraggerparam
     local Shared_param_file=$(echo $Shared_param_file | tr "[" "=")
     for param in $Shared_param_file

@@ -8,16 +8,13 @@ if [[ $RUNscripts == "" ]]; then
     if [[ $input == "" ]]; then
         echo "Error no input file given"
         exit
-    fi
-    if (($NUMprog>$NUMparam)); then
+    elif (($NUMprog>$NUMparam)); then
         echo "too few parameter files given"
         exit
-    fi
-    if (($NUMprog<$NUMparam)); then
+    elif (($NUMprog<$NUMparam)); then
         echo "too many parameter files given"
         exit
-    fi
-    if (($NUMparam == 0)); then
+    elif (($NUMparam == 0)); then
         echo "No parameter files given"
         exit
     fi
@@ -128,3 +125,38 @@ Repeat_Run_Local ()
     done
 
 }
+
+CPU_Use ()
+{
+    local num=0
+
+    for option in $SHARKoptions
+    do
+        if [[ $num == "2" ]]; then
+            CPUuse=${option}
+            local num="0"
+        fi
+        if [[ ${option} == "BWA" ]] && [[ $num == "1" ]]; then
+            local num=$[$num+1]
+        fi
+        if [[ ${option} == "-pe" ]]; then
+            local num=$[$num+1]
+        fi
+        if [[ ${option} == "h_vmem="* ]] && [[ $num == "1" ]]; then
+            MemUse=$(echo ${option} | awk -F\= '{print $2}')
+            local num="0"
+        fi
+        if [[ ${option} == "-l" ]]; then
+            local num=$[$num+1]
+        fi
+    done
+
+    if [[ $CPUuse == "" ]]; then
+        CPUuse="1"
+    fi
+    if [[ $MemUse == "" ]]; then
+        MemUse="3G"
+    fi
+    MemUse=$(echo "$CPUuse $MemUse" | sed 's/[[:alpha:]]/ &/g' | awk '{print ($1*$2/3)$3}')
+}
+
