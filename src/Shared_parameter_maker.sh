@@ -29,7 +29,7 @@ Header_Exit ()
 }
 #   the letters representing amino acids needed for enzyme digestion in MSFragger
 aminoacids="G A S P V T C L I N D Q K E M O H F U R Y W"
-
+SHARKoptions_CPUUse=$SHARKoptions
 #   Checks if each parameter has a value and if they do not enter the default value
 Default_check ()
 {
@@ -53,15 +53,20 @@ Default_check ()
         #   The line where the Default value is stored
             LOC_Default=$(grep -n "^$param_name" $LOC_Shared_param_file | awk -F\: '{print ($1+1)}')
 
-        #   Checks if the default value is there
+        #   Checks if the default value is there. echos a warning if the default was empty/missing, but only if the program was used in a script.
             if [[ $(head -n"$LOC_Default" $LOC_Shared_param_file | tail -n1 | awk '{print $2}') != "Default:" ]]; then
-                if [[ $param_name == *"_file" ]]; then
-                    echo -e "\e[93mWARNING:\e[0m \"$param_name\" was not found it will be left empty"
-                else
+                if [[ $param_name != *"_file" ]]; then
                     echo -e "\e[93mWARNING:\e[0m Default not found. The parameter \"$param_name\" will be left empty"
+                elif [[ $param_name == *"_file" ]] && [[ $Programs == *"$(echo ${param_name,,} | awk -F_ '{print $1}')"* ]]; then
+                    echo -e "\e[93mWARNING:\e[0m \"$param_name\" was not found it will be left empty"
+                elif [[ $param_name == *"_file" ]] && [[ $valid != *"$(echo ${param_name,,} | awk -F_ '{print $1}')"* ]]; then
+                    echo -e "\e[91mERROR:\e[0m \"$param_name\" was not found this is a required parameter"
+                    exit
+                else
+                    echo -n ""
                 fi
             else
-        #   adds the default value to the shared parameter file
+        #   sets the parameter to the default value in the shared parameter file
                 default_value=$(head -n"$LOC_Default" $LOC_Shared_param_file | tail -n1 | awk '{print $3}')
                 sed -i "s/$param_name =/& $default_value/g" $LOC_Shared_param_file
             fi
@@ -69,32 +74,22 @@ Default_check ()
     done
 }
 
-#   only run the CPU_Use function if SHARK == 1
 CPU_Use ()
 {
-    local num=0
-
-    for option in $SHARKoptions
-    do
-        if [[ $num == "2" ]]; then
-            CPUuse=${option}
-            local num="0"
-        fi
-        if [[ ${option} == "BWA" ]] && [[ $num == "1" ]]; then
-            local num=$[$num+1]
-        fi
-        if [[ ${option} == "-pe" ]]; then
-            local num=$[$num+1]
-        fi
-        if [[ ${option} == "h_vmem="* ]] && [[ $num == "1" ]]; then
-            MemUse=$(echo ${option} | awk -F\= '{print $2}')
-            local num="0"
-        fi
-        if [[ ${option} == "-l" ]]; then
-            local num=$[$num+1]
-        fi
+#   change the options to a variable (revamp)
+#   Checks for -pe BWA and for -l h_vmem= in orde to check the amount of CPUs and memory.
+    while [ "$1" != "" ]; do
+        case $1 in
+           -pe )                    CPUuse=$3
+                                    ;;
+            --ntasks-per-node=* )   CPUuse=$(echo $1 | awk -F= '{print $NF}')
+                                    ;;
+            h_vmem=* | --mem=* )    MemUse=$(echo $1 | awk -F= '{print $NF}')
+                                    ;;
+        esac
+        shift
     done
-
+#   if the options aren't given set the values to default
     if [[ $CPUuse == "" ]]; then
         CPUuse="1"
     fi
@@ -102,10 +97,10 @@ CPU_Use ()
         MemUse="3G"
     fi
     #   Takes CPUuse and MemUse and puts it in Mem_Use and removes any decimal values
-    #   it also divides it by 3 to aviod errors while running on the shark cluster
+    #   it also divides it by 3 to avoid errors while running on the shark cluster
     if [[ $SHARK == "1" ]]; then
-        Mem_Use=$(echo "$CPUuse $MemUse" | sed 's/[[:alpha:]]/ &/g' | awk '{print ($1*$2/3)" "$3}' | awk -F\. '{if($2=="")print $0;else print $1" "$2}' | awk '{if($3=="")print $1$2;else print $1$3}')
-    fi
+        Mem_Use=$(echo "$CPUuse $MemUse" | sed 's/[[:alpha:]]/ &/g' | awk '{print ($1*$2/2.5)" "$3}' | awk -F\. '{if($2=="")print $0;else print $1" "$2}' | awk '{if($3=="")print $1$2;else print $1$3}')
+    fi                                                                          # change ^ to adjust the factor of memory given to java.
 }
 
 
@@ -284,7 +279,7 @@ Comet ()
 MSGFPlus ()
 {
     if [[ $SHARK == "1" ]]; then
-        CPU_Use
+        CPU_Use $SHARKoptions_CPUUse
     fi
     MSGFPlusparam="$LOC_param""$NAME_Spf"_MSGFPlus
     local temp_MSGFPlusparam=$output_dir/.temp_MSGFPlusparam_PPG
@@ -362,6 +357,10 @@ Tandem ()
 {
 #   copies the default parameter file to the location of the Sharedparameter file and gives each tandem parameter file a name
     Tandemparam=$(grep "tandem_default_input" $LOC_Shared_param_file | awk '{print $3}')
+    if [[ $Tandemparam == "" ]]; then
+        echo -e "\e[91mERROR:\e[0m The tandem parameter file is not given"
+        exit
+    fi
     cp "$Tandemparam" "$LOC_param""$NAME_Spf"_Tandemparam.xml
 
     Tandemparam_input="$LOC_param""$NAME_Spf"_Tandem_input.xml
@@ -526,7 +525,7 @@ Tandem ()
 MSFragger ()
 {
     if [[ $SHARK == "1" ]]; then
-        CPU_Use
+        CPU_Use $SHARKoptions_CPUUse
     fi
     MSFraggerparam="$LOC_param""$NAME_Spf"_MSFraggerparam
     local Shared_param_file=$(echo $Shared_param_file | tr "[" "=")

@@ -27,8 +27,8 @@ if [[ $PIDprog == "" ]] || [ ! -f $PIDprog ]; then
 fi
 
 #   Puts the parameters into variables
-MSGFparam=$(grep -v "^#" $PIDparam |awk '{print $2,$3}' |tr "\n" " ")
-MemUse=$(grep "^#Mem_Use" $PIDparam | awk '{print $2}')
+MSGFparam=$(grep -v "^#" $PIDparam | grep -v "Mem_Use" | grep -v "Output_suffix" |awk '{print $2,$3}' |tr "\n" " ")
+MemUse=$(grep "Mem_Use" $PIDparam | awk '{print $2}')
 #   if the amount of allowcated memory was not given set it to the default value (4G)
 if [[ $MemUse == "" ]]; then
     MemUse="4G"
