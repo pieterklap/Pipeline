@@ -1,8 +1,5 @@
 ##Start## "Tandem2XML"
 
-# Sets the name of the output file to {file}.pep.xml
-VALinput=${PIDoutput//.xml/.pep.xml}
-
 # Location of Tandem2XMl
 CONVprog=$(grep Tandem2XML "$LOC"install_locations | awk '{print $2}')
 if [[ $CONVprog == "" ]] || [ ! -f $CONVprog ]; then
@@ -16,11 +13,35 @@ if [[ $CONVprog == "" ]] || [ ! -f $CONVprog ]; then
     fi
 fi
 
+for Pep_file in $PIDoutput
+do
+#   Sets the name of the output file to {file}.pep.xml
+    VALinput=${Pep_file//.xml/.pep.xml}
 
-# runs Tandem2XML
-$CONVprog $PIDoutput $VALinput |& tee -a $datelog
+#   runs Tandem2XML
+    $CONVprog $Pep_file $VALinput |& tee -a $datelog
 
+    CONVoutput+="$VALinput "
+done
 # sets PIDoutput to be used in peptideprophet
-PIDoutput="$VALinput"
+PIDoutput="$CONVoutput"
+
+for output in $PIDoutput
+do
+# if the file is not found and/or empty it is removed from the $PIDoutput it exits if $PIDoutput is empty
+    if [ -f ${output} ]; then
+        if [ ! -s ${output} ]; then
+            echo -e "\e[91mERROR:\e[0m ${output} is empty \nsomething went wrong running $CONVprog" | tee -a $datelog
+            PIDoutput=${PIDoutput//${output}/}
+        fi
+    else
+        echo -e "\e[91mERROR:\e[0m ${output} is not a file \nsomething went wrong running $CONVprog" | tee -a $datelog
+        PIDoutput=${PIDoutput//${output}/}
+    fi
+done
+if [[ $PIDoutput == "" ]]; then
+    echo -e "\e[91mERROR:\e[0m no output files found"
+    exit
+fi
 
 ##End## "Tandem2XML"

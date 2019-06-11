@@ -13,25 +13,34 @@ if [[ $VALprog == "" ]] || [ ! -f $VALprog ]; then
 fi
 
 EXTENTION=$(echo $PIDoutput | awk -F. '{print $NF}')
-VALoutput=$(echo $PIDoutput | sed "s/$EXTENTION/put.xml/")
-TSVoutput=$(echo $PIDoutput | sed "s/$EXTENTION/put.tsv/")
 
 #   if no parameter file was given do not search the non existent parameter file
 if [[ $VALparam != "" ]]; then
     VALparam=$(grep -v "^#" $VALparam | awk '{print $1, $2}' | tr "\n" " ")
 fi
-
+echo $VALoutput
 #   Run percolator
-$VALprog -X $VALoutput $VALparam $PIDoutput -r $TSVoutput |& tee -a $datelog 
+for Pep_file in $PIDoutput
+do
+    VALoutput_file=$(echo ${Pep_file} | sed "s/$EXTENTION/put.xml/g")
+    TSVoutput_file=$(echo ${Pep_file} | sed "s/$EXTENTION/put.tsv/g")
+    $VALprog -X $VALoutput_file $VALparam ${Pep_file} -r $TSVoutput_file |& tee -a $datelog 
 
-if [ -f $VALoutput ]; then
-    if [ ! -s $VALoutput ]; then
-        echo -e "\e[91mERROR:\e[0m $VALoutput is empty" | tee -a $datelog
+    VALoutput+="$VALoutput_file "
+    TSVoutput+="$TSVoutput_file "
+done
+
+for output in $VALoutput
+do
+    if [ -f ${output} ]; then
+        if [ ! -s ${output} ]; then
+            echo -e "\e[91mERROR:\e[0m ${output} is empty \nsomething went wrong running $VALprog" | tee -a $datelog
+            exit
+        fi
+    else
+        echo -e "\e[91mERROR:\e[0m ${output} is not a file \nsomething went wrong running $VALprog" | tee -a $datelog
         exit
     fi
-else
-    echo -e "\e[91mERROR:\e[0m $VALoutput is not a file" | tee -a $datelog
-    exit
-fi
+done
 
 ##End## "percolator"

@@ -1,22 +1,4 @@
 ##Start## "gprofiler"
-
-EXTENTION=$(echo $VALoutput | awk -F\. '{print $(NF-1)"."$NF}')
-NAMEfile=${VALoutput//.$EXTENTION/_gprofiler}
-
-if [[ $EXTENTION == pep.xml ]]; then
-    # takes the protein names out of the pep.xml file (peptideprophet)
-    PROTEIN=$(cat $VALoutput | grep "<search_hit hit_rank=\"1\"" | awk -F\| '{print "\"" $2 "\"""\,"}')
-fi
-if [[ $EXTENTION == put.xml ]]; then
-    #takes the protein names out of the put.xml file (percolator)
-    PROTEIN=$(cat $VALoutput | grep "<protein_id>" | awk -F\| '{print "\"" $2 "\"""\,"}')
-fi
-
-#removes the last "," from $PROTEIN
-PROTEIN=$(echo $PROTEIN | tr " " "\n" | sort -u | tr "\n" " " | head -c-2) 
-#saves the protein list
-echo $PROTEIN > $NAMEfile.prot
-
 if [[ $GPparams == "" ]]; then
     GPparams="X"
 fi
@@ -24,18 +6,38 @@ fi
 GPparams=$(grep -v "^#" $GPparams |grep -v "^ " | awk '{print $1":",$2","}' | grep -v "^:")
 
 if [[ $GPparams == "" ]]; then
-    # if no parameters were given it sets it to the default values
+#   if no parameters were given it sets it to the default values
     GPparams="\"organism\": \"hsapiens\","
 fi
 
-GPparams=$(echo "{$GPparams \"query\": [$PROTEIN]}")
+for Pep_file in $VALoutput
+do
+    EXTENTION=$(echo ${Pep_file} | awk -F\. '{print $(NF-1)"."$NF}')
+    NAMEfile=${Pep_file//.$EXTENTION/_gprofiler}
 
+    if [[ $EXTENTION == pep.xml ]]; then
+        # takes the protein names out of the pep.xml file (peptideprophet)
+        PROTEIN=$(cat ${Pep_file} | grep "<search_hit hit_rank=\"1\"" | awk -F\| '{print "\"" $2 "\"""\,"}')
+    fi
+    if [[ $EXTENTION == put.xml ]]; then
+        #takes the protein names out of the put.xml file (percolator)
+        PROTEIN=$(cat ${Pep_file} | grep "<protein_id>" | awk -F\| '{print "\"" $2 "\"""\,"}')
+    fi
 
-# calls the gost API
-curl  \
--o "$NAMEfile.json" \
--X 'POST' \
--H 'Content-Type: application/json' \
--d  "$GPparams" 'https://biit.cs.ut.ee/gprofiler_beta/api/gost/profile/' |& tee -a $datelog
+#   removes the last "," from $PROTEIN
+    PROTEIN=$(echo $PROTEIN | tr " " "\n" | sort -u | tr "\n" " " | head -c-2) 
+#   saves the protein list
+    echo $PROTEIN > $NAMEfile.prot
+
+    GPparams_complete=$(echo "{$GPparams \"query\": [$PROTEIN]}")
+
+#   calls the gost API
+    curl  \
+    -o "$NAMEfile.json" \
+    -X 'POST' \
+    -H 'Content-Type: application/json' \
+    -d  "$GPparams_complete" 'https://biit.cs.ut.ee/gprofiler_beta/api/gost/profile/' |& tee -a $datelog
+
+done
 
 ##End## "gprofiler"

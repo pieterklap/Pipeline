@@ -9,7 +9,6 @@ if [[ $output_suffix == "" ]]; then
     output_suffix=$(grep "output_suffix =" $PIDparam | awk '{print $3}')
 fi
 EXTENTION=$(echo "$PIDinput" |awk -F. '{print $NF}')
-COMEToutput=$(echo $PIDinput | sed "s/\.$EXTENTION/$output_suffix\.pin/")
-NAME_Cometoutput=$(echo $COMEToutput | awk -F/ '{print $NF}')
+COMEToutput=$(echo "$PIDinput" | sed "s/\.$EXTENTION/$output_suffix\.pin /g")
 
 ##End## "comet2pin"

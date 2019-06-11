@@ -11,20 +11,39 @@ if [[ $CONVprog == "" ]] || [ ! -f $CONVprog ]; then
         echo -e "\e[92mRunning:\e[0m $CONVprog"
     fi
 fi
-
-EXTENTION=$(echo "$PIDoutput" | awk -F. '{print $NF}')
-
-IDCONVoutput=$(echo $PIDoutput | awk -F/ '{$NF="";print $0}' | tr " " "/")
-
-$CONVprog $PIDoutput --pepXML -o $IDCONVoutput |& tee -a $datelog
-
-PIDoutput=$(echo "$PIDoutput" | sed "s/\.$EXTENTION//")
 if [[ $output_suffix != "" ]]; then
     PIDoutput=$(echo $PIDoutput | sed "s/$output_suffix//")
 fi
 
-mv $PIDoutput."pepXML" $PIDoutput$output_suffix".pep.xml"
-PIDoutput=$PIDoutput$output_suffix."pep.xml"
+for Pep_file in $PIDoutput
+do
 
+    EXTENTION=$(echo "${Pep_file}" | awk -F. '{print $NF}')
+    $CONVprog ${Pep_file} --pepXML -o $Stand_output |& tee -a $datelog
+
+    CONVoutput=$(echo "${Pep_file}" | sed "s/\.$EXTENTION//")
+
+    mv $CONVoutput."pepXML" $CONVoutput$output_suffix".pep.xml"
+    PIDoutput+=$CONVoutput$output_suffix."pep.xml "
+
+done
+
+for output in $PIDoutput
+do
+# if the file is not found and/or empty it is removed from the $PIDoutput it exits if $PIDoutput is empty
+    if [ -f ${output} ]; then
+        if [ ! -s ${output} ]; then
+            echo -e "\e[91mERROR:\e[0m ${output} is empty \nsomething went wrong running $CONVprog" | tee -a $datelog
+            PIDoutput=${PIDoutput//${output}/}
+        fi
+    else
+        echo -e "\e[91mERROR:\e[0m ${output} is not a file \nsomething went wrong running $CONVprog" | tee -a $datelog
+        PIDoutput=${PIDoutput//${output}/}
+    fi
+done
+if [[ $PIDoutput == "" ]]; then
+    echo -e "\e[91mERROR:\e[0m no output files found"
+    exit
+fi
 
 ##End## "idconvert"

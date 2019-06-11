@@ -16,27 +16,32 @@ fi
 
 
 EXTENTION=$(echo $PIDoutput | awk -F. '{print $(NF-1)"."$NF}')
-#   Makes a copy of the pep.xml file before peptideprophet overwrites it
-if [[ $EXTENTION == "pep.xml" ]]; then
-    copy_PIDoutput=$(echo $PIDoutput | sed "s/\.$EXTENTION/_database_search\.$EXTENTION/")
-    cp $PIDoutput $copy_PIDoutput
-fi
 #   if no parameter file was given do not check the non existing file
 if [[ $VALparam != "" ]]; then
     VALparam=$(grep -v "^#" $VALparam | awk '{print $1}' | tr "\n" " ")
 fi
+for Pep_file in $PIDoutput
+do
+#   Makes a copy of the pep.xml file before peptideprophet overwrites it
+    if [[ $EXTENTION == "pep.xml" ]]; then
+        copy_PIDoutput=$(echo ${Pep_file} | sed "s/\.$EXTENTION/_database_search\.$EXTENTION/")
+        cp ${Pep_file} $copy_PIDoutput
+    fi
 # runs peptideprophet
-$VALprog $PIDoutput $VALparam |& tee -a $datelog
-
+    $VALprog ${Pep_file} $VALparam |& tee -a $datelog
+done
 VALoutput=$PIDoutput
 
-if [ -f $VALoutput ]; then
-    if [ ! -s $VALoutput ]; then
-        echo -e "\e[91mERROR:\e[0m $VALoutput is empty \nThere was a problem running $VALprog" | tee -a $datelog
+for output in $VALoutput
+do
+    if [ -f ${output} ]; then
+        if [ ! -s ${output} ]; then
+            echo -e "\e[91mERROR:\e[0m ${output} is empty \nsomething went wrong running $VALprog" | tee -a $datelog
+            exit
+        fi
+    else
+        echo -e "\e[91mERROR:\e[0m ${output} is not a file \nsomething went wrong running $VALprog" | tee -a $datelog
         exit
     fi
-else
-    echo -e "\e[91mERROR:\e[0m $VALoutput is not a file \nThere was a problem running $VALprog" | tee -a $datelog
-    exit
-fi
+done
 ##End## "PeptideProphet"

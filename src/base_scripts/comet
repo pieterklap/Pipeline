@@ -22,7 +22,7 @@ if [[ $output_suffix != "" ]]; then
 fi
 
 # run comet
-"$PIDprog" -P"$PIDparam" "$PIDinput" |& tee -a $datelog
+"$PIDprog" -P"$PIDparam" $PIDinput |& tee -a $datelog
 
 #   if the output_suffix is NOT entered in the command line take the output suffix from the parameter file
 if [[ $output_suffix == "" ]]; then
@@ -31,18 +31,33 @@ fi
 #   Changes the Name of comet output (is also used in comet2pin)
 if [[ $COMEToutput == "" ]]; then
     EXTENTION=$(echo "$PIDinput" |awk -F. '{print $NF}')
-    COMEToutput=$(echo $PIDinput | sed "s/\.$EXTENTION/$output_suffix\.pep\.xml/")
-    NAME_Cometoutput=$(echo $COMEToutput | awk -F/ '{print $NF}')
+    COMEToutput=$(echo "$PIDinput" | sed "s/\.$EXTENTION/$output_suffix\.pep\.xml /g")
 fi
-PIDoutput="$PIDoutput/$NAME_Cometoutput"
-mv "$COMEToutput" "$PIDoutput"
 
-if [ -f $PIDoutput ]; then
-    if [ ! -s $PIDoutput ]; then
-        echo -e "\e[91mERROR:\e[0m $PIDoutput is empty \nsomething went wrong running $PIDprog" | tee -a $datelog
+for name in $COMEToutput
+do
+    NAME_Cometoutput=$(echo ${name} | awk -F/ '{print $NF}')
+    mv "${name}" "$PIDoutput"
+    COMEToutput_Locations+="$PIDoutput/$NAME_Cometoutput "
+done
+
+PIDoutput="$COMEToutput_Locations"
+
+for output in $PIDoutput
+do
+# if the file is not found and/or empty it is removed from the $PIDoutput it exits if $PIDoutput is empty
+    if [ -f ${output} ]; then
+        if [ ! -s ${output} ]; then
+            echo -e "\e[91mERROR:\e[0m ${output} is empty \nsomething went wrong running $PIDprog" | tee -a $datelog
+            PIDoutput=${PIDoutput//${output}/}
+        fi
+    else
+        echo -e "\e[91mERROR:\e[0m ${output} is not a file \nsomething went wrong running $PIDprog" | tee -a $datelog
+        PIDoutput=${PIDoutput//${output}/}
     fi
-else
-    echo -e "\e[91mERROR:\e[0m $PIDoutput is not a file \nsomething went wrong running $PIDprog" | tee -a $datelog
+done
+if [[ $PIDoutput == "" ]]; then
+    echo -e "\e[91mERROR:\e[0m no output files found"
     exit
 fi
 ##End## "comet"

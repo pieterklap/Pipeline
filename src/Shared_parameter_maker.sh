@@ -29,7 +29,6 @@ Header_Exit ()
 }
 #   the letters representing amino acids needed for enzyme digestion in MSFragger
 aminoacids="G A S P V T C L I N D Q K E M O H F U R Y W"
-SHARKoptions_CPUUse=$SHARKoptions
 #   Checks if each parameter has a value and if they do not enter the default value
 Default_check ()
 {
@@ -279,6 +278,7 @@ Comet ()
 MSGFPlus ()
 {
     if [[ $SHARK == "1" ]]; then
+        SHARKoptions_CPUUse=$SHARKoptions
         CPU_Use $SHARKoptions_CPUUse
     fi
     MSGFPlusparam="$LOC_param""$NAME_Spf"_MSGFPlus
@@ -295,7 +295,7 @@ MSGFPlus ()
         #   Set the parameter value in a variable with the parameter name except if the Mem_use value has to be set to a certain value
             if [[ $param_name == "Mem_Use" ]] && [[ $Mem_Use != "" ]]; then
                 if [[ $Mem_Use != $param_value ]]; then
-                    echo "The amount of memory availible to java has been adjusted to $Mem_Use from $param_value"
+                    echo "MS-GF+: The amount of memory availible to java has been adjusted to $Mem_Use from $param_value"
                 fi
             else
                 declare local "$param_name"="$param_value"
@@ -525,6 +525,7 @@ Tandem ()
 MSFragger ()
 {
     if [[ $SHARK == "1" ]]; then
+        SHARKoptions_CPUUse=$SHARKoptions
         CPU_Use $SHARKoptions_CPUUse
     fi
     MSFraggerparam="$LOC_param""$NAME_Spf"_MSFraggerparam
@@ -538,7 +539,13 @@ MSFragger ()
             local param_name=$(echo ${param} | awk -F\= '{print $1}')
             local param_value=$(echo ${param} | awk -F\= '{print $2}')
         #   Set the parameter value in a variable with the parameter name
-            declare local "$param_name"="$param_value"
+            if [[ $param_name == "Mem_Use" ]] && [[ $Mem_Use != "" ]]; then
+                if [[ $Mem_Use != $param_value ]]; then
+                    echo "MSFragger: The amount of memory availible to java has been adjusted to $Mem_Use from $param_value"
+                fi
+            else
+                declare local "$param_name"="$param_value"
+            fi
         fi
     done
 

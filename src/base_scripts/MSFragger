@@ -1,9 +1,5 @@
 ## Start ## "MSFragger"
 
-#input:     mzML
-Extention=$(echo $PIDinput | awk -F. '{print $NF}')
-Fraggerout=$(echo $PIDinput | sed "s/$Extention/pepXML/")
-
 #   Checks if/where MSFragger (version 20190222) is installed if it is not installed it will look for the .jar file.
 #   if more than 1 .jar files are found it will take the last one (the latest one if the location is the same).
 PIDprog=$(grep "MSFragger " "$LOC"install_locations | awk '{print $2}')
@@ -26,23 +22,35 @@ MemUse=$(grep "^#Mem_Use" $PIDparam | awk '{print $2}')
 if [[ $MemUse == "" ]]; then
     MemUse="4G"
 fi
+for input_file in $PIDinput
+do
+    Extention=$(echo ${input_file} | awk -F. '{print $NF}')
+    Fraggerout=$(echo ${input_file} | sed "s/$Extention/pepXML/")
 
+    java -Xmx"$MemUse" $JavaOptions -jar $PIDprog $PIDparam ${input_file}
 
-java -Xmx"$MemUse" $JavaOptions -jar $PIDprog $PIDparam $PIDinput
+    NAMEfraggerout=$(echo $Fraggerout | awk -F/ '{print $NF}' | sed "s/\.pepXML/$output_suffix\.pep.xml/")
+    PIDoutput+="$Stand_output/$NAMEfraggerout "
 
-NAMEfraggerout=$(echo $Fraggerout | awk -F/ '{print $NF}' | sed "s/\.pepXML/$output_suffix\.pep.xml/")
-PIDoutput=$PIDoutput/$NAMEfraggerout
+    mv $Fraggerout $Stand_output/$NAMEfraggerout
 
-mv $Fraggerout $PIDoutput 
+done
 
-if [ -f $PIDoutput ]; then
-    if [ ! -s $PIDoutput ]; then
-        echo "$PIDoutput is empty"
-        echo "something went wrong running $PIDprog"
+for output in $PIDoutput
+do
+# if the file is not found and/or empty it is removed from the $PIDoutput it exits if $PIDoutput is empty
+    if [ -f ${output} ]; then
+        if [ ! -s ${output} ]; then
+            echo -e "\e[91mERROR:\e[0m ${output} is empty \nsomething went wrong running $PIDprog" | tee -a $datelog
+            PIDoutput=${PIDoutput//${output}/}
+        fi
+    else
+        echo -e "\e[91mERROR:\e[0m ${output} is not a file \nsomething went wrong running $PIDprog" | tee -a $datelog
+        PIDoutput=${PIDoutput//${output}/}
     fi
-else
-    echo "$PIDoutput is not a file"
-    echo "something went wrong running $PIDprog"
+done
+if [[ $PIDoutput == "" ]]; then
+    echo -e "\e[91mERROR:\e[0m no output files found"
     exit
 fi
 

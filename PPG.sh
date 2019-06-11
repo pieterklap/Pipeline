@@ -38,13 +38,16 @@ while [ "$1" != "" ]; do
                             LOCscripts="$2"
                             shift
                             ;;
-        -i | --input )      if [ -f $2 ]; then
-                                input="$1 $2"
-                            else
-                                echo -e "\e[91mERROR:\e[0m $2 is not a file"
-                                exit
-                            fi
-                            shift
+        -i | --input )      input="$1 "
+                            while [[ ${2:0:1} != "-" ]] && [[ "$2" != "" ]]; do
+                                shift
+                                if [ -f $1 ]; then
+                                    input+="$1 "
+                                else
+                                    echo -e "\e[91mERROR:\e[0m $1 is not a file"
+                                    exit
+                                fi
+                            done
                             ;;
         -o | --output )     output="$1 $2"
                             shift
@@ -130,7 +133,7 @@ Programs=${Programs,,}
 
 for parameter_file in $paramsProg
 do
-    if [ ! -f ${paramsProg} ]; then
+    if [ ! -f ${parameter_file} ]; then
         echo -e "\e[91mERROR:\e[0m ${paramsProg} is not a file"
         exit
     fi
@@ -275,7 +278,7 @@ if (($NUMprog > 1)) && [[ $NUMparam == "1" ]]; then
     fi
 
 #   if the number of parameter files is equal to the amount of programs run this
-elif (($NUMparam==$NUMprog)); then
+    elif (($NUMparam==$NUMprog)); then
 #   use the parameter files the user entered
     echo "idividual parameter files"
     source "$LOC"src/Shared_parameter_maker.sh
@@ -297,21 +300,33 @@ elif (($NUMparam==$NUMprog)); then
     done
 
     if [[ $SHARK == "1" ]]; then
-        CPU_Use
         if [[ $Programs == *"msgfplus"* ]]; then
+            SHARKoptions_CPUUse=$SHARKoptions
+            CPU_Use $SHARKoptions_CPUUse
             MSGFPlus_Mem_Use=$(grep "^#Mem_Use" $msgfplus | awk '{print $2}')
             if [[ $MSGFPlus_Mem_Use != "" ]]; then
                 if [[ $MSGFPlus_Mem_Use != $Mem_Use ]]; then
                     sed -i "s/#Mem_Use .*/#Mem_Use $Mem_Use/" $msgfplus
-                    echo "The amount of memory availible to java has been adjusted to $Mem_Use from $MSGFPlus_Mem_Use"
+                    echo "MS-GF+: The amount of memory availible to java has been adjusted to $Mem_Use from $MSGFPlus_Mem_Use"
                 fi
             else
                 echo "#Mem_Use $Mem_Use" >> $msgfplus
-                echo "The amount of memory availible to java has been set to $Mem_Use"
+                echo "MS-GF+: The amount of memory availible to java has been set to $Mem_Use"
             fi
         fi
         if [[ $Programs == *"msfragger"* ]]; then
-            sed -i "s/#Mem_Use .*/#Mem_Use $Mem_Use/" $msfragger
+            SHARKoptions_CPUUse=$SHARKoptions
+            CPU_Use $SHARKoptions_CPUUse
+            MSFragger_Mem_Use=$(grep "^#Mem_Use" $msfragger | awk '{print $2}')
+            if [[ $MSFragger_Mem_Use != "" ]]; then
+                if [[ $MSFragger_Mem_Use != $Mem_Use ]]; then
+                    sed -i "s/#Mem_Use .*/#Mem_Use $Mem_Use/" $msfragger
+                    echo "MSFragger: The amount of memory availible to java has been adjusted to $Mem_Use from $MSFragger_Mem_Use"
+                fi
+            else
+                echo "#Mem_Use $Mem_Use" >> $msfragger
+                echo "MSFragger: The amount of memory availible to java has been set to $Mem_Use"
+            fi
         fi
     fi
 

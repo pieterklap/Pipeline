@@ -1,18 +1,5 @@
 ##Start## "msgf2pin"
 
-
-EXTENTION=$(echo "$PIDoutput" |awk -F. '{print $NF}')
-
-MSGFoutput_decoy=$(echo "$PIDoutput" | sed "s/.$EXTENTION/.decoy.mzid/")
-
-
-MSGFparam=$(grep -v "^#" $PIDparam_decoy |awk '{print $2,$3}' |tr "\n" " ")
-
-java -Xmx"$MemUse" $JavaOptions -jar $PIDprog -s $PIDinput -o $MSGFoutput_decoy $MSGFparam |tee -a $datelog
-
-PIDoutput_decoy="$MSGFoutput_decoy"
-
-
 CONVprog=$(grep msgf2pin "$LOC"install_locations | awk '{print $2}')
 if [[ $CONVprog == "" ]] || [ ! -f $CONVprog ]; then
     echo -e "\e[93mWARNING:\e[0m The location of msgf2pin is not given or does not exist"
@@ -25,11 +12,52 @@ if [[ $CONVprog == "" ]] || [ ! -f $CONVprog ]; then
     fi
 fi
 
-EXTENTION=$(echo "$PIDoutput" |awk -F. '{print $NF}')
-VALinput=$(echo "$PIDoutput" | sed "s/.$EXTENTION/.pin/")
+MSGFparam=$(grep -v "^#" $PIDparam_decoy |awk '{print $2,$3}' |tr "\n" " ")
+EXTENTION=$(echo "$PIDinput" |awk -F. '{print $NF}')
+
+for input_file in $PIDinput
+do
+    EXTENTION=$(echo "${input_file}" |awk -F. '{print $NF}')
+    MSGFoutput_decoy=$(echo "${input_file}" | sed "s/\.$EXTENTION/$output_suffix\.decoy\.mzid/")
 
 
-$CONVprog -o $VALinput $PIDoutput $PIDoutput_decoy |& tee -a $datelog
+    java -Xmx"$MemUse" $JavaOptions -jar $PIDprog -s ${input_file} -o $MSGFoutput_decoy $MSGFparam |tee -a $datelog
 
-PIDoutput=$VALinput
+    PIDoutput_decoy+="$MSGFoutput_decoy "
+
+done
+
+for Pep_file in $PIDoutput
+do
+    EXTENTION=$(echo "${Pep_file}" |awk -F. '{print $NF}')
+    VALinput=$(echo "${Pep_file}" | sed "s/\.$EXTENTION/\.pin/")
+    Decoy_Pep_file=$(echo $PIDoutput_decoy | awk '{print $1}')
+
+    $CONVprog -o $VALinput ${Pep_file} $Decoy_Pep_file |& tee -a $datelog
+
+    PIDoutput_decoy=$(echo $PIDoutput_decoy | awk '{$1="";print $0}')
+    CONVoutput+="$VALinput "
+done
+
+PIDoutput=$CONVoutput
+
+for output in $PIDoutput
+do
+# if the file is not found and/or empty it is removed from the $PIDoutput it exits if $PIDoutput is empty
+    if [ -f ${output} ]; then
+        if [ ! -s ${output} ]; then
+            echo -e "\e[91mERROR:\e[0m ${output} is empty \nsomething went wrong running $CONVprog" | tee -a $datelog
+            PIDoutput=${PIDoutput//${output}/}
+        fi
+    else
+        echo -e "\e[91mERROR:\e[0m ${output} is not a file \nsomething went wrong running $CONVprog" | tee -a $datelog
+        PIDoutput=${PIDoutput//${output}/}
+    fi
+done
+if [[ $PIDoutput == "" ]]; then
+    echo -e "\e[91mERROR:\e[0m no output files found"
+    exit
+fi
+
+
 ##End## "msgf2pin"

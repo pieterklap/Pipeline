@@ -18,6 +18,15 @@ if [[ $RUNscripts == "" ]]; then
         echo "No parameter files given"
         exit
     fi
+    if [[ $(grep -v "^#" "$LOC"install_locations |awk '{print $2}') == "" ]]; then
+        while [[ $Empty != [yY] ]]; do
+            read -p "The install_locations file is empty, are you sure you want to run it (y/n): " Empty
+            if [[ $Empty == [nN] ]]; then
+                exit
+            fi
+        done
+
+    fi
 fi
 
 if [[ $location == "" ]]; then
@@ -126,37 +135,4 @@ Repeat_Run_Local ()
 
 }
 
-CPU_Use ()
-{
-    local num=0
-
-    for option in $SHARKoptions
-    do
-        if [[ $num == "2" ]]; then
-            CPUuse=${option}
-            local num="0"
-        fi
-        if [[ ${option} == "BWA" ]] && [[ $num == "1" ]]; then
-            local num=$[$num+1]
-        fi
-        if [[ ${option} == "-pe" ]]; then
-            local num=$[$num+1]
-        fi
-        if [[ ${option} == "h_vmem="* ]] && [[ $num == "1" ]]; then
-            MemUse=$(echo ${option} | awk -F\= '{print $2}')
-            local num="0"
-        fi
-        if [[ ${option} == "-l" ]]; then
-            local num=$[$num+1]
-        fi
-    done
-
-    if [[ $CPUuse == "" ]]; then
-        CPUuse="1"
-    fi
-    if [[ $MemUse == "" ]]; then
-        MemUse="3G"
-    fi
-    MemUse=$(echo "$CPUuse $MemUse" | sed 's/[[:alpha:]]/ &/g' | awk '{print ($1*$2/3)$3}')
-}
 

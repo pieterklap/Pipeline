@@ -26,20 +26,19 @@ fi
 #   Argument to pass to java except for Xmx, which is always used and taken from the parameter file.
 JavaOptions="-XX:CompressedClassSpaceSize=1G -XX:+UseCompressedOops -XX:+UseCompressedClassPointers -XshowSettings:vm"
 
+NUMinput="0"
+
 while [ "$1" != "" ]; do
     Help="0"
     case $1 in
         -o | --output )         shift               # Enter -o to specify the output location
                                 PIDoutput=$1        # Enter -o to specify the output location
                                 ;;
-        -I | --multinput )      while [[ ${2:0:1} != "-" ]] && [[ "$2" != "" ]]; do
+        -i | --input )          while [[ ${2:0:1} != "-" ]] && [[ "$2" != "" ]]; do
                                     shift
                                     PIDinput+=$1" "         # Puts the input locations in a variable
                                     NUMinput=$[$NUMinput+1]     # Counts the amount of input files entered
                                 done
-                                ;;
-        -i | --input )          shift               # Enter -i to specify the input location
-                                PIDinput=$1         # Enter -i to specify the input location
                                 ;;
         -p | --parameter )      shift               # Enter -p to specify the database search paramater file location
                                 PIDparam=$1         # Enter -p to specify the database search paramater file location
@@ -78,6 +77,10 @@ while [ "$1" != "" ]; do
     shift
 done
 
+if [[ $NUMinput == "1" ]]; then
+    PIDinput=$(echo $PIDinput | awk '{print $1}')
+fi
+
 # Shows the help files of the programs in the particular pipeline if no options are given
 if [[ $Start_Help == "yes" ]]; then
 
@@ -93,10 +96,13 @@ if [[ $Start_Help == "yes" ]]; then
     exit
 fi
 
-if [ ! -f $PIDinput ]; then
-    echo -e "\e[91mERROR:\e[0m $PIDinput is not a file."
-    exit
-fi
+for input_file in $PIDinput
+do
+    if [ ! -f ${input_file} ]; then
+        echo -e "\e[91mERROR:\e[0m ${input_file} is not a file."
+        exit
+    fi
+done
 
 
 # Create a log file with the date and time
@@ -136,7 +142,7 @@ fi
 
 # Generates an output if none was given
 if [[ $PIDoutput == "" ]]; then
-    STout=$(echo "$PIDinput" |awk -F/ '{$NF="";print $0}' | tr " " "/")
+    STout=$(echo "$PIDinput" | awk '{print $1}' | awk -F/ '{$NF="";print $0}' | tr " " "/")
 else
     STout=$PIDoutput
 fi
@@ -145,7 +151,8 @@ if [ ! -d "$STout""$NAME" ]; then
     mkdir -v "$STout""$NAME" | tee -a $datelog   # Will create a directory for the output in the input directory
 fi
 PIDoutput="$STout""$NAME"                   # Default output location for the PID
-VALoutput="$STout""$NAME"                   # Default output location for the validator
+Stand_output="$PIDoutput"
+#VALoutput="$STout""$NAME"                   # Default output location for the validator
 
 
 ##End## "options"

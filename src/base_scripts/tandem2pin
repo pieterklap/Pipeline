@@ -2,16 +2,30 @@
 
 # create an extra parameter file with the decoy fasta
 PIDparam_decoy=$PIDparam"_decoy"
-
 sed 's/taxon">human/taxon">human_decoy/' $PIDparam > $PIDparam_decoy
-sed -i "s/\"output, path\">.*</\"output, path\">$outputXT\/decoy_$NAME_input</" $PIDparam_decoy
 
-# run tandem with the decoy
+for input in $PIDinput
+do
+#   input.xml
+#   creates varable to be able t be used in sed
+    inputXT=${input//\//\\/}        # sets backslashes in front of forward slashes for use with sed
+    outputXT=${Stand_output//\//\\/}      # sets backslashes in front of forward slashes for use with sed
 
-$PIDprog $PIDparam_decoy |& tee -a $datelog
+#   Changes the paths in the input.xml file
+#   Sets the input path
+    sed -i "s/\"spectrum, path\">.*</\"spectrum, path\">$inputXT</" "$PIDparam_decoy"
+#   changes the extention of the input file and adds the output suffix to create the output file name
+    NAME_input=$(echo ${input} | awk -F\/ '{print $NF}' | awk -F\. '{$NF="";print $0}' | tr " " "." | head -c-2)
+    NAME_input="decoy_$NAME_input$output_suffix.t.xml"
+#   Sets the output path/name
+    sed -i "s/\"output, path\">.*</\"output, path\">$outputXT\/$NAME_input</" "$PIDparam_decoy"
 
-PIDoutput_decoy=$(ls -t "$STout""$NAME"/* |head -n1)
+#   run Xtandem
+    $PIDprog $PIDparam_decoy |& tee -a $datelog
 
+    PIDoutput_decoy+="$Stand_output/$NAME_input "
+
+done
 
 # t.xml to tab delimited file with tandem2pin
 
@@ -27,12 +41,37 @@ if [[ $CONVprog == "" ]] || [ ! -f $CONVprog ]; then
     fi
 fi
 
-
 EXTENTION=$(echo $PIDoutput |awk -F\. '{print $NF}')
-VALinput=$(echo $PIDoutput | sed "s/$EXTENTION/pin/")
+for Pep_file in $PIDoutput
+do
+    VALinput=$(echo ${Pep_file} | sed "s/$EXTENTION/pin/")
+    Decoy_run=$(echo $PIDoutput_decoy | awk '{print $1}')
 
-$CONVprog -o $VALinput $PIDoutput $PIDoutput_decoy |& tee -a $datelog
+    $CONVprog -o $VALinput ${Pep_file} $Decoy_run |& tee -a $datelog
 
-PIDoutput=$VALinput
+    PIDoutput_decoy=$(echo $PIDoutput_decoy | awk '{$1="";print $0}')
+
+    CONVoutput+="$VALinput "
+done
+
+PIDoutput=$CONVoutput
+
+for output in $PIDoutput
+do
+# if the file is not found and/or empty it is removed from the $PIDoutput it exits if $PIDoutput is empty
+    if [ -f ${output} ]; then
+        if [ ! -s ${output} ]; then
+            echo -e "\e[91mERROR:\e[0m ${output} is empty \nsomething went wrong running $CONVprog" | tee -a $datelog
+            PIDoutput=${PIDoutput//${output}/}
+        fi
+    else
+        echo -e "\e[91mERROR:\e[0m ${output} is not a file \nsomething went wrong running $CONVprog" | tee -a $datelog
+        PIDoutput=${PIDoutput//${output}/}
+    fi
+done
+if [[ $PIDoutput == "" ]]; then
+    echo -e "\e[91mERROR:\e[0m no output files found"
+    exit
+fi
 
 ##End## "tandem2pin"
