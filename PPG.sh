@@ -1,11 +1,24 @@
 #!/bin/bash
 
+#   The name of the head node of the server cluster the default is shark.
+#   If you are not using the shark cluster you can leave it blank or change the name.
+#   the script will not directly execute programs on a node with the same name as the variable Head_node_name.
+Head_node_name="shark"
+
+PPG="$0"
+Entered_Command=" $@"
+
 # $LOC is the directory of the pipeline
 LOC=$(echo "$0" |awk -F/ '{$NF="";print $0}' | tr " " "/")
-
-if [[ $LOC == "./" ]]; then
-    LOC="$PWD/"
+#   if the Pipeline was called using ./PPG.sh set it to $PWD/
+if [[ ${LOC:0:1} != "/" ]]; then
+    if [[ $LOC == "./" ]]; then
+        LOC="$PWD/"
+    else
+        LOC="$PWD/$LOC"
+    fi
 fi
+
 
 #   if nothing has been entered output the README.md to the terminal.
 if [[ $1 == "" ]]; then
@@ -74,8 +87,8 @@ while [ "$1" != "" ]; do
                                 shift
                                 shift
                             fi
-                            if [[ ${1,,} == "cores" ]]; then
-                                RepeatRun_cores="yes"
+                            if [[ ${1,,} == "parameter" ]]; then
+                                RepeatRun_parameter_files="yes"
                             fi
                             ;;
         -n | --norun )      RUNscripts="n"
@@ -205,13 +218,45 @@ if [[ $Exitcode = 2 ]]; then
     exit
 fi
 
+# if header check is placed here the -r parameter option will no longer be needed
+source "$LOC"src/Shared_parameter_maker.sh
+
+#   Checks if the first parameter file is a PPG parameter file if it is it assumes the others are aswell
+LOC_Shared_param_file="$(echo $paramsProg | awk '{print $1}')"
+Header_Check
+if [[ "$Header" == "$Header_file" ]]; then
+    if (($NUMprog==1)); then
+        echo -e "\e[91mERROR:\e[0m The PPG parameter file only works with more than one program"
+        exit
+    elif (($NUMparam>=2)); then
+        RepeatRun_parameter_files="yes"
+    fi
+fi
+
+#   reapeat run parameters
+if [[ $RepeatRun_parameter_files == "yes" ]] && (($NUMparam>=2)); then
+    for param_file in $paramsProg
+    do
+        #   Checks the header
+        LOC_Shared_param_file=${param_file}
+        Header_Check
+        Header_Exit
+        #   TODO check if output_suffix has been set
+        if [[ $(grep "^Output_suffix" ${param_file} | awk '{print $4}') == "" ]]; then
+            echo -e "\e[91mERROR\e[0m ${param_file}: No output suffix given"
+        else
+            sed_param_file=${param_file//\//\\/}
+            sed_paramsProg=${paramsProg//\//\\/}
+            $PPG $(echo "$Entered_Command" | sed "s/$sed_paramsProg/$sed_param_file /")
+        fi
+    done
+    exit
+fi
 
 # if only one parameter file was entered but multiple programs the pipeline assumes the parameter file is the Shared parameter file.
 if (($NUMprog > 1)) && [[ $NUMparam == "1" ]]; then
 #   Use the Shared parameter file
     echo "not fully implemented yet"
-
-    #   add the CPU_Use changes here and/or in the Shared_parameter_maker.sh
 
     LOC_Shared_param_file="$paramsProg"
     echo "PPG parameter file"
@@ -224,12 +269,9 @@ if (($NUMprog > 1)) && [[ $NUMparam == "1" ]]; then
 #   resets the parameter counter
     NUMparam="0"
 #   uses the functions in the following bash scripts
-    source "$LOC"src/Shared_parameter_maker.sh
     Header_Check
     Header_Exit
     Default_check
-
-    #   Could add CPU check here
 
     source "$LOC"src/modifications.sh
     if [[ $Programs == *"comet"* ]]; then
@@ -281,15 +323,6 @@ if (($NUMprog > 1)) && [[ $NUMparam == "1" ]]; then
     elif (($NUMparam==$NUMprog)); then
 #   use the parameter files the user entered
     echo "idividual parameter files"
-    source "$LOC"src/Shared_parameter_maker.sh
-    if (($NUMprog == "1")); then
-        LOC_Shared_param_file="$paramsProg"
-        Header_Check
-        if [[ "$Header" == "$Header_file" ]]; then
-            echo -e "\e[91mERROR:\e[0mThe PPG parameter file only works with more than one program"
-            exit
-        fi
-    fi
 # sets the parameter files to be used for each peptide identifier
     for prog in $Programs
     do

@@ -92,7 +92,7 @@ Run_Repeated_pipeline ()
         $Run_Script_Repeat "-s" "_$PrecursorMassTolerence1""_$PrecursorMassTolerence2$MassUnit"
 }
 
-Rerun_Comet_Parameters ()
+Rerun_Comet_Tollerance_Parameters ()
 {
 
     SET_Tollerance_values
@@ -127,7 +127,7 @@ Rerun_Comet_Parameters ()
     done
 }
 
-Rerun_Tandem_Parameters ()
+Rerun_Tandem_Tollerance_Parameters ()
 {
     SET_Tollerance_values
 
@@ -168,7 +168,7 @@ Rerun_Tandem_Parameters ()
 
 }
 
-Rerun_MSGFPlus_Parameters ()
+Rerun_MSGFPlus_Tollerance_Parameters ()
 {
     SET_Tollerance_values
 
@@ -198,7 +198,7 @@ Rerun_MSGFPlus_Parameters ()
 
 }
 
-Rerun_MSFragger_Parameters ()
+Rerun_MSFragger_Tollerance_Parameters ()
 {
     SET_Tollerance_values
 

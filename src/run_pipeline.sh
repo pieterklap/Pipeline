@@ -64,6 +64,11 @@ Set_corect_parameter ()
 
 Local_Run ()
 {
+    if [[ $HOSTNAME == $Head_node_name ]]; then
+        echo "currently running on the head node do not execute the pipeline on the head node"
+        echo "if this is a exucutable node change the variable Head_node_name in the PPG.sh file to the head node name or leave it empty"
+        exit
+    fi
     while [[ $RUN != [yY] ]]; do
         read -p "Are you sure you want to run the pipeline locally?(y/n): " RUN
         if [[ $RUN == [nN] ]]; then
@@ -99,13 +104,13 @@ Repeat_Run_Shark ()
                 Run_Script="$submit_command $SHARKoptions ${file} $PIDparam $input $output $logfile $location $GPparams"
                 PIDparam=$(echo $PIDparam | awk '{print $2}')
             if [[ $PID == "comet" ]]; then
-                Rerun_Comet_Parameters
+                Rerun_Comet_Tollerance_Parameters
             fi
             if [[ $PID == "Xtandem" ]]; then
-                Rerun_Tandem_Parameters
+                Rerun_Tandem_Tollerance_Parameters
             fi
             if [[ $PID == "MSGFPlus" ]]; then
-                Rerun_MSGFPlus_Parameters
+                Rerun_MSGFPlus_Tollerance_Parameters
             fi
 
         fi
@@ -120,6 +125,10 @@ Repeat_Run_Shark ()
 
 Repeat_Run_Local ()
 {
+    if [[ $HOSTNAME == $Head_node_name ]]; then
+        echo "currently running on the head node do not execute the pipeline on the head node"
+        exit
+    fi
     while [[ $RUN != [yY] ]]; do
         read -p "Are you sure you want to run the pipeline locally?(y/n): " RUN
         if [[ $RUN == [nN] ]]; then

@@ -485,7 +485,7 @@ Tandem ()
 #   scoring parameters
 
 #   label="scoring, minimum ion count">4</note>
-       sed -i "s/label=\"scoring, maximum missed cleavage sites\">.*</label=\"scoring, maximum missed cleavage sites\">$allowed_missed_cleavage</" $Tandemparam
+       sed -i "s/label=\"scoring, maximum missed cleavage sites\">.*</label=\"scoring, maximum missed cleavage sites\">$Max_Missed_cleavage</" $Tandemparam
 
 #   Changes the 1 to yes and everything else to no (e.g. 0).
     ions="use_A_ions use_B_ions use_C_ions use_X_ions use_Y_ions use_Z_ions"

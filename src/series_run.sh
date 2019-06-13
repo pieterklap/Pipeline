@@ -53,18 +53,18 @@ done
 source $LOC/src/parameter_repeat.sh
 
 if [[ $PID == "comet" ]]; then
-    Rerun_Comet_Parameters
+    Rerun_Comet_Tollerance_Parameters
 fi
 
 if [[ $PID == "Xtandem" ]]; then
-    Rerun_Tandem_Parameters
+    Rerun_Tandem_Tollerance_Parameters
 fi
 
 if [[ $PID == "MSGFPlus" ]]; then
-    Rerun_MSGFPlus_Parameters
+    Rerun_MSGFPlus_Tollerance_Parameters
 fi
 
 
 if [[ $PID == "MSFragger" ]]; then
-    Rerun_MSFragger_Parameters
+    Rerun_MSFragger_Tollerance_Parameters
 fi
