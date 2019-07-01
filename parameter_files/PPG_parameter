@@ -10,9 +10,21 @@ tandem_default_input_file = /path/to/default_input.xml
 PeptideProphet_parameter_file = /path/to/peptideprophet/parameter
 Percolator_parameter_file = /path/to/percolator/parameter
 
-fasta_file = /path/to/target.fasta [comet,tandem,MSGFPlus,MSFragger]
-#	Sets the path to the fasta file that all the programs use
-decoy_fasta_file = /path/to/decoy.fasta [tandem,MSGFPlus]
+Data_base_type = 0 [comet]
+#   Default: 0
+#   Sets which type of database_file is used. any parameter other than 0 is currently only usable with comet
+#   Set this parameter to 0 to search a normal FASTA file, ignoring any PEFF annotations if present.
+#   Set this parameter to 1 to search PEFF PSI-MOD modifications and amino acid variants.
+#   Set this parameter to 2 to search PEFF Unimod modifications and amino acid variants.
+#   Set this parameter to 3 to search PEFF PSI-MOD modifications, skipping amino acid variants.
+#   Set this parameter to 4 to search PEFF Unimod modifications, skipping amino acid variants.
+#   Set this parameter to 5 to search PEFF amino acid variants, skipping PEFF modifications.
+
+database_file = /path/to/target.fasta [comet,tandem,MSGFPlus,MSFragger]
+#	Sets the path to the database file that all the programs use
+OBO_file = /home/pieter/repeatline/fasta/unimod.obo [comet]
+
+decoy_database_file = /path/to/decoy.fasta [tandem,MSGFPlus]
 
 Taxon = human [tandem]
 #   Default: human
