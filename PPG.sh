@@ -12,7 +12,7 @@ Entered_Command=" $@"
 LOC=$(echo "$0" |awk -F/ '{$NF="";print $0}' | tr " " "/")
 #   if the Pipeline was called using ./PPG.sh set it to $PWD/
 if [[ ${LOC:0:1} != "/" ]]; then
-    if [[ $LOC == "./" ]]; then
+    if [[ "$LOC" == "./" ]]; then
         LOC="$PWD/"
     else
         LOC="$PWD/$LOC"
@@ -26,7 +26,7 @@ if [[ $1 == "" ]]; then
         cat "$LOC"README.md
         exit
     else
-        echo -e "\e[91mERROR:\e[0m "$LOC"README.md: No such file or directory"
+        echo -e "\e[91mERROR:\e[0m ""$LOC""README.md: No such file or directory"
         exit
     fi
 fi
@@ -40,24 +40,24 @@ NUMparam="0"
 
 # allows the options to work
 while [ "$1" != "" ]; do
-    case $1 in
+    case "$1" in
         -P | --Programs )   while [[ ${2:0:1} != "-" ]] && [[ "$2" != "" ]]; do
                                 shift
-                                Programs+=$1" "     # Puts the program names in a variable
+                                Programs+="$1 "     # Puts the program names in a variable
                                 NUMprog=$[$NUMprog+1]   # Counts the amount of programs entered
                             done
                             ;;
         -L | --location )   location="$1 $2"            # Allows the script to be placed where to user wants
-                            LOCscripts="$2"
+                            END_LOCscripts="$2"
                             shift
                             ;;
         -i | --input )      input="$1 "
                             while [[ ${2:0:1} != "-" ]] && [[ "$2" != "" ]]; do
                                 shift
-                                if [ -f $1 ]; then
+                                if [ -f "$1" ]; then
                                     input+="$1 "
                                 else
-                                    echo -e "\e[91mERROR:\e[0m $1 is not a file"
+                                    echo -e "\e[91mERROR:\e[0m ""$1"" is not a file"
                                     exit
                                 fi
                             done
@@ -67,7 +67,7 @@ while [ "$1" != "" ]; do
                             ;;
         -p | --parameters ) while [[ ${2:0:1} != "-" ]] && [[ "$2" != "" ]]; do
                                 shift
-                                paramsProg+=$1" "
+                                paramsProg+="$1 "
                                 NUMparam=$[$NUMparam+1] # Counts the amount of parameter files entered
                             done
                             ;;
@@ -107,7 +107,7 @@ while [ "$1" != "" ]; do
                                 cat "$LOC"README.md
                                 exit
                             else
-                                echo -e "\e[91mERROR:\e[0m "$LOC"README.md: No such file or directory"
+                                echo -e "\e[91mERROR:\e[0m ""$LOC""README.md: No such file or directory"
                                 exit
                             fi
                             ;;
@@ -117,9 +117,15 @@ while [ "$1" != "" ]; do
     esac
     shift
 done
+
+if [[ $onlyparam == "1" ]] && [[ $paramsProg == "" ]]; then
+    echo -e "\e[91mERROR:\e[0m no parameter files entered"
+    exit
+fi
+
 #   If no Script location has been given set it to a directory named Scripts in the directory of the pipeline
-if [[ $LOCscripts == "" ]]; then
-    LOCscripts="$LOC"Scripts/
+if [[ $END_LOCscripts == "" ]]; then
+    END_LOCscripts="$LOC"Scripts/
 fi
 
 #   makes the user enter one program
@@ -149,7 +155,7 @@ Programs=${Programs,,}
 for parameter_file in $paramsProg
 do
     if [ ! -f ${parameter_file} ]; then
-        echo -e "\e[91mERROR:\e[0m ${paramsProg} is not a file"
+        echo -e "\e[91mERROR:\e[0m ${parameter_file} is not a file"
         exit
     fi
 done
@@ -213,7 +219,6 @@ do
         Exitcode=2
     fi
 done
-
 # Exits if a indirect reference has been used
 if [[ $Exitcode = 2 ]]; then
     echo "Please use direct references"
@@ -225,8 +230,10 @@ source "$LOC"src/Shared_parameter_maker.sh
 
 #   Checks if the first parameter file is a PPG parameter file if it is it assumes the others are aswell
 LOC_Shared_param_file="$(echo $paramsProg | awk '{print $1}')"
-Header_Check
-if [[ "$Header" == "$Header_file" ]]; then
+if [[ $LOC_Shared_param_file != "" ]]; then
+    Header_Check
+fi
+if [[ "$Header" == "$Header_file" ]] && [[ $LOC_Shared_param_file != "" ]]; then
     if (($NUMprog==1)); then
         echo -e "\e[91mERROR:\e[0m The PPG parameter file only works with more than one program"
         exit
@@ -234,7 +241,6 @@ if [[ "$Header" == "$Header_file" ]]; then
         RepeatRun_parameter_files="yes"
     fi
 fi
-
 #   reapeat run parameters
 if [[ $RepeatRun_parameter_files == "yes" ]] && (($NUMparam>=2)); then
     if [[ $Times_Run == "" ]]; then
@@ -463,17 +469,7 @@ if [[ $Run_scripts != "no" ]]; then
         rm -f "$LOC".VALs/*.sh
     done
 
-#   Creates the directory scripts and copies the scripts to it and makes them executable and removes the files in the temp folders
-    if [ ! -d "$LOCscripts" ]; then
-        mkdir -vp "$LOCscripts"
-    else
-        rm  "$LOCscripts"*
-    fi
-    cp "$LOC".END/* "$LOCscripts"
-    chmod 750 "$LOCscripts"*
-    rm -f "$LOC".PIDs/* "$LOC".VALs/*
-    rm -f "$LOC".END/*
-
+    LOCscripts="$LOC"".END/"
 
 #   Adds the options fille to all the scripts
 #   this should always be first
@@ -594,7 +590,7 @@ if [[ $Run_scripts != "no" ]]; then
     for file in "$LOCscripts"*.sh
     do
         cat "$LOC"src/base_scripts/End >> ${file}
-        echo "Generated ${file}"
+        echo "Generated ""$END_LOCscripts""$(echo "${file}" | awk -F\/ '{print $NF}')"
     done
 
 #   puts the name of the script in the script (changes the name of the job on the shark cluster)
@@ -611,6 +607,21 @@ if [[ $Run_scripts != "no" ]]; then
     do
         rm -f "${file}"
     done
+
+    LOCscripts="$END_LOCscripts"
+#   Creates the directory scripts and copies the scripts to it and makes them executable and removes the files in the temp folders
+    if [ ! -d "$LOCscripts" ]; then
+        mkdir -vp "$LOCscripts"
+    fi
+    for file in "$LOC".END/*
+    do
+        cp "${file}" "$LOCscripts"
+        Scripts_to_Run+="$LOCscripts""$(echo "${file}" | awk -F\/ '{print $NF}') "
+    done
+    chmod 750 "$LOCscripts"*
+    rm -f "$LOC".PIDs/* "$LOC".VALs/*
+    rm -f "$LOC".END/*
+
 
 #   copies the install_locations to the locations of the scripts
     cp -v "$LOC"install_locations "$LOCscripts"

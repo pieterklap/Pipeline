@@ -133,10 +133,10 @@ Comet ()
     echo "# comet_version 2017.01 rev. 1 " > $cometparam                # Start of the comet parameterfile
     echo "# Comet MS/MS search engine parameters file." >> $cometparam  # Start of the comet parameterfile
 
-    echo "database_name = $fasta_file" >> $cometparam
+    echo "database_name = $database_file" >> $cometparam
     echo "decoy_search = $Decoy_Database" >> $cometparam
-    echo "peff_format = 0" >> $cometparam
-    echo "peff_obo =" >> $cometparam
+    echo "peff_format = $Data_base_type" >> $cometparam
+    echo "peff_obo = $OBO_file" >> $cometparam
     echo "num_threads = $NumThreads" >> $cometparam
     echo "peptide_mass_tolerance = $PrecursorMassTolerance" >> $cometparam
     echo "peptide_mass_units = $MassUnit" >> $cometparam
@@ -148,7 +148,7 @@ Comet ()
     local IsotopeErrorRange=$(echo $IsotopeErrorRange | awk -F\, '{print $NF}')
     echo "isotope_error = $IsotopeErrorRange" >> $cometparam
     echo "search_enzyme_number = $search_enzyme_number" >> $cometparam
-    echo "num_enzyme_termini = $Tolerable_Termini" >> $cometparam
+    echo "num_enzyme_termini = $num_enzyme_termini" >> $cometparam
     echo "allowed_missed_cleavage = $allowed_missed_cleavage" >> $cometparam
 
     echo "fragment_bin_tol = $fragment_bin_tol " >> $cometparam
@@ -304,7 +304,7 @@ MSGFPlus ()
     done
 
 
-    echo "DatabaseFile -d $fasta_file" > $MSGFPlusparam
+    echo "DatabaseFile -d $database_file" > $MSGFPlusparam
     if [[ "$MassUnit" == "Daltons" ]]; then
         local MassUnit="Da"
     fi
@@ -388,10 +388,10 @@ Tandem ()
     echo -e "<?xml version=\"1.0\"?>\n"\
             "<bioml label=\"x! taxon-to-file matching list\">\n"\
             "    <taxon label=\""$Taxon"_decoy\">\n"\
-            "        <file format=\"peptide\" URL=\"$decoy_fasta_file\" />\n"\
+            "        <file format=\"peptide\" URL=\"$decoy_database_file\" />\n"\
             "    </taxon>\n"\
             "    <taxon label=\"$Taxon\">\n"\
-            "        <file format=\"peptide\" URL=\"$fasta_file\" />\n"\
+            "        <file format=\"peptide\" URL=\"$database_file\" />\n"\
             "    </taxon>\n"\
             "</bioml>" > $Tandem_taxonomy
 
@@ -550,7 +550,7 @@ MSFragger ()
     done
 
 
-    echo "database_name =  $fasta_file " > $MSFraggerparam
+    echo "database_name =  $database_file" > $MSFraggerparam
     echo "num_threads = 0" >> $MSFraggerparam
     if [[ $Mem_Use == "" ]]; then
         Mem_Use="4G"

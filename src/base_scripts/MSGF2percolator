@@ -1,11 +1,10 @@
 ##Start## "MSGF2percolator"
 
-#   Change decoy search to 0
-cat $PIDparam | sed 's/\-tda 1/\-tda 0/' > $PIDparam"_percolator"
-PIDparam=$PIDparam"_percolator"
-
-#   make a separate parameter file with a decoy fasta file named [name].decoy.fasta
-cat $PIDparam | sed 's/\.fasta/\.decoy\.fasta/' > $PIDparam"_decoy"
-PIDparam_decoy=$PIDparam"_decoy"
+Decoy_search=$(grep "^Decoy_search -tda " "$PIDparam" |awk '{print $3}')
+if [[ "$Separate_TD_search" == "yes" ]]; then
+    #   make a separate parameter file with a decoy fasta file named [name].decoy.fasta
+    cat $PIDparam | sed 's/\.fasta/\.decoy\.fasta/' > $PIDparam"_decoy"
+    PIDparam_decoy=$PIDparam"_decoy"
+fi
 
 ##End## "MSGF2percolator"

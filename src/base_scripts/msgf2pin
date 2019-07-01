@@ -12,31 +12,58 @@ if [[ $CONVprog == "" ]] || [ ! -f $CONVprog ]; then
     fi
 fi
 
-MSGFparam=$(grep -v "^#" $PIDparam_decoy |awk '{print $2,$3}' |tr "\n" " ")
-EXTENTION=$(echo "$PIDinput" |awk -F. '{print $NF}')
+#   Used in a separated target/decoy search
+if [[ "$Separate_TD_search" != "yes" ]]; then
+    MSGFparam=$(grep -v "^#" $PIDparam_decoy |awk '{print $2,$3}' |tr "\n" " ")
+    EXTENTION=$(echo "$PIDinput" |awk -F. '{print $NF}')
 
-for input_file in $PIDinput
-do
-    EXTENTION=$(echo "${input_file}" |awk -F. '{print $NF}')
-    MSGFoutput_decoy=$(echo "${input_file}" | sed "s/\.$EXTENTION/$output_suffix\.decoy\.mzid/")
+    for input_file in $PIDinput
+    do
+        EXTENTION=$(echo "${input_file}" |awk -F. '{print $NF}')
+        MSGFoutput_decoy=$(echo "${input_file}" | sed "s/\.$EXTENTION/$output_suffix\.decoy\.mzid/")
 
+        java -Xmx"$MemUse" $JavaOptions -jar $PIDprog -s ${input_file} -o $MSGFoutput_decoy $MSGFparam |tee -a $datelog
 
-    java -Xmx"$MemUse" $JavaOptions -jar $PIDprog -s ${input_file} -o $MSGFoutput_decoy $MSGFparam |tee -a $datelog
-
-    PIDoutput_decoy+="$MSGFoutput_decoy "
-
-done
+        PIDoutput_decoy+="$MSGFoutput_decoy "
+    done
+fi
 
 for Pep_file in $PIDoutput
 do
     EXTENTION=$(echo "${Pep_file}" |awk -F. '{print $NF}')
     VALinput=$(echo "${Pep_file}" | sed "s/\.$EXTENTION/\.pin/")
-    Decoy_Pep_file=$(echo $PIDoutput_decoy | awk '{print $1}')
 
-    $CONVprog -o $VALinput ${Pep_file} $Decoy_Pep_file |& tee -a $datelog
+    Species_names=$(grep '<DBSequence' ${Pep_file} | awk -F\" '{print $6}' | awk -F\| '{print $1}' | sort -u)
+    num_species=$(echo $Species_names | wc -w)
 
+    if [[ "$Separate_TD_search" != "yes" ]]; then
+    #   Assumes that the decoy name is alwas longer than the target name because it is a prefix
+        if [[ $num_species != "2" ]]; then
+            echo "decoy not found"
+        elif (( $(echo $Species_names | awk '{print $1}' | wc -c) > $(echo $Species_names | awk '{print $2}' | wc -c) )); then
+            #    $1 is the decoy
+            decoy_string=$(echo $Species_names | awk '{print $1}')
+            target_string=$(echo $Species_names | awk '{print $2}')
+        elif (( $(echo $Species_names | awk '{print $2}' | wc -c) > $(echo $Species_names | awk '{print $1}' | wc -c) )); then
+            #   $1 is the decoy
+            decoy_string=$(echo $Species_names | awk '{print $2}')
+            target_string=$(echo $Species_names | awk '{print $1}')
+        fi
+
+        target_string=$(printf '%q\n' "$target_string")
+        decoy_string=$(printf '%q\n' "$decoy_string" | sed "s/$target_string//")
+
+        $CONVprog -o $VALinput -P $decoy_string ${Pep_file} |& tee -a $datelog
+    else
+    #   Runs if no decoy string was found in mzid file
+        Decoy_Pep_file=$(echo $PIDoutput_decoy | awk '{print $1}')
+        $CONVprog -o $VALinput ${Pep_file} $Decoy_Pep_file |& tee -a $datelog
+    fi
     PIDoutput_decoy=$(echo $PIDoutput_decoy | awk '{$1="";print $0}')
     CONVoutput+="$VALinput "
+#   Resets the target and decoy strings
+    target_string=""
+    decoy_string=""
 done
 
 PIDoutput=$CONVoutput

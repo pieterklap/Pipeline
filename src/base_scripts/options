@@ -5,7 +5,7 @@
 
 ##Start## "options"
 
-echo -e "\nrunning $0 with the following arguments: \n$@\n"
+Run_info=$(echo -e "\nrunning $0 with the following arguments: \n$@\n")
 
 # notes the location of the pipeline
 LOC=$(echo "$0" |awk -F/ '{$NF="";print $0}' | tr " " "/")
@@ -114,8 +114,10 @@ if [[ $logfile != "" ]]; then
     datelog_tee="\| tee -a datelog"
 fi
 
+echo -e "$Run_info" | tee $datelog
+
 # adds the start time to the log file
-echo "Start time: " | tee  $datelog
+echo "Start time: " | tee -a $datelog
 date -I'seconds' | tee -a $datelog
 echo " " | tee -a $datelog
 Start_Seconds=$(date +%s)

@@ -75,7 +75,8 @@ Local_Run ()
             exit
         fi
     done
-    for file in "$LOCscripts"*.sh
+    echo $Scripts_to_Run
+    for file in $Scripts_to_Run
     do
         Set_corect_parameter
     #   Run the pipeline for each combination of programs
@@ -85,7 +86,7 @@ Local_Run ()
 
 Shark_Run ()
 {
-    for file in "$LOCscripts"*.sh
+    for file in $Scripts_to_Run
     do
         Set_corect_parameter
         $submit_command $SHARKoptions ${file} $PIDparam $input $output $logfile $location $GPparams
@@ -96,7 +97,7 @@ Repeat_Run_Shark ()
 {
     source $LOC/src/parameter_repeat.sh
 
-    for file in "$LOCscripts"*.sh
+    for file in $Scripts_to_Run
     do
         Set_corect_parameter
 
@@ -135,7 +136,7 @@ Repeat_Run_Local ()
             exit
         fi
     done
-    for file in "$LOCscripts"*.sh
+    for file in $Scripts_to_Run
     do
         Set_corect_parameter
         Run_Script="${file} $PIDparam $VALparam $input $output $logfile $location $GPparams"
