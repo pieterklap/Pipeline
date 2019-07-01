@@ -22,7 +22,7 @@ Data_base_type = 0 [comet]
 
 database_file = /path/to/target.fasta [comet,tandem,MSGFPlus,MSFragger]
 #	Sets the path to the database file that all the programs use
-OBO_file = /home/pieter/repeatline/fasta/unimod.obo [comet]
+OBO_file = /path/to/unimod.obo [comet]
 
 decoy_database_file = /path/to/decoy.fasta [tandem,MSGFPlus]
 
