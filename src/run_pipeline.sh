@@ -6,16 +6,16 @@ submit_command="qsub"
 # Checks if the required parameters have been passed to the script
 if [[ $RUNscripts == "" ]]; then
     if [[ $input == "" ]]; then
-        echo "Error no input file given"
+        echo -e "\e[91mERROR:\e[0m no input file given"
         exit
     elif (($NUMprog>$NUMparam)); then
-        echo "too few parameter files given"
+        echo -e "\e[91mERROR:\e[0m too few parameter files given"
         exit
     elif (($NUMprog<$NUMparam)); then
-        echo "too many parameter files given"
+        echo -e "\e[91mERROR:\e[0m too many parameter files given"
         exit
     elif (($NUMparam == 0)); then
-        echo "No parameter files given"
+        echo -e "\e[91mERROR:\e[0m No parameter files given"
         exit
     fi
     if [[ $(grep -v "^#" "$LOC"install_locations |awk '{print $2}') == "" ]]; then
@@ -80,7 +80,7 @@ Local_Run ()
     do
         Set_corect_parameter
     #   Run the pipeline for each combination of programs
-        ${file} $PIDparam $VALparam $input $output $logfile $location $GPparams
+        ${file} $PIDparam $VALparam $input $output $logfile $location $GPparams $Extra_parameters
     done
 }
 

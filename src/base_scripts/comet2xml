@@ -1,0 +1,18 @@
+##Start## "comet2xml"
+
+if [[ $NAME != *"all"* ]]; then
+    sed 's/output_pepxmlfile = ./output_pepxmlfile = 1/' "$PIDparam" > "$PIDparam""_Peptideprophet"
+    sed -i 's/output_percolatorfile = ./output_percolatorfile = 0/' "$PIDparam""_Peptideprophet"
+    PIDparam="$PIDparam""_Peptideprophet"
+else
+     sed -i 's/output_pepxmlfile = ./output_pepxmlfile = 1/' "$PIDparam"
+fi
+
+if [[ $output_suffix == "" ]]; then
+    output_suffix=$(grep "output_suffix =" $PIDparam | awk '{print $3}')
+fi
+EXTENTION=$(echo "$PIDinput" |awk -F. '{print $NF}')
+COMEToutput+=$(echo "$PIDinput" | sed "s/\.$EXTENTION/$output_suffix\.pep.xml /g")
+
+##End## "comet2xml"
+

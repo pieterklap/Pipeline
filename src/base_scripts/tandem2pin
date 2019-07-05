@@ -1,34 +1,5 @@
 ##Start## "tandem2pin"
 
-# create an extra parameter file with the decoy fasta
-PIDparam_decoy=$PIDparam"_decoy"
-sed 's/taxon">human/taxon">human_decoy/' $PIDparam > $PIDparam_decoy
-
-for input in $PIDinput
-do
-#   input.xml
-#   creates varable to be able t be used in sed
-    inputXT=${input//\//\\/}        # sets backslashes in front of forward slashes for use with sed
-    outputXT=${Stand_output//\//\\/}      # sets backslashes in front of forward slashes for use with sed
-
-#   Changes the paths in the input.xml file
-#   Sets the input path
-    sed -i "s/\"spectrum, path\">.*</\"spectrum, path\">$inputXT</" "$PIDparam_decoy"
-#   changes the extention of the input file and adds the output suffix to create the output file name
-    NAME_input=$(echo ${input} | awk -F\/ '{print $NF}' | awk -F\. '{$NF="";print $0}' | tr " " "." | head -c-2)
-    NAME_input="decoy_$NAME_input$output_suffix.t.xml"
-#   Sets the output path/name
-    sed -i "s/\"output, path\">.*</\"output, path\">$outputXT\/$NAME_input</" "$PIDparam_decoy"
-
-#   run Xtandem
-    $PIDprog $PIDparam_decoy |& tee -a $datelog
-
-    PIDoutput_decoy+="$Stand_output/$NAME_input "
-
-done
-
-# t.xml to tab delimited file with tandem2pin
-
 CONVprog=$(grep "tandem2pin " "$LOC"install_locations | awk '{print $2}')
 if [[ $CONVprog == "" ]] || [ ! -f $CONVprog ]; then
     echo -e "\e[93mWARNING:\e[0m The location of tandem2pin is not given or does not exist"
@@ -42,17 +13,84 @@ if [[ $CONVprog == "" ]] || [ ! -f $CONVprog ]; then
 fi
 
 EXTENTION=$(echo $PIDoutput |awk -F\. '{print $NF}')
-for Pep_file in $PIDoutput
-do
-    VALinput=$(echo ${Pep_file} | sed "s/$EXTENTION/pin/")
-    Decoy_run=$(echo $PIDoutput_decoy | awk '{print $1}')
 
-    $CONVprog -o $VALinput ${Pep_file} $Decoy_run |& tee -a $datelog
+if [[ "$Separate_TD_search" == "yes" ]]; then
 
-    PIDoutput_decoy=$(echo $PIDoutput_decoy | awk '{$1="";print $0}')
+#   create an extra parameter file with the decoy fasta
+    PIDparam_decoy=$PIDparam"_decoy"
+    sed 's/taxon">human/taxon">human_decoy/' $PIDparam > $PIDparam_decoy
 
-    CONVoutput+="$VALinput "
-done
+    for input in $PIDinput
+    do
+    #   input.xml
+    #   creates varable to be able t be used in sed
+        inputXT=${input//\//\\/}        # sets backslashes in front of forward slashes for use with sed
+        outputXT=${Stand_output//\//\\/}      # sets backslashes in front of forward slashes for use with sed
+
+    #   Changes the paths in the input.xml file
+    #   Sets the input path
+        sed -i "s/\"spectrum, path\">.*</\"spectrum, path\">$inputXT</" "$PIDparam_decoy"
+    #   changes the extention of the input file and adds the output suffix to create the output file name
+        NAME_input=$(echo ${input} | awk -F\/ '{print $NF}' | awk -F\. '{$NF="";print $0}' | tr " " "." | head -c-2)
+        NAME_input="decoy_$NAME_input$output_suffix.t.xml"
+    #   Sets the output path/name
+        sed -i "s/\"output, path\">.*</\"output, path\">$outputXT\/$NAME_input</" "$PIDparam_decoy"
+
+    #   run Xtandem
+        $PIDprog $PIDparam_decoy |& tee -a $datelog
+
+        PIDoutput_decoy+="$Stand_output/$NAME_input "
+    done
+
+    for Pep_file in $PIDoutput
+    do
+        VALinput=$(echo ${Pep_file} | sed "s/$EXTENTION/pin/")
+        Decoy_run=$(echo $PIDoutput_decoy | awk '{print $1}')
+
+        $CONVprog -o $VALinput ${Pep_file} $Decoy_run |& tee -a $datelog
+
+        PIDoutput_decoy=$(echo $PIDoutput_decoy | awk '{$1="";print $0}')
+
+        CONVoutput+="$VALinput "
+    done
+else
+
+    decoy_prefix=$(grep "Decoy_prefix" $PIDparam | awk -F\< '{$NF="";print $0}' | awk -F= '{print $NF}' | sed 's/ //g')
+    if [[ $decoy_prefix == '' ]]; then
+        decoy_prefix=":reversed"
+    fi
+    decoy_prefix=$(printf '%q\n' "$decoy_prefix")
+
+    for Pep_file in $PIDoutput
+    do
+        VALinput=$(echo ${Pep_file} | sed "s/$EXTENTION/pin/")
+
+        if [[ $decoy_prefix == ":reversed" ]]; then
+        #   Puts the comment in the xml file indicating a reversed sequence and makes it a prefix so tandem2pin can detect it.
+            Tandem_decoy_fix="$(awk -F\> '{if($2~/:reversed/) $2=":reversed"$2;OFS=FS;print $0}' ${Pep_file})"
+            echo "$Tandem_decoy_fix" > ${Pep_file} 
+        fi
+
+        $CONVprog -o $VALinput -P $decoy_prefix ${Pep_file} |& tee -a $datelog
+
+    #   Check VALinput for decoy sequences
+        if [[ "$(awk '{if($2==-1) print $2}' $VALinput)" == "" ]]; then
+            echo -e "\e[93mWARNING:\e[0m no decoys found in $VALinput fixing errors made by tandem2pin" | tee -a $datelog
+        #   changes the label column to -1 if the first protien hit was from a decoy protein, making it a decoy
+            Decoy_check_output="$(awk -v decoy=$decoy_prefix '{if($21~decoy) $2=-1;print $0}' $VALinput | tr " " "\t")"
+            echo "$Decoy_check_output" > $VALinput
+        #   Notifies the user if decoys were detected. if no decoys were detected percolator will most likely not run to completion
+            if [[ "$(awk '{if($2==-1) print $2}' $VALinput)" == "" ]]; then
+                echo -e "\e[93mWARNING:\e[0m No decoy's were found we recomend you run a separate target decoy search for Tandem" | tee -a $datelog
+            else
+                echo -e "\e[93mWARNING:\e[0m decoy(s) detected. Be sure to check your data files if the decoy(s) were corerctly detected" | tee -a $datelog
+            fi
+        fi
+
+        CONVoutput+="$VALinput "
+    done
+fi
+
 
 PIDoutput=$CONVoutput
 

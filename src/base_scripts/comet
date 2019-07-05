@@ -25,14 +25,11 @@ fi
 # run comet
 "$PIDprog" -P"$PIDparam" $PIDinput |& tee -a $datelog
 
-#   if the output_suffix is NOT entered in the command line take the output suffix from the parameter file
-if [[ $output_suffix == "" ]]; then
-    output_suffix=$(grep "output_suffix =" $PIDparam | awk '{print $3}')
-fi
-#   Changes the Name of comet output (is also used in comet2pin)
+#   COMEToutput should only be empty if no statistical validator had been used
 if [[ $COMEToutput == "" ]]; then
     EXTENTION=$(echo "$PIDinput" |awk -F. '{print $NF}')
-    COMEToutput=$(echo "$PIDinput" | sed "s/\.$EXTENTION/$output_suffix\.pep\.xml /g")
+    COMEToutput+=$(echo "$PIDinput" | sed "s/\.$EXTENTION/$output_suffix\.pin /g")
+    COMEToutput+=$(echo "$PIDinput" | sed "s/\.$EXTENTION/$output_suffix\.pep.xml /g")
 fi
 
 for name in $COMEToutput
@@ -61,4 +58,6 @@ if [[ $PIDoutput == "" ]]; then
     echo -e "\e[91mERROR:\e[0m no output files found"
     exit
 fi
+
+VALinput="$PIDoutput "
 ##End## "comet"

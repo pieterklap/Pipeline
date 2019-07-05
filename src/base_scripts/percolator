@@ -12,22 +12,23 @@ if [[ $VALprog == "" ]] || [ ! -f $VALprog ]; then
     fi
 fi
 
-EXTENTION=$(echo $PIDoutput | awk -F. '{print $NF}')
 
 #   if no parameter file was given do not search the non existent parameter file
 if [[ $VALparam != "" ]]; then
     VALparam=$(grep -v "^#" $VALparam | awk '{print $1, $2}' | tr "\n" " ")
 fi
-echo $VALoutput
 #   Run percolator
 for Pep_file in $PIDoutput
 do
-    VALoutput_file=$(echo ${Pep_file} | sed "s/$EXTENTION/put.xml/g")
-    TSVoutput_file=$(echo ${Pep_file} | sed "s/$EXTENTION/put.tsv/g")
-    $VALprog -X $VALoutput_file $VALparam ${Pep_file} -r $TSVoutput_file |& tee -a $datelog 
+    EXTENTION=$(echo ${Pep_file} | awk -F. '{print $NF}')
+    if [[ "$EXTENTION" == "pin" ]]; then
+        VALoutput_file=$(echo ${Pep_file} | sed "s/$EXTENTION/put.xml/g")
+        TSVoutput_file=$(echo ${Pep_file} | sed "s/$EXTENTION/put.tsv/g")
+        $VALprog -X $VALoutput_file $VALparam ${Pep_file} -r $TSVoutput_file |& tee -a $datelog 
 
-    VALoutput+="$VALoutput_file "
-    TSVoutput+="$TSVoutput_file "
+        VALoutput+="$VALoutput_file "
+        TSVoutput+="$TSVoutput_file "
+    fi
 done
 
 for output in $VALoutput

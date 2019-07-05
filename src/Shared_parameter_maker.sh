@@ -194,7 +194,7 @@ Comet ()
     echo "nucleotide_reading_frame = 0" >> $cometparam
     echo "clip_nterm_methionine = 0" >> $cometparam
     echo "spectrum_batch_size = $spectrum_batch_size" >> $cometparam
-    echo "decoy_prefix = decoy_" >> $cometparam
+    echo "decoy_prefix = $Decoy_prefix" >> $cometparam
     echo "output_suffix = $Output_suffix" >> $cometparam
     echo "mass_offsets = " >> $cometparam
 
@@ -209,7 +209,7 @@ Comet ()
     echo "output_sqtfile = 0" >> $cometparam
     echo "output_txtfile = 0" >> $cometparam
     echo "output_pepxmlfile = 1" >> $cometparam
-    echo "output_percolatorfile = 0" >> $cometparam
+    echo "output_percolatorfile = 1" >> $cometparam
 
 
 #   will be changed by the modification file
@@ -269,6 +269,16 @@ Comet ()
     echo "9.  PepsinA                1      FL          P" >> $cometparam
     echo "10. Chymotrypsin           1      FWYL        P" >> $cometparam
 
+#   If any parameters are left empty they wil be commented out in the parameter file
+    local comet_paramlist=$(sed 's/#.*//g' $cometparam | sed 's/ //g' | grep "=")
+    for parameter in $comet_paramlist
+    do
+        cometparam_column3=$(echo "${parameter}" | awk -F= '{print $2}')
+        if [[ "$cometparam_column3" == "" ]]; then
+            comet_parameter_name=$(echo "${parameter}" | awk -F= '{print $1}')
+            sed -i "s/$comet_parameter_name =/#&/" $cometparam
+        fi
+    done
 #   End of Comet parameter generation
     echo "Comet parameter file has been generated. located at: $cometparam"
 
@@ -319,7 +329,8 @@ MSGFPlus ()
     echo "Mem_Use $Mem_Use" >> $MSGFPlusparam
 
     echo "verbose -verbose 0" >> $MSGFPlusparam
-    echo "Decoy_search -tda 1" >> $MSGFPlusparam
+    echo "Decoy_search -tda $Decoy_Database" >> $MSGFPlusparam
+    echo "DecoyPrefix -decoy $Decoy_prefix" >> $MSGFPlusparam
 
     echo "FragmentMethodID -m $FragmentMethodID" >> $MSGFPlusparam
     echo "MS2DetectorID -inst $MS2DetectorID" >> $MSGFPlusparam
@@ -401,6 +412,7 @@ Tandem ()
             "    <note type=\"input\" label=\"list path, default parameters\">$Tandemparam</note>\n"\
             "    <note type=\"input\" label=\"list path, taxonomy information\">$Tandem_taxonomy</note>\n"\
             "    <note type=\"input\" label=\"protein, taxon\">$Taxon</note>\n"\
+            "    <note>Decoy_prefix=$Decoy_prefix</note>\n"\
             "    <note type=\"input\" label=\"spectrum, path\">/path/to/input</note>\n"\
             "    <note type=\"input\" label=\"output, path\">/path/to/output</note>\n"\
             "</bioml>" > $Tandemparam_input
@@ -485,7 +497,7 @@ Tandem ()
 #   scoring parameters
 
 #   label="scoring, minimum ion count">4</note>
-       sed -i "s/label=\"scoring, maximum missed cleavage sites\">.*</label=\"scoring, maximum missed cleavage sites\">$Max_Missed_cleavage</" $Tandemparam
+    sed -i "s/label=\"scoring, maximum missed cleavage sites\">.*</label=\"scoring, maximum missed cleavage sites\">$Max_Missed_cleavage</" $Tandemparam
 
 #   Changes the 1 to yes and everything else to no (e.g. 0).
     ions="use_A_ions use_B_ions use_C_ions use_X_ions use_Y_ions use_Z_ions"
@@ -509,7 +521,12 @@ Tandem ()
     sed -i "s/label=\"scoring, z ions\">.*</label=\"scoring, z ions\">$use_Z_ions</g" $Tandemparam
 
 #   label="scoring, cyclic permutation">no</note>
-#   label="scoring, include reverse">no</note>
+    if [[ $Decoy_Database == "0" ]]; then
+        Decoy_tandem="no"
+    else
+        Decoy_tandem="yes"
+    fi
+    sed -i "s/label=\"scoring, include reverse\">.*</label=\"scoring, include reverse\">$Decoy_tandem</" $Tandemparam
 #   label="scoring, cyclic permutation">no</note>
 #   label="scoring, include reverse">no</note>
 

@@ -111,6 +111,11 @@ while [ "$1" != "" ]; do
                                 exit
                             fi
                             ;;
+        -f | --fused )      one_script_per_DDS="yes"
+                            ;;
+        --separate )        Separate_TD_search="yes"
+                            Extra_parameters+="--separate "
+                            ;;
         * )                 echo -e "\e[91mERROR:\e[0m Unknown parameter ""$1"
                             exit
                             ;;
@@ -234,11 +239,10 @@ if [[ $LOC_Shared_param_file != "" ]]; then
     Header_Check
 fi
 if [[ "$Header" == "$Header_file" ]] && [[ $LOC_Shared_param_file != "" ]]; then
-    if (($NUMprog==1)); then
-        echo -e "\e[91mERROR:\e[0m The PPG parameter file only works with more than one program"
-        exit
-    elif (($NUMparam>=2)); then
+    if (($NUMparam>=2)); then
         RepeatRun_parameter_files="yes"
+    else
+        Run_PPG_with_sharedparam="yes"
     fi
 fi
 #   reapeat run parameters
@@ -270,7 +274,7 @@ if [[ $RepeatRun_parameter_files == "yes" ]] && (($NUMparam>=2)); then
 fi
 
 # if only one parameter file was entered but multiple programs the pipeline assumes the parameter file is the Shared parameter file.
-if (($NUMprog > 1)) && [[ $NUMparam == "1" ]]; then
+if [[ $Run_PPG_with_sharedparam == "yes" ]]; then
 #   Use the Shared parameter file
     echo "not fully implemented yet"
 
@@ -347,7 +351,8 @@ if (($NUMprog > 1)) && [[ $NUMparam == "1" ]]; then
         declare "${prog}"="$paramloc"
         paramsProg=$(echo $paramsProg | awk '{$1="";print}')
     done
-
+#   if the cluster option is used change the memory requirement for java because the shark cluster doesn't allocate memory correctly
+#   the amount that the memory is changed is in the CPU_Use function in src/Shared_parameter_maker.sh
     if [[ $SHARK == "1" ]]; then
         if [[ $Programs == *"msgfplus"* ]]; then
             SHARKoptions_CPUUse=$SHARKoptions
@@ -428,23 +433,38 @@ if [[ $Run_scripts != "no" ]]; then
     mkdir -vp "$LOC".VALs
     rm -f "$LOC".VALs/*
 #   Creates the files that will use PeptideProphet or percolator
-    if [[ $Programs == *"peptideprophet"* ]];then
-        for file in "$LOC".PIDs/*
-        do
-            cp ${file} ${file}_PeptideProphet
-            cp "$LOC".PIDs/*_PeptideProphet "$LOC".VALs/
-            rm -f "$LOC".PIDs/*_PeptideProphet
-        done
-    fi
-    if [[ $Programs == *"percolator"* ]];then
-        for file in "$LOC".PIDs/*
-        do
-            cp ${file} ${file}_percolator
-            cp "$LOC".PIDs/*_percolator "$LOC".VALs/
-            rm -f "$LOC".PIDs/*_percolator
-        done
-    fi
+   if [[ $one_script_per_DDS == "yes" ]]; then
+    #   only create a script named [DDS]_all.sh
+        PeptideProphet_base_script="all"
+        percolator_base_script="all"
 
+        for file in "$LOC".PIDs/*
+        do
+            cp ${file} ${file}_all
+            cp "$LOC".PIDs/*_all "$LOC".VALs/
+            rm -f "$LOC".PIDs/*_all
+        done
+    else
+        PeptideProphet_base_script="PeptideProphet"
+        percolator_base_script="percolator"
+
+        if [[ $Programs == *"peptideprophet"* ]];then
+            for file in "$LOC".PIDs/*
+            do
+                cp ${file} ${file}_$PeptideProphet_base_script
+                cp "$LOC".PIDs/*_$PeptideProphet_base_script "$LOC".VALs/
+                rm -f "$LOC".PIDs/*_$PeptideProphet_base_script
+            done
+        fi
+        if [[ $Programs == *"percolator"* ]];then
+            for file in "$LOC".PIDs/*
+            do
+                cp ${file} ${file}_$percolator_base_script
+                cp "$LOC".PIDs/*_$percolator_base_script "$LOC".VALs/
+                rm -f "$LOC".PIDs/*_$percolator_base_script
+            done
+        fi
+    fi
 #   checks if a validator has been used if not it copies everyting in the .PIDs directory to the .VALs directory
 #   It also sets NOVAL to 1 to stop analysis programs from being added
     VALcheck=$(ls "$LOC".VALs)
@@ -487,11 +507,16 @@ if [[ $Run_scripts != "no" ]]; then
 
 #   Makes changes to the parameter files
 #   Changes the comet output file from pep.xml to PIN
-    for file in "$LOCscripts"*comet_percolator*
+    for file in "$LOCscripts"*comet_$percolator_base_script*
     do
         cat "$LOC"src/base_scripts/comet2pin >> ${file}
     done
-    for file in "$LOCscripts"*MSGFPlus_percolator*
+    for file in "$LOCscripts"*comet_$PeptideProphet_base_script*
+    do
+        cat "$LOC"src/base_scripts/comet2xml >> ${file}
+    done
+
+    for file in "$LOCscripts"*MSGFPlus_$percolator_base_script*
     do
         cat "$LOC"src/base_scripts/MSGF2percolator >> ${file}
     done
@@ -530,23 +555,23 @@ if [[ $Run_scripts != "no" ]]; then
 
 #   starts adding converters to the scripts
 #   Adds the Tandem2XML file to all the scripts that contain Xtandem and Peptideprophet
-    for file in "$LOCscripts"*Xtandem_PeptideProphet*
+    for file in "$LOCscripts"*Xtandem_$PeptideProphet_base_script*
     do
         cat "$LOC"src/base_scripts/Tandem2XML >> ${file}
     done
-    for file in "$LOCscripts"*MSGFPlus_PeptideProphet*
+    for file in "$LOCscripts"*MSGFPlus_$PeptideProphet_base_script*
     do
         cat "$LOC"src/base_scripts/idconvert >> ${file}
     done
-    for file in "$LOCscripts"*Xtandem_percolator*
+    for file in "$LOCscripts"*Xtandem_$percolator_base_script*
     do
         cat "$LOC"src/base_scripts/tandem2pin >> ${file}
     done
-    for file in "$LOCscripts"*MSGFPlus_percolator*
+    for file in "$LOCscripts"*MSGFPlus_$percolator_base_script*
     do
         cat "$LOC"src/base_scripts/msgf2pin >> ${file}
     done
-    for file in "$LOCscripts"*MSFragger_percolator*
+    for file in "$LOCscripts"*MSFragger_$percolator_base_script*
     do
         cat "$LOC""src/base_scripts/make-pin" >> ${file}
     done
@@ -555,19 +580,19 @@ if [[ $Run_scripts != "no" ]]; then
 
 #   starts adding validators to the scripts
 #   Adds the PeptideProphet file to all the scripts containing peptideprophet
-    for file in "$LOCscripts"*PeptideProphet*
+    for file in "$LOCscripts"*$PeptideProphet_base_script*
     do
         cat "$LOC"src/base_scripts/PeptideProphet >> ${file}
     done
 #   Adds the percolator file to all the scripts containing percolator
-    for file in "$LOCscripts"*percolator*
+    for file in "$LOCscripts"*$percolator_base_script*
     do
         cat "$LOC"src/base_scripts/percolator >> ${file}
     done
 #   done adding validators to the scripts
 
 #   Add an intermediate time to the script
-    for file in "$LOCscripts"*.sh
+    for file in "$LOCscripts"*_*.sh
     do
         cat "$LOC"src/base_scripts/"time" >> ${file}
     done
