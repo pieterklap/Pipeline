@@ -118,6 +118,9 @@ while [ "$1" != "" ]; do
         -g | --genparam )   onlyparam="1"
                             ;;
         -S | --noScripts )  Run_scripts="no"
+                            if [[ $location == "" ]]; then
+                                location="-L $(echo $2 | awk -F\/ '{$NF="";OFS=FS;print $0}')"
+                            fi
                             while [[ ${2:0:1} != "-" ]] && [[ "$2" != "" ]]; do
                                 shift
                                 Scripts_to_Run+="$1 "
