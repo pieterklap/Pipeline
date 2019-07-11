@@ -1,33 +1,33 @@
 ##Start## "Reactome"
 
+if [[ $ANAparameters != "" ]]; then
+    RTparam=$(echo $ANAparameters | awk '{print $1}')
+    ANAparameters=$(echo $ANAparameters | awk '{$1="";print $0}')
+fi
+
 #   Base URL for Reactome
 baseURL="https://reactome.org/AnalysisService"
-#   parameter for annalysis with Reactome
-interactors="interactors=false"
-species="species=Homo sapiens"
-#pageSize="pageSize=50"
-#page="page=1"
-sortBy="sortBy=ENTITIES_PVALUE"
-#order="order=ASC"
-resource="resource=TOTAL"
-pValue="pValue=1"
-includeDisease="includeDisease=true"
+if [[ $RTparam == "" ]]; then
+    #   parameter for annalysis with Reactome
+    reactome_parameter_identifiers="interactors=false&species=Homo%20sapiens&sortBy=ENTITIES_PVALUE&resource=TOTAL&pValue=1&includeDisease=true"
+    # parameters for downloading the pdf
+    reactome_parameter_report="number=25&diagramProfile=Modern&analysisProfile=Standard&fireworksProfile=Barium%20Lithium"
+    species="species=Homo%20sapiens"
+else
+    reactome_parameter_identifiers=$(sed 's/#.*//g' $RTparam | grep '\[identifiers\]' | sed 's/ \[identifiers\]//g' | sed 's/ /%20/g')
+    reactome_parameter_report=$(sed 's/#.*//g' $RTparam | grep '\[report\]' | sed 's/ \[report\]//g' | sed 's/ /%20/g')
 
-# parameters for downloading the pdf
-number="number=25"
-diagramProfile="diagramProfile=Modern"
-analysisProfile="analysisProfile=Standard"
-fireworksProfile="fireworksProfile=Barium%20Lithium"
+    reactome_parameter_identifiers=$(echo $reactome_parameter_identifiers | sed 's/ /\&/g')
+    reactome_parameter_report=$(echo $reactome_parameter_report | sed 's/ /\&/g')
 
-#   Changes the spaces to %20 to be used in a url
-species=${species// /%20}
+    species=$(grep "species=" $RTparam | sed 's/\[.*\]//g')
+    species=$(echo $species | sed 's/ /%20/g')
+fi
 
 for Pep_file in $VALoutput
 do
-
     EXTENTION=$(echo ${Pep_file} | awk -F\. '{print $(NF-1)"."$NF}')
-    NAMEfile=${Pep_file//.$EXTENTION/_Reactome}
-
+    NAMEfile=${Pep_file//.$EXTENTION/_Reactome_${EXTENTION//./_}}
 #   checks the extention so it knows where the protein names are located and prints all the proteins in a sring
     if [[ $EXTENTION == pep.xml ]]; then
     #   takes the protein names out of the pep.xml file (peptideprophet)
@@ -37,26 +37,24 @@ do
         #takes the protein names out of the put.xml file (percolator)
         PROTEIN=$(cat ${Pep_file} | grep "<protein_id>" | awk -F\| '{print $2 }')
     fi
-
     PROTEIN=$(echo $PROTEIN | tr " " "\n" | sort -u | tr "\n" " ")
 #   saves the protein list
     echo $PROTEIN > $NAMEfile.prot
-
     Datainput="\"$PROTEIN\""
+    echo "Running Reactome for ${Pep_file}"
 #   Runs the identifiers tool
     curl -X POST \
-    "$baseURL/identifiers/?$interactors&$species&$pageSize&$page&$sortBy&$order&$resource&$pValue&$includeDisease" \
+    "$baseURL/identifiers/?$reactome_parameter_identifiers" \
     -H  "accept: application/json" \
     -H  "content-type: text/plain" \
     -d "$Datainput" \
     --output $NAMEfile.json |& tee -a $datelog
-
 #   takes the token from the .json file and replaces any % with %25 so that it can be used in a url
     Token=$(cat $NAMEfile.json | awk -F\" '{print $6}')
     Token=${Token//%/%25}
-
+    echo "Retreving Reactome report for ${Pep_file}"
     curl -X GET \
-    "$baseURL/report/$Token/${species//species=/}/report.pdf?$number&$recource&$diagramProfile&$analysisProfile&$fireworksProfile" \
+    "$baseURL/report/$Token/${species//species=/}/report.pdf?$reactome_parameter_report" \
     -H  "accept: application/pdf" \
     --output $NAMEfile.pdf |& tee -a $datelog
 

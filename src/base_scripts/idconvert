@@ -24,24 +24,24 @@ do
     CONVoutput=$(echo "${Pep_file}" | sed "s/\.$EXTENTION//")
 
     mv $CONVoutput."pepXML" $CONVoutput$output_suffix".pep.xml"
-    PIDoutput+=$CONVoutput$output_suffix."pep.xml "
+    VALinput+=$CONVoutput$output_suffix."pep.xml "
 
 done
 
-for output in $PIDoutput
+for output in $VALinput
 do
-# if the file is not found and/or empty it is removed from the $PIDoutput it exits if $PIDoutput is empty
+# if the file is not found and/or empty it is removed from the $VALinput it exits if $VALinput is empty
     if [ -f ${output} ]; then
         if [ ! -s ${output} ]; then
             echo -e "\e[91mERROR:\e[0m ${output} is empty \nsomething went wrong running $CONVprog" | tee -a $datelog
-            PIDoutput=${PIDoutput//${output}/}
+            VALinput=${VALinput//${output}/}
         fi
     else
         echo -e "\e[91mERROR:\e[0m ${output} is not a file \nsomething went wrong running $CONVprog" | tee -a $datelog
-        PIDoutput=${PIDoutput//${output}/}
+        VALinput=${VALinput//${output}/}
     fi
 done
-if [[ $PIDoutput == "" ]]; then
+if [[ $VALinput == "" ]]; then
     echo -e "\e[91mERROR:\e[0m no output files found"
     exit
 fi

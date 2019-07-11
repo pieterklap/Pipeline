@@ -31,7 +31,7 @@ fi
 for Pep_file in $PIDoutput
 do
     EXTENTION=$(echo "${Pep_file}" |awk -F. '{print $NF}')
-    VALinput=$(echo "${Pep_file}" | sed "s/\.$EXTENTION/\.pin/")
+    CONVoutput=$(echo "${Pep_file}" | sed "s/\.$EXTENTION/\.pin/")
 
     decoy_prefix=$(grep "^DecoyPrefix -decoy" $PIDparam | awk '{print $3}')
     if [[ $decoy_prefix == "" ]]; then
@@ -41,36 +41,32 @@ do
     fi
 
     if [[ "$Separate_TD_search" != "yes" ]]; then
-        $CONVprog -o $VALinput -P $decoy_prefix ${Pep_file} |& tee -a $datelog
+        $CONVprog -o $CONVoutput -P $decoy_prefix ${Pep_file} |& tee -a $datelog
     else
         Decoy_Pep_file=$(echo $PIDoutput_decoy | awk '{print $1}')
-        $CONVprog -o $VALinput ${Pep_file} $Decoy_Pep_file |& tee -a $datelog
+        $CONVprog -o $CONVoutput ${Pep_file} $Decoy_Pep_file |& tee -a $datelog
 
         PIDoutput_decoy=$(echo $PIDoutput_decoy | awk '{$1="";print $0}')
     fi
 
-    CONVoutput+="$VALinput "
-#   Resets the target and decoy strings
-    target_string=""
-    decoy_string=""
+    VALinput+="$CONVoutput "
 done
 
-PIDoutput=$CONVoutput
 
-for output in $PIDoutput
+for output in $VALinput
 do
-# if the file is not found and/or empty it is removed from the $PIDoutput it exits if $PIDoutput is empty
+# if the file is not found and/or empty it is removed from the $VALinput it exits if $VALinput is empty
     if [ -f ${output} ]; then
         if [ ! -s ${output} ]; then
             echo -e "\e[91mERROR:\e[0m ${output} is empty \nsomething went wrong running $CONVprog" | tee -a $datelog
-            PIDoutput=${PIDoutput//${output}/}
+            VALinput=${VALinput//${output}/}
         fi
     else
         echo -e "\e[91mERROR:\e[0m ${output} is not a file \nsomething went wrong running $CONVprog" | tee -a $datelog
-        PIDoutput=${PIDoutput//${output}/}
+        VALinput=${VALinput//${output}/}
     fi
 done
-if [[ $PIDoutput == "" ]]; then
+if [[ $VALinput == "" ]]; then
     echo -e "\e[91mERROR:\e[0m no output files found"
     exit
 fi

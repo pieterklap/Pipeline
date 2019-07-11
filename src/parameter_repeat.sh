@@ -1,5 +1,6 @@
 #!/bin/bash
-
+Parameter_repeat_default ()
+{
 #   sets the start and end number for the Mass Tolerence
     PrecursorMassTolerance=$(echo $PrecursorMassToleranceRange | awk '{print $1}')
     PrecursorMassToleranceMax=$(echo $PrecursorMassToleranceRange | awk '{print $2}')
@@ -22,7 +23,7 @@
     else
         PrecursorMassToleranceIncrement2="0"
     fi
-
+}
 
 SET_Tollerance_values ()
 {
@@ -228,7 +229,5 @@ Rerun_MSFragger_Tollerance_Parameters ()
 
         Increment_Tolerance_values
     done
-
-
 
 }

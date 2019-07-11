@@ -1,13 +1,15 @@
 #!/bin/bash
 
+
 comet_Help ()
 {
-    echo "comet help file goes here"
+#    echo "comet help file goes here"
     Comet_location=$(grep "comet" $LOC/install_locations | awk '{print $2}' | awk -F\/ '{$NF="";print $0}' | tr " " "/")
-    echo "$Comet_location"README.txt
-    if [ -f "$Comet_location"README.txt ]; then
+    if [ -f "$Comet_location"README.txt ] && [[ "$Comet_location"README.txt != "" ]]; then
         echo "$Comet_location"README.txt
         cat  "$Comet_location"README.txt
+    else
+        echo -e "More information about comet can be found here: http://comet-ms.sourceforge.net/"
     fi
 }
 
@@ -35,3 +37,10 @@ percolator_Help ()
 {
     echo "percolator help file goes here"
 }
+
+all_Help ()
+{
+    PeptideProphet_Help
+    percolator_Help
+}
+

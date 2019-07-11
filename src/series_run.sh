@@ -51,6 +51,7 @@ while [ "$3" != "" ]; do
 done
 
 source $LOC/src/parameter_repeat.sh
+Parameter_repeat_default
 
 if [[ $PID == "comet" ]]; then
     Rerun_Comet_Tollerance_Parameters
@@ -63,7 +64,6 @@ fi
 if [[ $PID == "MSGFPlus" ]]; then
     Rerun_MSGFPlus_Tollerance_Parameters
 fi
-
 
 if [[ $PID == "MSFragger" ]]; then
     Rerun_MSFragger_Tollerance_Parameters

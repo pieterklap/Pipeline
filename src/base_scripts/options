@@ -36,18 +36,24 @@ while [ "$1" != "" ]; do
                                 ;;
         -i | --input )          while [[ ${2:0:1} != "-" ]] && [[ "$2" != "" ]]; do
                                     shift
-                                    PIDinput+=$1" "         # Puts the input locations in a variable
+                                    PIDinput+="$1 "             # Puts the input locations in a variable
                                     NUMinput=$[$NUMinput+1]     # Counts the amount of input files entered
                                 done
                                 ;;
         -p | --parameter )      shift               # Enter -p to specify the database search paramater file location
                                 PIDparam=$1         # Enter -p to specify the database search paramater file location
                                 ;;
-        -v | --valparameter )   shift               # Enter -v to specify the Statistical validator parameter file location
-                                VALparam=$1         # Enter -v to specify the Statistical validator parameter file location
+        -v | --valparameter )   while [[ ${2:0:1} != "-" ]] && [[ "$2" != "" ]]; do
+                                    shift                           # Enter -v to specify the Statistical validator parameter file location
+                                    VALparameters+="$1 "            # Enter -v to specify the Statistical validator parameter file location
+                                    NUMVALparam=$[$NUMVALparam+1]   # Counts the amount of parameter files entered
+                                done
                                 ;;
-        -g | --gprofiler )      shift
-                                GPparams=$1
+        -a | --anaparameter )   while [[ ${2:0:1} != "-" ]] && [[ "$2" != "" ]]; do
+                                    shift                           # Enter -v to specify the Statistical validator parameter file location
+                                    ANAparameters+="$1 "            # Enter -v to specify the Statistical validator parameter file location
+                                    NUMANAparam=$[$NUMANAparam+1]   # Counts the amount of parameter files entered
+                                done
                                 ;;
         -l | --logfile )        shift               # Enter -l to specify the Logfile location
                                 logfile=$1          # Enter -l to specify the Logfile location

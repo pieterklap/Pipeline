@@ -16,30 +16,28 @@ fi
 for Pep_file in $PIDoutput
 do
 #   Sets the name of the output file to {file}.pep.xml
-    VALinput=${Pep_file//.xml/.pep.xml}
+    CONVoutput=${Pep_file//.xml/.pep.xml}
 
 #   runs Tandem2XML
-    $CONVprog $Pep_file $VALinput |& tee -a $datelog
+    $CONVprog $Pep_file $CONVoutput |& tee -a $datelog
 
-    CONVoutput+="$VALinput "
+    VALinput+="$CONVoutput "
 done
-# sets PIDoutput to be used in peptideprophet
-PIDoutput="$CONVoutput"
 
-for output in $PIDoutput
+for output in $VALinput
 do
-# if the file is not found and/or empty it is removed from the $PIDoutput it exits if $PIDoutput is empty
+# if the file is not found and/or empty it is removed from the $VALinput it exits if $VALinput is empty
     if [ -f ${output} ]; then
         if [ ! -s ${output} ]; then
             echo -e "\e[91mERROR:\e[0m ${output} is empty \nsomething went wrong running $CONVprog" | tee -a $datelog
-            PIDoutput=${PIDoutput//${output}/}
+            VALinput=${VALinput//${output}/}
         fi
     else
         echo -e "\e[91mERROR:\e[0m ${output} is not a file \nsomething went wrong running $CONVprog" | tee -a $datelog
-        PIDoutput=${PIDoutput//${output}/}
+        VALinput=${VALinput//${output}/}
     fi
 done
-if [[ $PIDoutput == "" ]]; then
+if [[ $VALinput == "" ]]; then
     echo -e "\e[91mERROR:\e[0m no output files found"
     exit
 fi

@@ -39,6 +39,10 @@ Set_corect_parameter ()
     PID=$(echo ${file} | awk -F. '{print $1}' | awk -F_ '{print $1}' | awk -F/ '{print $NF}')
     VAL=$(echo ${file} | awk -F. '{print $1}' | awk -F_ '{print $2}')
 
+#    PIDparam="-p "
+#    VALparam="-v "
+    ANAparam="-a "
+
     if [[ $PID == "comet" ]]; then
         PIDparam="-p $comet"
     fi
@@ -57,8 +61,14 @@ Set_corect_parameter ()
     if [[ $VAL == "percolator" ]]; then
         VALparam="-v $percolator"
     fi
+    if [[ $VAL == "all" ]]; then
+        VALparam="-v $peptideprophet $percolator"
+    fi
     if [[ $gprofiler != "" ]] && [[ $NOVAL != "1" ]]; then
-        GPparams="-g $gprofiler"
+        ANAparam+="$gprofiler "
+    fi
+    if [[ $reactome != "" ]] && [[ $NOVAL != "1" ]]; then
+        ANAparam+="$reactome "
     fi
 }
 
@@ -80,7 +90,7 @@ Local_Run ()
     do
         Set_corect_parameter
     #   Run the pipeline for each combination of programs
-        ${file} $PIDparam $VALparam $input $output $logfile $location $GPparams $Extra_parameters
+        ${file} $PIDparam $VALparam $input $output $logfile $location $ANAparam $Extra_parameters
     done
 }
 

@@ -33,7 +33,7 @@ fi
 
 
 # All the programs that are compatible with the PPG
-valid=" comet tandem msgfplus msfragger peptideprophet percolator gprofiler reactome "
+valid=" comet tandem msgfplus peptideprophet percolator gprofiler reactome "
 
 NUMprog="0"
 NUMparam="0"
@@ -52,15 +52,37 @@ while [ "$1" != "" ]; do
                             shift
                             ;;
         -i | --input )      input="$1 "
-                            while [[ ${2:0:1} != "-" ]] && [[ "$2" != "" ]]; do
+                            if [[ ${3:0:1} == "-" ]] && [[ "$3" != "" ]] && [ -f "$2" ]; then
                                 shift
-                                if [ -f "$1" ]; then
-                                    input+="$1 "
+                                meta_file_test=$(grep "^/" "$1" | head -n1)
+                                #   checks if the file contains file locations
+                                for file in $meta_file_test
+                                do
+                                    meta_file_test=$(echo ${file})
+                                done
+                                #   tests if it is a file if so puts it into $input
+                                if [ -f $meta_file_test ] && [[ $meta_file_test != "" ]]; then
+                                    echo "PPG meta file"
+                                    input+=$(echo $(sed 's/#.*//g' "$1"))
+                                elif [[ $meta_file_test == "" ]]; then
+                                    echo "separate file"
+                                    input+="$1"
                                 else
-                                    echo -e "\e[91mERROR:\e[0m ""$1"" is not a file"
+                                    echo "$meta_file_test is not a file"
                                     exit
                                 fi
-                            done
+                            else
+                                echo "separate files"
+                                while [[ ${2:0:1} != "-" ]] && [[ "$2" != "" ]]; do
+                                    shift
+                                    if [ -f "$1" ]; then
+                                        input+="$1 "
+                                    else
+                                        echo -e "\e[91mERROR:\e[0m ""$1"" is not a file"
+                                        exit
+                                    fi
+                                done
+                            fi
                             ;;
         -o | --output )     output="$1 $2"
                             shift
@@ -96,10 +118,17 @@ while [ "$1" != "" ]; do
         -g | --genparam )   onlyparam="1"
                             ;;
         -S | --noScripts )  Run_scripts="no"
+                            while [[ ${2:0:1} != "-" ]] && [[ "$2" != "" ]]; do
+                                shift
+                                Scripts_to_Run+="$1 "
+                            done
                             ;;
         -s | --shark )      SHARK="1"
                             shift                        # Allows Shark options to be entered
-                            SHARKoptions=$1             # Allows Shark options to be entered
+                            while [[ $1 != "" ]]; do
+                                SHARKoptions+="$1 "             # Allows Shark options to be entered
+                                shift
+                            done
                             ;;
         --auto-run )        RUN="y"
                             ;;
@@ -123,6 +152,7 @@ while [ "$1" != "" ]; do
     shift
 done
 
+
 if [[ $onlyparam == "1" ]] && [[ $paramsProg == "" ]]; then
     echo -e "\e[91mERROR:\e[0m no parameter files entered"
     exit
@@ -137,6 +167,18 @@ fi
 if [[ $Programs == "" ]]; then
     echo -e "\e[91mERROR:\e[0m please enter at least one program"
     exit
+fi
+#   checks if the validators have been called on the commandline when the fussed option has been used.
+#   if they have not add them to programs
+if [[ $one_script_per_DDS == "yes" ]]; then
+    if [[ ${Programs,,} != *"peptideprophet"* ]]; then
+        Programs+="peptideprophet "
+        NUMprog=$[$NUMprog+1]
+    fi
+    if [[ ${Programs,,} != *"percolator"* ]]; then
+        Programs+="percolator "
+        NUMprog=$[$NUMprog+1]
+    fi
 fi
 
 #   If all has been entered set Programs to include all the valid programs and skip the validation
@@ -161,6 +203,15 @@ for parameter_file in $paramsProg
 do
     if [ ! -f ${parameter_file} ]; then
         echo -e "\e[91mERROR:\e[0m ${parameter_file} is not a file"
+        exit
+    fi
+done
+
+for input_file in $input
+do
+
+    if [ ! -f ${input_file} ] && [[ ${input_file} != "-i" ]] && [[ $onlyparam != "1" ]] && [[ $RUNscripts != "n" ]]; then
+        echo -e "\e[91mERROR:\e[0m ${input_file} is not a file"
         exit
     fi
 done
@@ -230,182 +281,9 @@ if [[ $Exitcode = 2 ]]; then
     exit
 fi
 
-# if header check is placed here the -r parameter option will no longer be needed
-source "$LOC"src/Shared_parameter_maker.sh
 
-#   Checks if the first parameter file is a PPG parameter file if it is it assumes the others are aswell
-LOC_Shared_param_file="$(echo $paramsProg | awk '{print $1}')"
-if [[ $LOC_Shared_param_file != "" ]]; then
-    Header_Check
-fi
-if [[ "$Header" == "$Header_file" ]] && [[ $LOC_Shared_param_file != "" ]]; then
-    if (($NUMparam>=2)); then
-        RepeatRun_parameter_files="yes"
-    else
-        Run_PPG_with_sharedparam="yes"
-    fi
-fi
-#   reapeat run parameters
-if [[ $RepeatRun_parameter_files == "yes" ]] && (($NUMparam>=2)); then
-    if [[ $Times_Run == "" ]]; then
-        Times_Run=0
-    fi
-    for param_file in $paramsProg
-    do
-        #   Checks the header
-        LOC_Shared_param_file=${param_file}
-        Header_Check
-        Header_Exit
-        #   TODO check if output_suffix has been set
-        if [[ $(grep "^Output_suffix" ${param_file} | awk '{print $4}') == "" ]]; then
-            echo -e "\e[91mERROR\e[0m ${param_file}: No output suffix given"
-        else
-            sed_param_file=${param_file//\//\\/}
-            sed_paramsProg=${paramsProg//\//\\/}
-            if (($Times_Run==0)); then
-                $PPG $(echo "$Entered_Command" | sed "s/$sed_paramsProg/$sed_param_file /")
-            else
-                $PPG $(echo "$Entered_Command -S" | sed "s/$sed_paramsProg/$sed_param_file /")
-            fi
-            Times_Run=$[$Times_Run+1]
-        fi
-    done
-    exit
-fi
-
-# if only one parameter file was entered but multiple programs the pipeline assumes the parameter file is the Shared parameter file.
-if [[ $Run_PPG_with_sharedparam == "yes" ]]; then
-#   Use the Shared parameter file
-    echo "not fully implemented yet"
-
-    LOC_Shared_param_file="$paramsProg"
-    echo "PPG parameter file"
-
-#   removes the spaces between the parameter name and value and makes sure there is one space between each parameter
-    Shared_param_file=$(grep -v "^#" $LOC_Shared_param_file | sed "s/ //g" | tr "\n" " " | tr "\t" " " | sed "s/ \+/ /g" |tr " " "\n" )
-
-#   notes the output directory of the shared parameter file
-    LOC_param=$(echo $LOC_Shared_param_file | awk -F/ '{$NF="";print $0}' | tr " " "/")
-#   resets the parameter counter
-    NUMparam="0"
-#   uses the functions in the following bash scripts
-    Header_Check
-    Header_Exit
-    Default_check
-
-    source "$LOC"src/modifications.sh
-    if [[ $Programs == *"comet"* ]]; then
-        Comet                   #   generates the main bulk of the parameter file
-        Comet_mods              #   generates the modification data for the parameter file
-        comet="$cometparam"     #   sets the variable comet to the generated comet parameterfile
-        NUMparam=$[$NUMparam+1] #   recounts the parameter files
-    fi
-    if [[ $Programs == *"tandem"* ]]; then
-        Tandem
-        Tandem_mods
-        tandem="$Tandemparam_input"
-        NUMparam=$[$NUMparam+1]
-    fi
-    if [[ $Programs == *"msgfplus"* ]]; then
-        MSGFPlus
-        MSGFPlus_mods
-        msgfplus="$MSGFPlusparam"
-        NUMparam=$[$NUMparam+1]
-    fi
-    if [[ $Programs == *"msfragger"* ]]; then
-        MSFragger
-        MSFragger_mods
-        msfragger="$MSFraggerparam"
-        NUMparam=$[$NUMparam+1]
-    fi
-    if [[ $Programs == *"peptideprophet"* ]]; then
-        PeptideProphet                  #   For use later if peptideprophet gets added to the shared parameter file
-        peptideprophet="$PepProphParam" #
-        NUMparam=$[$NUMparam+1]
-    fi
-    if [[ $Programs == *"percolator"* ]]; then
-        Percolator                      #   For use later if percolator gets added to the shared parameter file
-        percolator="$PercolatorParam"   #
-        NUMparam=$[$NUMparam+1]
-    fi
-    if [[ $Programs == *"gprofiler"* ]]; then
-        Gprofiler                       #   For use later if gprofiler gets added to the shared parameter file
-        gprofiler="$gprofilerParam"     #
-        NUMparam=$[$NUMparam+1]
-    fi
-    if [[ $Programs == *"reactome"* ]]; then
-        Reactome                        #   For use later if Reactome gets added to the shared parameter file
-        reactome="$ReactomeParam"       #
-        NUMparam=$[$NUMparam+1]
-    fi
-
-#   if the number of parameter files is equal to the amount of programs run this
-    elif (($NUMparam==$NUMprog)); then
-#   use the parameter files the user entered
-    echo "idividual parameter files"
-# sets the parameter files to be used for each peptide identifier
-    for prog in $Programs
-    do
-#   Puts the parameter location into a variable with the programs name and removes the location from the string of locations
-        paramloc=$(echo $paramsProg | awk '{print $1}')
-        declare "${prog}"="$paramloc"
-        paramsProg=$(echo $paramsProg | awk '{$1="";print}')
-    done
-#   if the cluster option is used change the memory requirement for java because the shark cluster doesn't allocate memory correctly
-#   the amount that the memory is changed is in the CPU_Use function in src/Shared_parameter_maker.sh
-    if [[ $SHARK == "1" ]]; then
-        if [[ $Programs == *"msgfplus"* ]]; then
-            SHARKoptions_CPUUse=$SHARKoptions
-            CPU_Use $SHARKoptions_CPUUse
-            MSGFPlus_Mem_Use=$(grep "^#Mem_Use" $msgfplus | awk '{print $2}')
-            if [[ $MSGFPlus_Mem_Use != "" ]]; then
-                if [[ $MSGFPlus_Mem_Use != $Mem_Use ]]; then
-                    sed -i "s/#Mem_Use .*/#Mem_Use $Mem_Use/" $msgfplus
-                    echo "MS-GF+: The amount of memory availible to java has been adjusted to $Mem_Use from $MSGFPlus_Mem_Use"
-                fi
-            else
-                echo "#Mem_Use $Mem_Use" >> $msgfplus
-                echo "MS-GF+: The amount of memory availible to java has been set to $Mem_Use"
-            fi
-        fi
-        if [[ $Programs == *"msfragger"* ]]; then
-            SHARKoptions_CPUUse=$SHARKoptions
-            CPU_Use $SHARKoptions_CPUUse
-            MSFragger_Mem_Use=$(grep "^#Mem_Use" $msfragger | awk '{print $2}')
-            if [[ $MSFragger_Mem_Use != "" ]]; then
-                if [[ $MSFragger_Mem_Use != $Mem_Use ]]; then
-                    sed -i "s/#Mem_Use .*/#Mem_Use $Mem_Use/" $msfragger
-                    echo "MSFragger: The amount of memory availible to java has been adjusted to $Mem_Use from $MSFragger_Mem_Use"
-                fi
-            else
-                echo "#Mem_Use $Mem_Use" >> $msfragger
-                echo "MSFragger: The amount of memory availible to java has been set to $Mem_Use"
-            fi
-        fi
-    fi
-
-else
-    #   If all else fails exit
-    if [[ $RUNscripts != "n" ]]; then
-        if [[ $NUMparam == "0" ]]; then
-            RUNscripts="n"
-            echo -e "\e[93mWARNING:\e[0m No parameter file was given, only creating the scripts."
-        else
-            echo -e "\e[91mERROR:\e[0m number of programs($NUMprog) is not equal to the number of parameter files($NUMparam) given"
-            exit
-        fi
-    fi
-fi
-
-# Exits if only the parameterfiles were required
-if [[ $onlyparam == "1" ]] && [[ $LOC_Shared_param_file != "" ]]; then
-    echo "the parameter files have been genegrated"
-    exit
-fi
-
-#   End of asigning/generating parameter files
 #   will skip generateing scripts if asked
-if [[ $Run_scripts != "no" ]]; then
+if [[ $Run_scripts != "no" ]] && [[ $onlyparam != "1" ]]; then
 
 #   Creates the files for the PIDs
     mkdir -vp "$LOC".PIDs
@@ -668,6 +546,179 @@ if [[ $Run_scripts != "no" ]]; then
         fi
     fi
 fi
+
+# if header check is placed here the -r parameter option will no longer be needed
+source "$LOC"src/Shared_parameter_maker.sh
+
+#   Checks if the first parameter file is a PPG parameter file if it is it assumes the others are aswell
+LOC_Shared_param_file="$(echo $paramsProg | awk '{print $1}')"
+if [[ $LOC_Shared_param_file != "" ]]; then
+    Header_Check
+fi
+if [[ "$Header" == "$Header_file" ]] && [[ $LOC_Shared_param_file != "" ]]; then
+    if (($NUMparam>=2)); then
+        RepeatRun_parameter_files="yes"
+    else
+        Run_PPG_with_sharedparam="yes"
+    fi
+fi
+#   reapeat run parameters
+if [[ $RepeatRun_parameter_files == "yes" ]] && (($NUMparam>=2)); then
+    if [[ $Times_Run == "" ]]; then
+        Times_Run=0
+    fi
+    for param_file in $paramsProg
+    do
+        #   Checks the header
+        LOC_Shared_param_file=${param_file}
+        Header_Check
+        Header_Exit
+        #   TODO check if output_suffix has been set
+        if [[ $(grep "^Output_suffix" ${param_file} | awk '{print $4}') == "" ]]; then
+            echo -e "\e[91mERROR\e[0m ${param_file}: No output suffix given. \n      Without it the names of the output files would be the same"
+        else
+            sed_param_file=${param_file//\//\\/}
+            sed_paramsProg=${paramsProg//\//\\/}
+
+            $PPG $(echo "$Entered_Command -S $Scripts_to_Run" | sed "s/$sed_paramsProg/$sed_param_file /")
+            Times_Run=$[$Times_Run+1]
+        fi
+    done
+    exit
+fi
+
+# if only one parameter file was entered but multiple programs the pipeline assumes the parameter file is the Shared parameter file.
+if [[ $Run_PPG_with_sharedparam == "yes" ]]; then
+#   Use the Shared parameter file
+    echo "not fully implemented yet"
+
+    LOC_Shared_param_file="$paramsProg"
+    echo "PPG parameter file"
+
+#   removes the spaces between the parameter name and value and makes sure there is one space between each parameter
+    Shared_param_file=$(grep -v "^#" $LOC_Shared_param_file | sed "s/ //g" | tr "\n" " " | tr "\t" " " | sed "s/ \+/ /g" |tr " " "\n" )
+
+#   notes the output directory of the shared parameter file
+    LOC_param=$(echo $LOC_Shared_param_file | awk -F/ '{$NF="";print $0}' | tr " " "/")
+#   resets the parameter counter
+    NUMparam="0"
+#   uses the functions in the following bash scripts
+    Header_Check
+    Header_Exit
+    Default_check
+
+    source "$LOC"src/modifications.sh
+    if [[ $Programs == *"comet"* ]]; then
+        Comet                   #   generates the main bulk of the parameter file
+        Comet_mods              #   generates the modification data for the parameter file
+        comet="$cometparam"     #   sets the variable comet to the generated comet parameterfile
+        NUMparam=$[$NUMparam+1] #   recounts the parameter files
+    fi
+    if [[ $Programs == *"tandem"* ]]; then
+        Tandem
+        Tandem_mods
+        tandem="$Tandemparam_input"
+        NUMparam=$[$NUMparam+1]
+    fi
+    if [[ $Programs == *"msgfplus"* ]]; then
+        MSGFPlus
+        MSGFPlus_mods
+        msgfplus="$MSGFPlusparam"
+        NUMparam=$[$NUMparam+1]
+    fi
+    if [[ $Programs == *"msfragger"* ]]; then
+        MSFragger
+        MSFragger_mods
+        msfragger="$MSFraggerparam"
+        NUMparam=$[$NUMparam+1]
+    fi
+    if [[ $Programs == *"peptideprophet"* ]]; then
+        PeptideProphet                  #   For use later if peptideprophet gets added to the shared parameter file
+        peptideprophet="$PepProphParam" #
+        NUMparam=$[$NUMparam+1]
+    fi
+    if [[ $Programs == *"percolator"* ]]; then
+        Percolator                      #   For use later if percolator gets added to the shared parameter file
+        percolator="$PercolatorParam"   #
+        NUMparam=$[$NUMparam+1]
+    fi
+    if [[ $Programs == *"gprofiler"* ]]; then
+        Gprofiler                       #   For use later if gprofiler gets added to the shared parameter file
+        gprofiler="$gprofilerParam"     #
+        NUMparam=$[$NUMparam+1]
+    fi
+    if [[ $Programs == *"reactome"* ]]; then
+        Reactome                        #   For use later if Reactome gets added to the shared parameter file
+        reactome="$ReactomeParam"       #
+        NUMparam=$[$NUMparam+1]
+    fi
+
+#   if the number of parameter files is equal to the amount of programs run this
+    elif (($NUMparam==$NUMprog)); then
+#   use the parameter files the user entered
+    echo "idividual parameter files"
+# sets the parameter files to be used for each peptide identifier
+    for prog in $Programs
+    do
+#   Puts the parameter location into a variable with the programs name and removes the location from the string of locations
+        paramloc=$(echo $paramsProg | awk '{print $1}')
+        declare "${prog}"="$paramloc"
+        paramsProg=$(echo $paramsProg | awk '{$1="";print}')
+    done
+#   if the cluster option is used change the memory requirement for java because the shark cluster doesn't allocate memory correctly
+#   the amount that the memory is changed is in the CPU_Use function in src/Shared_parameter_maker.sh
+    if [[ $SHARK == "1" ]]; then
+        if [[ $Programs == *"msgfplus"* ]]; then
+            SHARKoptions_CPUUse=$SHARKoptions
+            CPU_Use $SHARKoptions_CPUUse
+            MSGFPlus_Mem_Use=$(grep "^#Mem_Use" $msgfplus | awk '{print $2}')
+            if [[ $MSGFPlus_Mem_Use != "" ]]; then
+                if [[ $MSGFPlus_Mem_Use != $Mem_Use ]]; then
+                    sed -i "s/#Mem_Use .*/#Mem_Use $Mem_Use/" $msgfplus
+                    echo "MS-GF+: The amount of memory availible to java has been adjusted to $Mem_Use from $MSGFPlus_Mem_Use"
+                fi
+            else
+                echo "#Mem_Use $Mem_Use" >> $msgfplus
+                echo "MS-GF+: The amount of memory availible to java has been set to $Mem_Use"
+            fi
+        fi
+        if [[ $Programs == *"msfragger"* ]]; then
+            SHARKoptions_CPUUse=$SHARKoptions
+            CPU_Use $SHARKoptions_CPUUse
+            MSFragger_Mem_Use=$(grep "^#Mem_Use" $msfragger | awk '{print $2}')
+            if [[ $MSFragger_Mem_Use != "" ]]; then
+                if [[ $MSFragger_Mem_Use != $Mem_Use ]]; then
+                    sed -i "s/#Mem_Use .*/#Mem_Use $Mem_Use/" $msfragger
+                    echo "MSFragger: The amount of memory availible to java has been adjusted to $Mem_Use from $MSFragger_Mem_Use"
+                fi
+            else
+                echo "#Mem_Use $Mem_Use" >> $msfragger
+                echo "MSFragger: The amount of memory availible to java has been set to $Mem_Use"
+            fi
+        fi
+    fi
+
+else
+    #   If all else fails exit
+    if [[ $RUNscripts != "n" ]]; then
+        if [[ $NUMparam == "0" ]]; then
+            RUNscripts="n"
+            echo -e "\e[93mWARNING:\e[0m No parameter file was given, only creating the scripts."
+        else
+            echo -e "\e[91mERROR:\e[0m number of programs($NUMprog) is not equal to the number of parameter files($NUMparam) given"
+            exit
+        fi
+    fi
+fi
+
+# Exits if only the parameterfiles were required
+if [[ $onlyparam == "1" ]] && [[ $LOC_Shared_param_file != "" ]]; then
+    echo "the parameter files have been genegrated"
+    exit
+fi
+
+#   End of asigning/generating parameter files
+
 #   Load the file that runs the scripts
 source $LOC/src/run_pipeline.sh
 

@@ -32,6 +32,7 @@ aminoacids="G A S P V T C L I N D Q K E M O H F U R Y W"
 #   Checks if each parameter has a value and if they do not enter the default value
 Default_check ()
 {
+    echo "Checking Defaults."
     local Shared_param_file=$(grep -v "^#" $LOC_Shared_param_file | sed 's/ //g' | tr "[" "=[")
     for param in $Shared_param_file
     do
@@ -48,9 +49,9 @@ Default_check ()
             fi
         fi
     #   if the parameter is left empty add the default value to it
-        if [[ $param_value == "[*]" ]] || [[ $param_value == "" ]] ; then
+        if [[ $param_value == "["*"]" ]] || [[ $param_value == "" ]]; then
         #   The line where the Default value is stored
-            LOC_Default=$(grep -n "^$param_name" $LOC_Shared_param_file | awk -F\: '{print ($1+1)}')
+            LOC_Default=$(grep -n "^$param_name" $LOC_Shared_param_file | tail -n1 | awk -F\: '{print ($1+1)}')
 
         #   Checks if the default value is there. echos a warning if the default was empty/missing, but only if the program was used in a script.
             if [[ $(head -n"$LOC_Default" $LOC_Shared_param_file | tail -n1 | awk '{print $2}') != "Default:" ]]; then
@@ -67,7 +68,13 @@ Default_check ()
             else
         #   sets the parameter to the default value in the shared parameter file
                 default_value=$(head -n"$LOC_Default" $LOC_Shared_param_file | tail -n1 | awk '{print $3}')
-                sed -i "s/$param_name =/& $default_value/g" $LOC_Shared_param_file
+                duplicate_value_check=$(grep "^$param_name" $LOC_Shared_param_file | tail -n1 | awk -F\= '{print $2}' | sed 's/ //g')
+                #   Checks if it is empty otherwise it will keep adding spaces to the parameters
+                if [[ $default_value != "" ]]; then
+                    if [[ $duplicate_value_check == "["*"]" ]] || [[ $duplicate_value_check == "" ]]; then
+                        sed -i "s/$param_name =/& $default_value/g" $LOC_Shared_param_file
+                    fi
+                fi
             fi
         fi
     done
@@ -99,7 +106,7 @@ CPU_Use ()
     #   it also divides it by 3 to avoid errors while running on the shark cluster
     if [[ $SHARK == "1" ]]; then
         Mem_Use=$(echo "$CPUuse $MemUse" | sed 's/[[:alpha:]]/ &/g' | awk '{print ($1*$2/2.5)" "$3}' | awk -F\. '{if($2=="")print $0;else print $1" "$2}' | awk '{if($3=="")print $1$2;else print $1$3}')
-    fi                                                                          # change ^ to adjust the factor of memory given to java.
+    fi                                                                          # change ^^^ to adjust the factor of memory given to java.
 }
 
 
@@ -107,6 +114,7 @@ Comet ()
 {
     #input needed is $LOC_Shared_param_file and $output_dir
     cometparam="$LOC_param""$NAME_Spf"_comet
+    local Shared_param_file=$(grep -v "^#" $LOC_Shared_param_file | sed 's/ //g' | tr "[" "=[")
     local Shared_param_file=$(echo $Shared_param_file | tr "[" "=")
     for param in $Shared_param_file
     do
@@ -293,6 +301,7 @@ MSGFPlus ()
     fi
     MSGFPlusparam="$LOC_param""$NAME_Spf"_MSGFPlus
     local temp_MSGFPlusparam=$output_dir/.temp_MSGFPlusparam_PPG
+    local Shared_param_file=$(grep -v "^#" $LOC_Shared_param_file | sed 's/ //g' | tr "[" "=[")
     local Shared_param_file=$(echo $Shared_param_file | tr "[" "=")
     for param in $Shared_param_file
     do
@@ -382,6 +391,7 @@ Tandem ()
     local temp_Tandemparam="$LOC_param"."$NAME_spf"_temp_Tandemparam_PPG
 
 #   puts the parameters in the shared parameter file into local variables
+    local Shared_param_file=$(grep -v "^#" $LOC_Shared_param_file | sed 's/ //g' | tr "[" "=[")
     local Shared_param_file=$(echo $Shared_param_file | tr "[" "=")
     for param in $Shared_param_file
     do
@@ -546,6 +556,7 @@ MSFragger ()
         CPU_Use $SHARKoptions_CPUUse
     fi
     MSFraggerparam="$LOC_param""$NAME_Spf"_MSFraggerparam
+    local Shared_param_file=$(grep -v "^#" $LOC_Shared_param_file | sed 's/ //g' | tr "[" "=[")
     local Shared_param_file=$(echo $Shared_param_file | tr "[" "=")
     for param in $Shared_param_file
     do
