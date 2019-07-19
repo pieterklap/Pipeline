@@ -60,13 +60,13 @@ while [ "$1" != "" ]; do
                                 ;;
         -h | --help )           Start_Help="yes"
                                 ;;
-        -L | --location )       shift       # gives the location of the install_locations file to the script
-                                LOC="$1"    # required if the install_locations file is not in the same folder as the script when it is executed
-                                ;;
-        -s | --output_suffix )  shift           # overwrites teh output suffix in the parameter file
+        -L | --location )       shift
+                                LOC="$1"    # gives the location of the install_locations file to the script
+                                ;;          # required if the install_locations file is not in the same folder as the script when it is executed
+        -s | --output_suffix )  shift
                                 output_suffix=$1
                                 ;;
-        -m | --mode )           shift                               # not inplemented yet do not use or do your call
+        -m | --mode )           shift
                                 if [[ ${1,,} == "parralel" ]]; then
                                     Parallel_Run="1"
                                 fi
@@ -74,7 +74,7 @@ while [ "$1" != "" ]; do
                                     Series_Run="1"
                                 fi
                                 ;;
-        --separate )            Separate_TD_search="yes"            # not inplemented yet do not use or do your call
+        --separate )            Separate_TD_search="yes"
                                 ;;
         * )                     echo " "                            # Requires you to anounce input with a - option
                                 echo "Error invalid paramater $1"   # Tells the use wich parameter was invalid

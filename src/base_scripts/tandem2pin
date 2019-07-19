@@ -17,8 +17,9 @@ EXTENTION=$(echo $PIDoutput |awk -F\. '{print $NF}')
 if [[ "$Separate_TD_search" == "yes" ]]; then
 
 #   create an extra parameter file with the decoy fasta
-    PIDparam_decoy=$PIDparam"_decoy"
-    sed 's/taxon">human/taxon">human_decoy/' $PIDparam > $PIDparam_decoy
+    PIDparam_decoy=${PIDparam//.xml/_decoy.xml}
+    TAXON=$(grep "protein, taxon" $PIDparam | awk -F\> '{print $2}' | awk -F\< '{print $1}')
+    sed 's/taxon">$TAXON/taxon">$TAXON_decoy/' $PIDparam > $PIDparam_decoy
 
     for input in $PIDinput
     do
@@ -36,7 +37,7 @@ if [[ "$Separate_TD_search" == "yes" ]]; then
     #   Sets the output path/name
         sed -i "s/\"output, path\">.*</\"output, path\">$outputXT\/$NAME_input</" "$PIDparam_decoy"
 
-    #   run Xtandem
+    #   run Tandem
         $PIDprog $PIDparam_decoy |& tee -a $datelog
 
         PIDoutput_decoy+="$Stand_output/$NAME_input "

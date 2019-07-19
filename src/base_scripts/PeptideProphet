@@ -16,9 +16,10 @@ fi
 
 
 #   if no parameter file was given do not check the non existing file
-if [[ $VALparameters != "" ]]; then
+if [[ $VALparameters != "" ]] && [[ $MSGF_param_change != "1" ]]; then
+    #   selects the correct parameter file if more than 1 are given
     VALparam=$(echo $VALparameters | awk '{print $1}')
-    VALparam=$(grep -v "^#" $VALparam | awk '{print $1}' | tr "\n" " ")
+    VALparam=$(grep -v "^#" $VALparam | grep "[A-Z]" | tr "\n" " ")
     VALparameters=$(echo $VALparameters | awk '{$1="";print $0}')
 fi
 
@@ -30,6 +31,7 @@ do
         copy_PIDoutput=$(echo ${Pep_file} | sed "s/\.$EXTENTION/_database_search\.$EXTENTION/")
         cp ${Pep_file} $copy_PIDoutput
 # runs peptideprophet
+        echo -e "Issued command: \n$VALprog ${Pep_file} $VALparam" |& tee -a $datelog
         $VALprog ${Pep_file} $VALparam |& tee -a $datelog
         VALoutput+="${Pep_file} "
     fi

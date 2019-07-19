@@ -5,9 +5,12 @@ Header_Check ()
     #   What the header should be
     Header="# Parameter file to be used with the Proteomic Pipeline Generator. "
     Header_ver="(v0.x)"
-    #   What the header is
-    Header_file_ver=$(head -n1 $LOC_Shared_param_file | awk '{print $NF}')
-    Header_file=$(head -n1 $LOC_Shared_param_file | awk '{$NF="";print $0}')
+    #   What the header is check until it finds a non empty line
+    while [[ $Header_file == "" ]]; do
+        NUM_Header_file=$(($NUM_Header_file+1))
+        Header_file=$(head -n$NUM_Header_file $LOC_Shared_param_file | tail -n1 | awk '{$NF="";print $0}')
+    done
+    Header_file_ver=$(head -n$NUM_Header_file $LOC_Shared_param_file | tail -n1 | awk '{print $NF}')
 
     # Spf=Shared parameter file
     NAME_Spf=$(echo $LOC_Shared_param_file | awk -F\/ '{print $NF}')
@@ -405,6 +408,11 @@ Tandem ()
             declare local "$param_name"="$param_value"
         fi
     done
+    if [[ $Decoy_Database == "0" ]]; then
+        Decoy_tandem="no"
+    else
+        Decoy_tandem="yes"
+    fi
 #   taxonomy: generates the taxonomy.xml like file
     echo -e "<?xml version=\"1.0\"?>\n"\
             "<bioml label=\"x! taxon-to-file matching list\">\n"\
@@ -423,6 +431,7 @@ Tandem ()
             "    <note type=\"input\" label=\"list path, taxonomy information\">$Tandem_taxonomy</note>\n"\
             "    <note type=\"input\" label=\"protein, taxon\">$Taxon</note>\n"\
             "    <note>Decoy_prefix=$Decoy_prefix</note>\n"\
+            "    <note type=\"input\" label=\"scoring, include reverse\">$Decoy_tandem</note>\n"\
             "    <note type=\"input\" label=\"spectrum, path\">/path/to/input</note>\n"\
             "    <note type=\"input\" label=\"output, path\">/path/to/output</note>\n"\
             "</bioml>" > $Tandemparam_input
@@ -467,7 +476,7 @@ Tandem ()
 
 #   model refinement parameters
 
-#   label="refine">yes</note>
+    sed -i "s/label=\"refine\">.*</label=\"refine\">yes</g" $Tandemparam
 #    label="refine, modification mass"><
 #    label="refine, sequence path"><
 #    label="refine, tic percent">20<
@@ -499,7 +508,7 @@ Tandem ()
     fi
 
 #   protein parameters
-#   label=\"protein, taxon\">.*<
+    sed -i "s/label=\"protein, taxon\">.*</label=\"protein, taxon\">$Taxon</g" $Tandemparam
     sed -i "s/label=\"protein, cleavage site\">.*</label=\"protein, cleavage site\">$search_enzyme_number</" $Tandemparam
 #   label="protein, modified residue mass file"></note>
 #   label="protein, homolog management">no</note>
@@ -531,14 +540,8 @@ Tandem ()
     sed -i "s/label=\"scoring, z ions\">.*</label=\"scoring, z ions\">$use_Z_ions</g" $Tandemparam
 
 #   label="scoring, cyclic permutation">no</note>
-    if [[ $Decoy_Database == "0" ]]; then
-        Decoy_tandem="no"
-    else
-        Decoy_tandem="yes"
-    fi
-    sed -i "s/label=\"scoring, include reverse\">.*</label=\"scoring, include reverse\">$Decoy_tandem</" $Tandemparam
+#    sed -i "s/label=\"scoring, include reverse\">.*</label=\"scoring, include reverse\">$Decoy_tandem</" $Tandemparam
 #   label="scoring, cyclic permutation">no</note>
-#   label="scoring, include reverse">no</note>
 
 
 

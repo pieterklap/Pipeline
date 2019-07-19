@@ -1,4 +1,4 @@
-##Start## "Xtandem"
+##Start## "Tandem"
 
 # Stes the location of tandem into a variable
 PIDprog=$(grep "Tandem " "$LOC"install_locations | awk '{print $2}')
@@ -17,24 +17,53 @@ if [[ $PIDprog == "" ]] || [ ! -f $PIDprog ]; then
     fi
 fi
 
-# input.xml
-# creates varable to be able t be used in sed
-inputXT=${PIDinput//\//\\/}        # sets backslashes in front of forward slashes for use with sed
-outputXT=${PIDoutput//\//\\/}      # sets backslashes in front of forward slashes for use with sed
+cp $PIDparam ${PIDparam//.xml/_$NAME.xml}
+PIDparam=${PIDparam//.xml/_$NAME.xml}
+if [[ $NAME == *"PeptideProphet"* ]]; then
+    sed -i "s/label=\"scoring, include reverse\">.*</label=\"scoring, include reverse\">no</" $PIDparam
+fi
 
-# Changes the paths in the input.xml file
-# Sets the input path 
-sed -i "s/\"spectrum, path\">.*</\"spectrum, path\">$inputXT</" "$PIDparam"
-# changes the extention of the input file and adds the output suffix to create the output file name
-NAME_input=$(echo $PIDinput | awk -F\/ '{print $NF}' | awk -F\. '{$NF="";print $0}' | tr " " "." | head -c-2)
-NAME_input="$NAME_input$output_suffix.t.xml"
-# Sets the output path/name
-sed -i "s/\"output, path\">.*</\"output, path\">$outputXT\/$NAME_input</" "$PIDparam"
+for input in $PIDinput
+do
+#   input.xml
+#   creates varable to be able t be used in sed
+    inputXT=${input//\//\\/}        # sets backslashes in front of forward slashes for use with sed
+    outputXT=${Stand_output//\//\\/}      # sets backslashes in front of forward slashes for use with sed
 
-# run Xtandem
-$PIDprog $PIDparam |& tee -a $datelog
+#   Changes the paths in the input.xml file
+#   Sets the input path
+    sed -i "s/\"spectrum, path\">.*</\"spectrum, path\">$inputXT</" "$PIDparam"
+#   changes the extention of the input file and adds the output suffix to create the output file name
+    NAME_input=$(echo ${input} | awk -F\/ '{print $NF}' | awk -F\. '{$NF="";print $0}' | tr " " "." | head -c-2)
+    NAME_input="$NAME_input$output_suffix.t.xml"
+#   Sets the output path/name
+    sed -i "s/\"output, path\">.*</\"output, path\">$outputXT\/$NAME_input</" "$PIDparam"
 
-PIDoutput=$PIDoutput/$NAME_input
-#PIDoutput=$(ls -t $PIDoutput/* |head -n1)
+#   run Tandem
+    $PIDprog $PIDparam |& tee -a $datelog
 
-##End## "Xtandem"
+    Tandemoutput+="$Stand_output/$NAME_input "
+
+done
+
+PIDoutput=$Tandemoutput
+
+for output in $PIDoutput
+do
+# if the file is not found and/or empty it is removed from the $PIDoutput it exits if $PIDoutput is empty
+    if [ -f ${output} ]; then
+        if [ ! -s ${output} ]; then
+            echo -e "\e[91mERROR:\e[0m ${output} is empty \nsomething went wrong running $PIDprog" | tee -a $datelog
+            PIDoutput=${PIDoutput//${output}/}
+        fi
+    else
+        echo -e "\e[91mERROR:\e[0m ${output} is not a file \nsomething went wrong running $PIDprog" | tee -a $datelog
+        PIDoutput=${PIDoutput//${output}/}
+    fi
+done
+if [[ $PIDoutput == "" ]]; then
+    echo -e "\e[91mERROR:\e[0m no output files found"
+    exit
+fi
+
+##End## "Tandem"

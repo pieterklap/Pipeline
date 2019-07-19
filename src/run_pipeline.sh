@@ -46,7 +46,7 @@ Set_corect_parameter ()
     if [[ $PID == "comet" ]]; then
         PIDparam="-p $comet"
     fi
-    if [[ $PID == "Xtandem" ]]; then
+    if [[ $PID == "Tandem" ]]; then
         PIDparam="-p $tandem"
     fi
     if [[ $PID == "MSGFPlus" ]]; then

@@ -46,4 +46,26 @@ if [[ $VALinput == "" ]]; then
     exit
 fi
 
+#   check if semiparametric parameters have been used for msgfplus if peptideprophet is used as a validator
+if [[ $NAME == *"all"* ]] || [[ $NAME == *"PeptideProphet"* ]]; then
+    #   selects the correct parameter file if more than 1 are given
+    if [[ $VALparameters != "" ]]; then
+        VALparam=$(echo $VALparameters | awk '{print $1}')
+        VALparam=$(grep -v "^#" $VALparam | grep "[A-Z]" | tr "\n" " ")
+        VALparameters=$(echo $VALparameters | awk '{$1="";print $0}')
+    fi
+    if [[ $VALparam != *"DECOY="* ]]; then
+        decoy_prefix=$(grep "^DecoyPrefix -decoy" $PIDparam | awk '{print $3}')
+        if [[ $decoy_prefix == "" ]]; then
+            decoy_prefix="XXX"
+        else
+            decoy_prefix=$(printf '%q\n' "$decoy_prefix")
+        fi
+        VALparam="$VALparam DECOY=$decoy_prefix"
+    fi
+    if [[ $VALparam != *"NONPARAM"* ]]; then
+        VALparam="$VALparam NONPARAM"
+    fi
+    MSGF_param_change="1"
+fi
 ##End## "idconvert"

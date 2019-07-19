@@ -52,29 +52,38 @@ while [ "$1" != "" ]; do
                             shift
                             ;;
         -i | --input )      input="$1 "
+                            #   Check only one input file has been given is so test if it is a meta file
                             if [[ ${3:0:1} == "-" ]] && [[ "$3" != "" ]] && [ -f "$2" ]; then
                                 shift
-                                meta_file_test=$(grep "^/" "$1" | head -n1)
-                                #   checks if the file contains file locations
+                                #   Checks from the top down for text that does not start with a #
+                                while [[ $meta_file_test == "" ]]; do
+                                    NUMlines=$[$NUMlines+1]
+                                    meta_file_test=$(head -n$NUMlines $1 | tail -n1  | sed 's/#.*//g')
+                                done
+                                #   nececery if a single line contains multiple files takes the last one for testing
                                 for file in $meta_file_test
                                 do
                                     meta_file_test=$(echo ${file})
                                 done
-                                #   tests if it is a file if so puts it into $input
+                                #   tests if it is a file if so puts all the lines into $input
                                 if [ -f $meta_file_test ] && [[ $meta_file_test != "" ]]; then
                                     echo "PPG meta file"
                                     input+=$(echo $(sed 's/#.*//g' "$1"))
-                                elif [[ $meta_file_test == "" ]]; then
+                                #   If it is not a file assume that it is a regular input file
+                                elif [ ! -f $meta_file_test ]; then
                                     echo "separate file"
                                     input+="$1"
                                 else
-                                    echo "$meta_file_test is not a file"
+                                #   else should not happen
+                                    echo "Cannot allocate input files"
                                     exit
                                 fi
                             else
+                            #   If multiple file have been given they are separate files.
                                 echo "separate files"
                                 while [[ ${2:0:1} != "-" ]] && [[ "$2" != "" ]]; do
                                     shift
+                                    #   simple test to see if the input is valid
                                     if [ -f "$1" ]; then
                                         input+="$1 "
                                     else
@@ -119,7 +128,7 @@ while [ "$1" != "" ]; do
                             ;;
         -S | --noScripts )  Run_scripts="no"
                             if [[ $location == "" ]]; then
-                                location="-L $(echo $2 | awk -F\/ '{$NF="";OFS=FS;print $0}')"
+                                location="-L $(echo $2 | awk -F\/ '{$NF="";print $0}' | tr " " "/")"
                             fi
                             while [[ ${2:0:1} != "-" ]] && [[ "$2" != "" ]]; do
                                 shift
@@ -172,7 +181,7 @@ if [[ $Programs == "" ]]; then
     exit
 fi
 #   checks if the validators have been called on the commandline when the fussed option has been used.
-#   if they have not add them to programs
+#   if they have not add them to programs. this way the script knows which parameters to use
 if [[ $one_script_per_DDS == "yes" ]]; then
     if [[ ${Programs,,} != *"peptideprophet"* ]]; then
         Programs+="peptideprophet "
@@ -237,7 +246,7 @@ if [[ $Programs == *"msgfplus"* ]]; then
     fi
 fi
 if [[ $Programs == *"msfragger"* ]]; then
-    if [[ $Programs == *"msfragger"* ]]; then
+    if [[ $Programs == *"percolator"* ]]; then
         converters+="crux "
     fi
 fi
@@ -295,9 +304,9 @@ if [[ $Run_scripts != "no" ]] && [[ $onlyparam != "1" ]]; then
     if [[ $Programs == *"comet"* ]]; then
         touch "$LOC".PIDs/comet
     fi
-#   Creates the files that will use Xtandem
+#   Creates the files that will use Tandem
     if [[ $Programs == *"tandem"* ]]; then
-        touch "$LOC".PIDs/Xtandem
+        touch "$LOC".PIDs/Tandem
     fi
 #   Creates the files that will use MSGFPlus
     if [[ $Programs == *"msgfplus"* ]]; then
@@ -410,10 +419,10 @@ if [[ $Run_scripts != "no" ]] && [[ $onlyparam != "1" ]]; then
     do
         cat "$LOC"src/base_scripts/comet >> ${file}
     done
-#   Adds the Xtandem file to all the scripts containing Xtandem
-    for file in "$LOCscripts"*Xtandem*
+#   Adds the Tandem file to all the scripts containing Tandem
+    for file in "$LOCscripts"*Tandem*
     do
-        cat "$LOC"src/base_scripts/Xtandem >> ${file}
+        cat "$LOC"src/base_scripts/Tandem >> ${file}
     done
 #   adds the MSGFPlus file to all the scripts containing MSGFPlus
     for file in "$LOCscripts"*MSGFPlus*
@@ -435,8 +444,8 @@ if [[ $Run_scripts != "no" ]] && [[ $onlyparam != "1" ]]; then
 
 
 #   starts adding converters to the scripts
-#   Adds the Tandem2XML file to all the scripts that contain Xtandem and Peptideprophet
-    for file in "$LOCscripts"*Xtandem_$PeptideProphet_base_script*
+#   Adds the Tandem2XML file to all the scripts that contain Tandem and Peptideprophet
+    for file in "$LOCscripts"*Tandem_$PeptideProphet_base_script*
     do
         cat "$LOC"src/base_scripts/Tandem2XML >> ${file}
     done
@@ -444,7 +453,7 @@ if [[ $Run_scripts != "no" ]] && [[ $onlyparam != "1" ]]; then
     do
         cat "$LOC"src/base_scripts/idconvert >> ${file}
     done
-    for file in "$LOCscripts"*Xtandem_$percolator_base_script*
+    for file in "$LOCscripts"*Tandem_$percolator_base_script*
     do
         cat "$LOC"src/base_scripts/tandem2pin >> ${file}
     done
@@ -572,20 +581,35 @@ if [[ $RepeatRun_parameter_files == "yes" ]] && (($NUMparam>=2)); then
     fi
     for param_file in $paramsProg
     do
+    #   check if any of the output suffixes are the same
+        Name_output_suffix="$(grep 'Output_suffix' ${param_file} | tail -n1 | tr '[' '=' | sed 's/ //g' | awk -F\= '{print $2}')"
+        for name in $files_output_suffix
+        do
+            if [[ "$(grep 'Output_suffix' ${name} | tail -n1 | tr '[' '=' | sed 's/ //g' | awk -F\= '{print $2}')" == "$Name_output_suffix" ]]; then
+                echo -e "\e[91mERROR\e[0m: output suffix of ${param_file} is the same as ${name}"
+                echo -e "       Output_suffix = $Name_output_suffix"
+                exit
+            fi
+        done
+        files_output_suffix+="${param_file} "
+    done
+
+    for param_file in $paramsProg
+    do
         #   Checks the header
         LOC_Shared_param_file=${param_file}
         Header_Check
         Header_Exit
-        #   TODO check if output_suffix has been set
-        if [[ $(grep "^Output_suffix" ${param_file} | awk '{print $4}') == "" ]]; then
-            echo -e "\e[91mERROR\e[0m ${param_file}: No output suffix given. \n      Without it the names of the output files would be the same"
-        else
-            sed_param_file=${param_file//\//\\/}
-            sed_paramsProg=${paramsProg//\//\\/}
-
-            $PPG $(echo "$Entered_Command -S $Scripts_to_Run" | sed "s/$sed_paramsProg/$sed_param_file /")
-            Times_Run=$[$Times_Run+1]
+        #   check if output_suffix has been set
+        if [[ "$(grep 'Output_suffix' ${param_file} | tail -n1 | tr '[' '=' | sed 's/ //g' | awk -F\= '{print $2}')" == "" ]]; then
+            echo -e "\n\e[93mWARNING:\e[0m ${param_file}: No output suffix given. \n      Without it the names of the output files might be the same"
         fi
+        sed_param_file=${param_file//\//\\/}
+        sed_paramsProg=${paramsProg//\//\\/}
+
+        $PPG $(echo "$Entered_Command -S $Scripts_to_Run" | sed "s/$sed_paramsProg/$sed_param_file /")
+        Times_Run=$[$Times_Run+1]
+
     done
     exit
 fi
