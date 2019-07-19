@@ -72,7 +72,7 @@
 #  MINPROB=0.05 
 #  report results with minimum probability <number> (default 0.05)
 
-#  DECOY=\###RND###
+#  DECOY=<decoy_prefix>
 #  semi-supervised mode, protein name prefix to identify Decoy entries
 
 #  DECOYPROBS 
