@@ -1,0 +1,184 @@
+#Options:
+
+#-p <value>
+#          Cpos, penalty for mistakes made on positive examples. 
+#          Set by cross validation if not specified.
+#-n <value>
+#          Cneg, penalty for mistakes made on negative examples.
+#          Set by cross validation if not specified or if -p is not specified.
+#-t <value>
+#          False discovery rate threshold for evaluating best cross validation 
+#          result and reported end result. Default = 0.01.
+#-F <value>
+#          False discovery rate threshold to define positive examples in 
+#          training. Set to testFDR if 0. Default = 0.01.
+#-i <number>
+#          Maximal number of iterations. Default = 10.
+#-N <number>
+#          Only train an SVM on a subset of <x> PSMs, and use the resulting 
+#          score vector to evaluate the other PSMs. Recommended when analyzing 
+#          huge numbers (>1 million) of PSMs. When set to 0, all PSMs are used 
+#          for training as normal. Default = 0.
+#-x
+#          Quicker execution by reduced internal cross-validation.
+#-V <[-]?featureName>
+#          Use given feature name as initial search direction, can be negated 
+#          to indicate that a lower value is better.
+#-v <level>
+#          Set verbosity of output: 0=no processing info, 5=all. Default = 2
+#-o
+#          Do not stop execution when encountering questionable SVM inputs or results.
+#-u
+#          Use unit normalization [0-1] instead of standard deviation normalization
+#-R
+#          Measure performance on test set each iteration
+#-O
+#          Override error check and do not fall back on default score vector 
+#          in case of suspect score vector from SVM.
+#-S <value>
+#          Set seed of the random number generator. Default = 1
+#-D
+#          Include description of correct features, i.e. features describing 
+#          the difference between the observed and predicted isoelectric 
+#          point, retention time and precursor mass.
+#-K
+#          Retention time features are calculated as in Klammer et al. 
+#          Only available if -D is set.
+#-r <filename>
+#          Output tab delimited results of peptides to a file instead of 
+#          stdout (will be ignored if used with -U option)
+#-B <filename>
+#          Output tab delimited results for decoy peptides into a file (will 
+#          be ignored if used with -U option)
+#-m <filename>
+#          Output tab delimited results of PSMs to a file instead of stdout
+#-M <filename>
+#          Output tab delimited results for decoy PSMs into a file
+#-U
+#          Do not remove redundant peptides, keep all PSMS and exclude peptide 
+#          level probabilities.
+#-y
+#          Use the mix-max method to assign q-values and PEPs. Note that this 
+#          option only has an effect if the input PSMs are from separate 
+#          target and decoy searches. This is the default setting.
+#-Y
+#          Replace the mix-max method by target-decoy competition for 
+#          assigning q-values and PEPs. If the input PSMs are from separate 
+#          target and decoy searches, Percolator's SVM scores will be 
+#          used to eliminate the lower scoring target or decoy PSM(s) of
+#          each scan+expMass combination. If the input PSMs are detected to be 
+#          coming from a concatenated search, this option will be turned on 
+#          automatically, as this is incompatible with the mix-max 
+#          method. In case this detection fails, turn this option on explicitly.
+#-I <value>
+#          Specify the type of target-decoy search: "auto" (Percolator 
+#          attempts to detect the search type automatically), "concatenated" 
+#          (single search on concatenated target-decoy protein db) or 
+#          "separate" (two searches, one against target and one against
+#          decoy protein db). Default = "auto".
+#-s
+#          Skip validation of input file against xml schema.
+#-f <value>
+#          Use the picked protein-level FDR to infer protein probabilities. 
+#          Provide the fasta file as the argument to this flag, which will 
+#          be used for protein grouping based on an in-silico digest. If no 
+#          fasta file is available or protein grouping is not desired, set this 
+#          flag to "auto" to skip protein grouping.
+#-A
+#          Use the Fido algorithm to infer protein probabilities
+#-l <filename>
+#          Output tab delimited results of proteins to a file instead of 
+#          stdout (Only valid if option -A or -f is active)
+#-L <filename>
+#          Output tab delimited results for decoy proteins into a file (Only 
+#          valid if option -A or -f is active)
+#-P decoy_
+#          Define the text pattern to identify decoy proteins in the 
+#          database for the picked-protein algorithm. This will have no 
+#          effect on the target/decoy labels specified in the input file. 
+#          Default = "random_".
+#-z
+#          Type of enzyme used for in silico protein digestion for picked 
+#          protein-level FDR estimation. One of 
+#          "no_enzyme","elastase","pepsin","proteinasek","thermolysin","trypsin p",
+#          "chymotrypsin","lys-n","lys-c","arg-c","asp-n","glu-c","trypsin". Default="trypsin".
+#-c
+#          By default, if the peptides associated with protein A are a 
+#          proper subset of the peptides associated with protein B, then
+#          protein A is eliminated and all the peptides are considered as 
+#          evidence for protein B. Note that this filtering is done based on 
+#          the complete set of peptides in the database, not based on the 
+#          identified peptides in the search results. Alternatively, if this 
+#          option is set and if all of the identified peptides associated 
+#          with protein B are also associated with protein A, then Percolator 
+#          will report a comma-separated list of protein IDs, where the 
+#          full-length protein B is first in the list and the fragment protein 
+#          A is listed second. Commas inside protein IDs will be replaced by 
+#          semicolons. Not available for Fido.
+#-g
+#          If this option is set and multiple database proteins contain exactly 
+#          the same set of peptides, then the IDs of these duplicated proteins 
+#          will be reported as a comma-separated list, instead of 
+#          the default behavior of randomly discarding all but one of the 
+#          proteins. Commas inside protein IDs will be replaced by 
+#          semicolons. Not available for Fido.
+#-a <value>
+#          Set Fido's probability with which a present protein emits an 
+#          associated peptide. Set by grid search if not specified.
+#-b <value>
+#          Set Fido's probability of creation of a peptide from noise. Set by 
+#          grid search if not specified.
+#-G <value>
+#          Set Fido's prior probability that a protein is present in the 
+#          sample. Set by grid search if not specified.
+#-q
+#          Output empirical p-values and q-values for Fido using 
+#          target-decoy analysis to XML output (only valid if -X flag is present).
+#-d <value>
+#          Setting the gridsearch-depth to 0 (fastest), 1 or 2 (slowest) 
+#          controls how much computational time is required for the 
+#          estimation of alpha, beta and gamma parameters for Fido. Default = 0.
+#-T <value>
+#          Apply the specified threshold to PSM, peptide and protein 
+#          probabilities to obtain a faster estimate of the alpha, beta and 
+#          gamma parameters. Default = 0; Recommended when set = 0.2.
+#-C
+#          Do not approximate the posterior distribution by allowing large 
+#          graph components to be split into subgraphs. The splitting is done 
+#          by duplicating peptides with low probabilities. Splitting continues 
+#          until the number of possible configurations of each subgraph is below 2^18.
+#-E <value>
+#          To speed up inference, proteins for which none of the associated 
+#          peptides has a probability exceeding the specified threshold 
+#          will be assigned probability = 0. Default = 0.01.
+#-H <value>
+#          Q-value threshold that will be used in the computation of the MSE 
+#          and ROC AUC score in the grid search. Recommended 0.05 for 
+#          normal size datasets and 0.1 for large datasets. Default = 0.1
+#[EXPERIMENTAL FEATURE]
+# --nested-xval-bins <value>                   
+#           Number of nested cross validation bins within each cross validation 
+#           bin. This should reduce overfitting of the hyperparameters. Default = 1.
+#[EXPERIMENTAL FEATURE]
+# --spectral-counting-fdr <value>              
+#           Activates spectral counting on protein level (either 
+#           --fido-protein or --picked-protein has to be set) at the specified 
+#           PSM q-value threshold. Adds two columns, "spec_count_unique" and 
+#           "spec_count_all", to the protein tab separated output, containing 
+#           the spectral count for the peptides unique to the protein and 
+#           the spectral count including shared peptides respectively.
+#[EXPERIMENTAL FEATURE]
+# --train-best-positive                        
+#           Enforce that, for each spectrum, at most one PSM is included in the 
+#           positive set during each training iteration. If the user only 
+#           provides one PSM per spectrum, this filter will have no effect.
+#[EXPERIMENTAL FEATURE]
+# --train-fdr-initial <value>                  
+#           Set the FDR threshold for the first iteration. This is useful in 
+#           cases where the original features do not display a good separation 
+#           between targets and decoys. In subsequent iterations, the normal 
+#           --trainFDR will be used.
+#[EXPERIMENTAL FEATURE]
+# --parameter-file <filename>                  
+#           Read flags from a parameter file. If flags are specified on the 
+#           command line as well, these will override the ones in the parameter file.

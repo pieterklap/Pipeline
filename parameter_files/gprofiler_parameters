@@ -1,0 +1,59 @@
+# parameter file for gprofiler
+# Every line after a "#" is regarded as a comment
+# all parameters starting with a "#" use the default value
+
+"organism" "hsapiens"
+#   ID of species to be queried. List of possible ID-s can be seen at the organisms list page (https://biit.cs.ut.ee/gprofiler/page/organism_list).
+#
+"sources" []
+#   An emty list is equal to a full list
+#   sources ["GO:MF","GO:CC","GO:BP","KEGG","REAC","WP","TF","MIRNA","HPA","CORUM","HP"] = sources []
+#   List of datasources to use for query. NB! Not all sources are available for all species.
+#       source ID   Source name
+#       GO:MF       molecular function
+#       GO:CC       cellular component
+#       GO:BP       biological process
+#       KEGG        Kyoto Encyclopedia of Genes and Genomes
+#       REAC        Reactome
+#       WP          WikiPathways
+#       TF          Transfac
+#       MIRNA       miRTarBase
+#       HPA         Human Protein Atlas
+#       CORUM       CORUM protein complexes
+#       HP          Human Phenotype Ontology
+#
+##"user_threshold" 0.05
+#   Default 0.05. float between 0 and 1, used to define custom significance threshold. 
+#
+##"all_results" false
+#   Boolean. Default false. If "true", the API also returns results that are below the significance threshold.
+#
+##"ordered" false
+#   Boolean. Default false. If true, the API performs ordered query. Read more.
+#
+##"combined" false
+#   Boolean. Default false. If true, runs queries simultaneously and combines the result. See query for how to supply more than one query in request. Read more.
+#
+##"measure_underrepresentation" false
+#   Boolean, default false. If true, g:GOSt returns significantly under-represented functional terms. Read more.
+#
+##"no_iea" false
+#   Boolean, default false. If true, g:GOSt excludes electronic annotations from GO terms. Read more.
+#
+##"domain_scope" "annotated"
+#   String, default 'annotated'. Other options 'known' or 'custom'. If set to 'custom', the 'background' parameter must be populated. Read more.
+#
+##"numeric_ns" "ENTREZGENE"
+#   String. Default "ENTREZGENE". Indicating which namespace to use when IDs are numeric. Read more.
+#
+"significance_threshold_method" "fdr"
+#   String. Multiple testing correction method. Default 'g_SCS'. Other options are 'bonferroni' and 'fdr' Read more.
+#
+##"background"
+#   List of strings. Should be a list of gene-ids (preferably ensembl id-s) to be considered as the statistical background for the query. To use this parameter, 'domain_scope' should be set to custom. TODO: check if true. Read more.
+#
+##"output" "json"
+#   String. Default "json". No other options should be used at the moment.
+#
+##"no_evidences" false
+#   Boolean. Default false. If true, skips lookup for evidence codes. Speeds up queries, if there is no interest in evidence codes. 

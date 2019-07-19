@@ -1,0 +1,31 @@
+# parameter file for Reactome
+# Every line after a "#" is regarded as a comment
+# all parameters starting with a "#" use the default value
+#
+interactors=false [identifiers]
+#   true/false
+species=Homo sapiens [identifiers]
+#   list of species to filter the result (accepts taxonomy ids, species names and dbId)
+#pageSize=50 [identifiers]
+#   pathways per page
+#page=1 [identifiers]
+#   page number
+sortBy=ENTITIES_PVALUE [identifiers]
+#   How to sort the result
+#order=ASC [identifiers]
+#   Specifies the order
+resource=TOTAL [identifiers]
+#   the resource to sort
+pValue=1 [identifiers]
+#   defines the pValue threshold. Only hit pathway with pValue equals or below the threshold will be returned
+includeDisease=true [identifiers]
+#   set to ‘false’ to exclude the disease pathways from the result (it does not alter the statistics)
+
+number=25 [report]
+
+diagramProfile=Modern [report]
+
+analysisProfile=Standard [report]
+
+fireworksProfile=Barium%20Lithium [report]
+
