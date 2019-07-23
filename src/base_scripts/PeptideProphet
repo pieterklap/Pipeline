@@ -33,8 +33,8 @@ do
     EXTENTION=$(echo ${Pep_file} | awk -F. '{print $(NF-1)"."$NF}')
 #   Makes a copy of the pep.xml file before peptideprophet overwrites it
     if [[ $EXTENTION == "pep.xml" ]]; then
-        copy_PIDoutput=$(echo ${Pep_file} | sed "s/\.$EXTENTION/_database_search\.$EXTENTION/")
-        cp ${Pep_file} $copy_PIDoutput
+        copy_DSSoutput=$(echo ${Pep_file} | sed "s/\.$EXTENTION/_database_search\.$EXTENTION/")
+        cp ${Pep_file} $copy_DSSoutput
 # runs peptideprophet
         echo -e "Issued command: \n$VALprog ${Pep_file} $VALparam" |& tee -a $datelog
         $VALprog ${Pep_file} $VALparam |& tee -a $datelog

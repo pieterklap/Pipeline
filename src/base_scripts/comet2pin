@@ -1,17 +1,17 @@
 ##Start## "comet2pin"
 
 if [[ $NAME != *"all"* ]]; then
-    sed 's/output_pepxmlfile = ./output_pepxmlfile = 0/' "$PIDparam" > "$PIDparam""_percolator"
-    sed -i 's/output_percolatorfile = ./output_percolatorfile = 1/' "$PIDparam""_percolator"
-    PIDparam="$PIDparam""_percolator"
+    sed 's/output_pepxmlfile = ./output_pepxmlfile = 0/' "$DSSparam" > "$DSSparam""_percolator"
+    sed -i 's/output_percolatorfile = ./output_percolatorfile = 1/' "$DSSparam""_percolator"
+    DSSparam="$DSSparam""_percolator"
 else
-     sed -i 's/output_percolatorfile = ./output_percolatorfile = 1/' "$PIDparam"
+     sed -i 's/output_percolatorfile = ./output_percolatorfile = 1/' "$DSSparam"
 fi
 
 if [[ $output_suffix == "" ]]; then
-    output_suffix=$(grep "output_suffix =" $PIDparam | awk '{print $3}')
+    output_suffix=$(grep "output_suffix =" $DSSparam | awk '{print $3}')
 fi
-EXTENTION=$(echo "$PIDinput" |awk -F. '{print $NF}')
-COMEToutput+=$(echo "$PIDinput" | sed "s/\.$EXTENTION/$output_suffix\.pin /g")
+EXTENTION=$(echo "$DSSinput" |awk -F. '{print $NF}')
+COMEToutput+=$(echo "$DSSinput" | sed "s/\.$EXTENTION/$output_suffix\.pin /g")
 
 ##End## "comet2pin"

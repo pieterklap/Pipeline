@@ -2,54 +2,54 @@
 
 #   Checks if/where MSFragger (version 20190222) is installed if it is not installed it will look for the .jar file.
 #   if more than 1 .jar files are found it will take the last one (the latest one if the location is the same).
-PIDprog=$(grep "MSFragger " "$LOC"install_locations | awk '{print $2}')
-if [[ $PIDprog == "" ]] || [ ! -f $PIDprog ]; then
+DSSprog=$(grep "MSFragger " "$LOC"install_locations | awk '{print $2}')
+if [[ $DSSprog == "" ]] || [ ! -f $DSSprog ]; then
     echo -e "\e[93mWARNING:\e[0m The location of MSFragger is not given or does not exist"
-    PIDprog=$(command -v MSFragger-20190222.jar)
-    if [[ $PIDprog == "" ]]; then
-        PIDprog=$(locate -b MSFragger*.jar | tail -n1)
+    DSSprog=$(command -v MSFragger-20190222.jar)
+    if [[ $DSSprog == "" ]]; then
+        DSSprog=$(locate -b MSFragger*.jar | tail -n1)
     fi
-    if [[ $PIDprog == "" ]]; then
+    if [[ $DSSprog == "" ]]; then
         echo -e "\e[91mERROR:\e[0m MSFragger was not found. \nexiting"
         exit
     else
-        echo -e "\e[92mRunning:\e[0m $PIDprog"
+        echo -e "\e[92mRunning:\e[0m $DSSprog"
     fi
 fi
 
-MemUse=$(grep "^#Mem_Use" $PIDparam | awk '{print $2}')
+MemUse=$(grep "^#Mem_Use" $DSSparam | awk '{print $2}')
 
 if [[ $MemUse == "" ]]; then
     MemUse="4G"
 fi
-for input_file in $PIDinput
+for input_file in $DSSinput
 do
     Extention=$(echo ${input_file} | awk -F. '{print $NF}')
     Fraggerout=$(echo ${input_file} | sed "s/$Extention/pepXML/")
 
-    java -Xmx"$MemUse" $JavaOptions -jar $PIDprog $PIDparam ${input_file}
+    java -Xmx"$MemUse" $JavaOptions -jar $DSSprog $DSSparam ${input_file}
 
     NAMEfraggerout=$(echo $Fraggerout | awk -F/ '{print $NF}' | sed "s/\.pepXML/$output_suffix\.pep.xml/")
-    PIDoutput+="$Stand_output/$NAMEfraggerout "
+    DSSoutput+="$Stand_output/$NAMEfraggerout "
 
     mv $Fraggerout $Stand_output/$NAMEfraggerout
 
 done
 
-for output in $PIDoutput
+for output in $DSSoutput
 do
-# if the file is not found and/or empty it is removed from the $PIDoutput it exits if $PIDoutput is empty
+# if the file is not found and/or empty it is removed from the $DSSoutput it exits if $DSSoutput is empty
     if [ -f ${output} ]; then
         if [ ! -s ${output} ]; then
-            echo -e "\e[91mERROR:\e[0m ${output} is empty \nsomething went wrong running $PIDprog" | tee -a $datelog
-            PIDoutput=${PIDoutput//${output}/}
+            echo -e "\e[91mERROR:\e[0m ${output} is empty \nsomething went wrong running $DSSprog" | tee -a $datelog
+            DSSoutput=${DSSoutput//${output}/}
         fi
     else
-        echo -e "\e[91mERROR:\e[0m ${output} is not a file \nsomething went wrong running $PIDprog" | tee -a $datelog
-        PIDoutput=${PIDoutput//${output}/}
+        echo -e "\e[91mERROR:\e[0m ${output} is not a file \nsomething went wrong running $DSSprog" | tee -a $datelog
+        DSSoutput=${DSSoutput//${output}/}
     fi
 done
-if [[ $PIDoutput == "" ]]; then
+if [[ $DSSoutput == "" ]]; then
     echo -e "\e[91mERROR:\e[0m no output files found"
     exit
 fi

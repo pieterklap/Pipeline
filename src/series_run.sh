@@ -10,7 +10,7 @@ shift
 shift
 
 LOC=$(echo $@ |awk '{print $NF}')
-PID=$(echo $@ | awk '{print $(NF-1)}')
+DSS=$(echo $@ | awk '{print $(NF-1)}')
 
 Run_Script=$(echo $@ |awk '{$NF="";$(NF-1)="";print $0}')
 
@@ -21,13 +21,13 @@ while [ "$3" != "" ]; do
     Help="0"
     case $1 in
         -o | --output )         shift               # Enter -o to specify the output location
-                                PIDoutput=$1        # Enter -o to specify the output location
+                                DSSoutput=$1        # Enter -o to specify the output location
                                 ;;
         -i | --input )          shift               # Enter -i to specify the input location
-                                PIDinput=$1         # Enter -i to specify the input location
+                                DSSinput=$1         # Enter -i to specify the input location
                                 ;;
         -p | --parameter )      shift               # Enter -p to specify the paramater locatio
-                                PIDparam=$1
+                                DSSparam=$1
                                 ;;
         -v | --valparameter )   shift
                                 VALparam=$1
@@ -53,18 +53,18 @@ done
 source $LOC/src/parameter_repeat.sh
 Parameter_repeat_default
 
-if [[ $PID == "comet" ]]; then
+if [[ $DSS == "comet" ]]; then
     Rerun_Comet_Tollerance_Parameters
 fi
 
-if [[ $PID == "Xtandem" ]]; then
+if [[ $DSS == "Xtandem" ]]; then
     Rerun_Tandem_Tollerance_Parameters
 fi
 
-if [[ $PID == "MSGFPlus" ]]; then
+if [[ $DSS == "MSGFPlus" ]]; then
     Rerun_MSGFPlus_Tollerance_Parameters
 fi
 
-if [[ $PID == "MSFragger" ]]; then
+if [[ $DSS == "MSFragger" ]]; then
     Rerun_MSFragger_Tollerance_Parameters
 fi

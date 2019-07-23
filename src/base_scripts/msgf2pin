@@ -14,21 +14,21 @@ fi
 
 #   Used in a separated target/decoy search
 if [[ "$Separate_TD_search" == "yes" ]]; then
-    MSGFparam=$(grep -v "^#" $PIDparam_decoy |awk '{print $2,$3}' |tr "\n" " ")
-    EXTENTION=$(echo "$PIDinput" |awk -F. '{print $NF}')
+    MSGFparam=$(grep -v "^#" $DSSparam_decoy |awk '{print $2,$3}' |tr "\n" " ")
+    EXTENTION=$(echo "$DSSinput" |awk -F. '{print $NF}')
 
-    for input_file in $PIDinput
+    for input_file in $DSSinput
     do
         EXTENTION=$(echo "${input_file}" |awk -F. '{print $NF}')
         MSGFoutput_decoy=$(echo "${input_file}" | sed "s/\.$EXTENTION/$output_suffix\.decoy\.mzid/")
 
-        java -Xmx"$MemUse" $JavaOptions -jar $PIDprog -s ${input_file} -o $MSGFoutput_decoy $MSGFparam |tee -a $datelog
+        java -Xmx"$MemUse" $JavaOptions -jar $DSSprog -s ${input_file} -o $MSGFoutput_decoy $MSGFparam |tee -a $datelog
 
-        PIDoutput_decoy+="$MSGFoutput_decoy "
+        DSSoutput_decoy+="$MSGFoutput_decoy "
     done
 fi
 
-for Pep_file in $PIDoutput
+for Pep_file in $DSSoutput
 do
     EXTENTION=$(echo "${Pep_file}" |awk -F. '{print $NF}')
     CONVoutput=$(echo "${Pep_file}" | sed "s/\.$EXTENTION/\.pin/")
@@ -36,10 +36,10 @@ do
     if [[ "$Separate_TD_search" != "yes" ]]; then
         $CONVprog -o $CONVoutput -P $decoy_prefix ${Pep_file} |& tee -a $datelog
     else
-        Decoy_Pep_file=$(echo $PIDoutput_decoy | awk '{print $1}')
+        Decoy_Pep_file=$(echo $DSSoutput_decoy | awk '{print $1}')
         $CONVprog -o $CONVoutput ${Pep_file} $Decoy_Pep_file |& tee -a $datelog
 
-        PIDoutput_decoy=$(echo $PIDoutput_decoy | awk '{$1="";print $0}')
+        DSSoutput_decoy=$(echo $DSSoutput_decoy | awk '{$1="";print $0}')
     fi
 
     VALinput+="$CONVoutput "

@@ -1,31 +1,31 @@
 ##Start## "MSGFPlus"
-PIDprog=$(grep MSGFPlus "$LOC"install_locations | awk '{print $2}')
+DSSprog=$(grep MSGFPlus "$LOC"install_locations | awk '{print $2}')
 #   If the program was not in the install_locations file it tries to find it.
-if [[ $PIDprog == "" ]] || [ ! -f $PIDprog ]; then
+if [[ $DSSprog == "" ]] || [ ! -f $DSSprog ]; then
     echo -e "\e[93mWARNING:\e[0m The location of MSGFPlus is not given or does not exist"
-    PIDprog=$(command -v MSGFPlus.jar)
-    if [[ $PIDprog == "" ]]; then
-        PIDprog=$(locate -b MSGFPlus.jar | tail -n1)
+    DSSprog=$(command -v MSGFPlus.jar)
+    if [[ $DSSprog == "" ]]; then
+        DSSprog=$(locate -b MSGFPlus.jar | tail -n1)
     fi
-    if [[ $PIDprog == "" ]]; then
+    if [[ $DSSprog == "" ]]; then
         echo -e "\e[91mERROR:\e[0m MSGFPlus was not found. \nexiting"
         exit
     else
-        echo -e "\e[92mRunning:\e[0m $PIDprog"
+        echo -e "\e[92mRunning:\e[0m $DSSprog"
     fi
 fi
 #   Puts the parameters into variables
-MSGFparam=$(grep -v "^#" $PIDparam | grep -v "Mem_Use" | grep -v "Output_suffix" |awk '{print $2,$3}' |tr "\n" " ")
-MemUse=$(grep "Mem_Use" $PIDparam | awk '{print $2}')
+MSGFparam=$(grep -v "^#" $DSSparam | grep -v "Mem_Use" | grep -v "Output_suffix" |awk '{print $2,$3}' |tr "\n" " ")
+MemUse=$(grep "Mem_Use" $DSSparam | awk '{print $2}')
 #   if the amount of allocated memory was not given set it to the default value (4G)
 if [[ $MemUse == "" ]]; then
     MemUse="4G"
 fi
 if [[ $output_suffix == "" ]]; then
-    output_suffix=$(grep "^#Output_suffix" $PIDparam | awk '{print $2}')
+    output_suffix=$(grep "^#Output_suffix" $DSSparam | awk '{print $2}')
 fi
 
-for input_file in $PIDinput
+for input_file in $DSSinput
 do
 #   notes the name and the extention 
     MSGFoutput=$(echo "${input_file}" |awk -F/ '{print $NF}')
@@ -34,31 +34,31 @@ do
     MSGFoutput="$Stand_output"/$(echo "$MSGFoutput" | sed "s/\.$EXTENTION/$output_suffix\.mzid/")
 
 #   runnig MSGFPlus
-    java -Xmx$MemUse $JavaOptions -jar $PIDprog -s ${input_file} -o $MSGFoutput $MSGFparam |& tee -a $datelog
+    java -Xmx$MemUse $JavaOptions -jar $DSSprog -s ${input_file} -o $MSGFoutput $MSGFparam |& tee -a $datelog
 
     MSGFPlusoutput+="$MSGFoutput "
 done
-PIDoutput=$MSGFPlusoutput
+DSSoutput=$MSGFPlusoutput
 
-for output in $PIDoutput
+for output in $DSSoutput
 do
-# if the file is not found and/or empty it is removed from the $PIDoutput it exits if $PIDoutput is empty
+# if the file is not found and/or empty it is removed from the $DSSoutput it exits if $DSSoutput is empty
     if [ -f ${output} ]; then
         if [ ! -s ${output} ]; then
-            echo -e "\e[91mERROR:\e[0m ${output} is empty \nsomething went wrong running $PIDprog" | tee -a $datelog
-            PIDoutput=${PIDoutput//${output}/}
+            echo -e "\e[91mERROR:\e[0m ${output} is empty \nsomething went wrong running $DSSprog" | tee -a $datelog
+            DSSoutput=${DSSoutput//${output}/}
         fi
     else
-        echo -e "\e[91mERROR:\e[0m ${output} is not a file \nsomething went wrong running $PIDprog" | tee -a $datelog
-        PIDoutput=${PIDoutput//${output}/}
+        echo -e "\e[91mERROR:\e[0m ${output} is not a file \nsomething went wrong running $DSSprog" | tee -a $datelog
+        DSSoutput=${DSSoutput//${output}/}
     fi
 done
-if [[ $PIDoutput == "" ]]; then
+if [[ $DSSoutput == "" ]]; then
     echo -e "\e[91mERROR:\e[0m no output files found"
     exit
 fi
 
-decoy_prefix=$(grep "^DecoyPrefix -decoy" $PIDparam | awk '{print $3}')
+decoy_prefix=$(grep "^DecoyPrefix -decoy" $DSSparam | awk '{print $3}')
 if [[ $decoy_prefix == "" ]]; then
     decoy_prefix="XXX"
 else

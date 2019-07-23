@@ -13,7 +13,7 @@ if [[ $CONVprog == "" ]] || [ ! -f $CONVprog ]; then
     fi
 fi
 
-for Pep_file in $PIDoutput
+for Pep_file in $DSSoutput
 do
 #   Sets the name of the output file to {file}.pep.xml
     CONVoutput=${Pep_file//.xml/.pep.xml}

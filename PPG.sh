@@ -19,7 +19,6 @@ if [[ ${LOC:0:1} != "/" ]]; then
     fi
 fi
 
-
 #   if nothing has been entered output the README.md to the terminal.
 if [[ $1 == "" ]]; then
     if [ -f "$LOC"README.md ]; then
@@ -297,26 +296,26 @@ fi
 #   will skip generateing scripts if asked
 if [[ $Run_scripts != "no" ]] && [[ $onlyparam != "1" ]]; then
 
-#   Creates the files for the PIDs
-    mkdir -vp "$LOC".PIDs
-    rm -f "$LOC".PIDs/*
+#   Creates the files for the DSSs
+    mkdir -vp "$LOC".DSSs
+    rm -f "$LOC".DSSs/*
 #   Creates the files that will use comet
     if [[ $Programs == *"comet"* ]]; then
-        touch "$LOC".PIDs/comet
+        touch "$LOC".DSSs/comet
     fi
 #   Creates the files that will use Tandem
     if [[ $Programs == *"tandem"* ]]; then
-        touch "$LOC".PIDs/Tandem
+        touch "$LOC".DSSs/Tandem
     fi
 #   Creates the files that will use MSGFPlus
     if [[ $Programs == *"msgfplus"* ]]; then
-        touch "$LOC".PIDs/MSGFPlus
+        touch "$LOC".DSSs/MSGFPlus
     fi
     if [[ $Programs == *"msfragger"* ]]; then
-        touch "$LOC".PIDs/MSFragger
+        touch "$LOC".DSSs/MSFragger
     fi
 
-#   done creating files for the PIDs
+#   done creating files for the DSSs
 
 
 #   Adds the validator to the name of the scripts
@@ -328,38 +327,38 @@ if [[ $Run_scripts != "no" ]] && [[ $onlyparam != "1" ]]; then
         PeptideProphet_base_script="all"
         percolator_base_script="all"
 
-        for file in "$LOC".PIDs/*
+        for file in "$LOC".DSSs/*
         do
             cp ${file} ${file}_all
-            cp "$LOC".PIDs/*_all "$LOC".VALs/
-            rm -f "$LOC".PIDs/*_all
+            cp "$LOC".DSSs/*_all "$LOC".VALs/
+            rm -f "$LOC".DSSs/*_all
         done
     else
         PeptideProphet_base_script="PeptideProphet"
         percolator_base_script="percolator"
 
         if [[ $Programs == *"peptideprophet"* ]];then
-            for file in "$LOC".PIDs/*
+            for file in "$LOC".DSSs/*
             do
                 cp ${file} ${file}_$PeptideProphet_base_script
-                cp "$LOC".PIDs/*_$PeptideProphet_base_script "$LOC".VALs/
-                rm -f "$LOC".PIDs/*_$PeptideProphet_base_script
+                cp "$LOC".DSSs/*_$PeptideProphet_base_script "$LOC".VALs/
+                rm -f "$LOC".DSSs/*_$PeptideProphet_base_script
             done
         fi
         if [[ $Programs == *"percolator"* ]];then
-            for file in "$LOC".PIDs/*
+            for file in "$LOC".DSSs/*
             do
                 cp ${file} ${file}_$percolator_base_script
-                cp "$LOC".PIDs/*_$percolator_base_script "$LOC".VALs/
-                rm -f "$LOC".PIDs/*_$percolator_base_script
+                cp "$LOC".DSSs/*_$percolator_base_script "$LOC".VALs/
+                rm -f "$LOC".DSSs/*_$percolator_base_script
             done
         fi
     fi
-#   checks if a validator has been used if not it copies everyting in the .PIDs directory to the .VALs directory
+#   checks if a validator has been used if not it copies everyting in the .DSSs directory to the .VALs directory
 #   It also sets NOVAL to 1 to stop analysis programs from being added
     VALcheck=$(ls "$LOC".VALs)
     if [[ $VALcheck == "" ]]; then
-        cp "$LOC".PIDs/* "$LOC".VALs/
+        cp "$LOC".DSSs/* "$LOC".VALs/
         NOVAL="1"
     fi
 #   done adding validators to the name of the scripts
@@ -367,8 +366,6 @@ if [[ $Run_scripts != "no" ]] && [[ $onlyparam != "1" ]]; then
 #   Counts the amount of scripts that have been generated
     NUM=$(ls "$LOC".VALs/ | wc -l)
 
-#   adds .sh to the files
-    LOC=$(echo "$0" |awk -F/ '{$NF="";print $0}' | tr " " "/")
 
     mkdir -vp "$LOC".END
     rm -f "$LOC".END/*
@@ -386,12 +383,13 @@ if [[ $Run_scripts != "no" ]] && [[ $onlyparam != "1" ]]; then
     for file in "$LOCscripts"*.sh
     do
         cat "$LOC"src/base_scripts/options > ${file}
-    #   changes PIDhelp_to_be_replaced and VALhelp_to_be_replaced to the name of the PID/VAL
-        PIDHELP=$(echo ${file} | awk -F\/ '{print $NF}' | awk -F_ '{print $1}')
+    #   changes DSShelp_to_be_replaced and VALhelp_to_be_replaced to the name of the DSS/VAL
+        DSSHELP=$(echo ${file} | awk -F\/ '{print $NF}' | awk -F_ '{print $1}')
         VALHELP=$(echo ${file} | awk -F_ '{print $2}' | awk -F\. '{print $1}')
         LOC_sed=${LOC//\//\\/}
+        echo $LOC
         sed -i "s/LOChelp_to_be_replaced/$LOC_sed/" ${file}
-        sed -i "s/PIDhelp_to_be_replaced/$PIDHELP/" ${file}
+        sed -i "s/DSShelp_to_be_replaced/$DSSHELP/" ${file}
         sed -i "s/VALhelp_to_be_replaced/$VALHELP/" ${file}
     done
 
@@ -413,7 +411,7 @@ if [[ $Run_scripts != "no" ]] && [[ $onlyparam != "1" ]]; then
 
 
 
-#   starts adding PIDs to the scripts
+#   starts adding DSSs to the scripts
 #   Adds the comet file to all the scripts containing comet
     for file in "$LOCscripts"*comet*
     do
@@ -434,7 +432,7 @@ if [[ $Run_scripts != "no" ]] && [[ $onlyparam != "1" ]]; then
         cat "$LOC"src/base_scripts/MSFragger >> ${file}
     done
 
-#   done with adding PIDs to the scripts
+#   done with adding DSSs to the scripts
 
 #   Add an intermediate time to the script
     for file in "$LOCscripts"*.sh
@@ -534,7 +532,7 @@ if [[ $Run_scripts != "no" ]] && [[ $onlyparam != "1" ]]; then
         Scripts_to_Run+="$LOCscripts""$(echo "${file}" | awk -F\/ '{print $NF}') "
     done
     chmod 750 "$LOCscripts"*
-    rm -f "$LOC".PIDs/* "$LOC".VALs/*
+    rm -f "$LOC".DSSs/* "$LOC".VALs/*
     rm -f "$LOC".END/*
 
 

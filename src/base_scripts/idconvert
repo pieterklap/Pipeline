@@ -12,10 +12,10 @@ if [[ $CONVprog == "" ]] || [ ! -f $CONVprog ]; then
     fi
 fi
 if [[ $output_suffix != "" ]]; then
-    PIDoutput=$(echo $PIDoutput | sed "s/$output_suffix//")
+    DSSoutput=$(echo $DSSoutput | sed "s/$output_suffix//")
 fi
 
-for Pep_file in $PIDoutput
+for Pep_file in $DSSoutput
 do
 
     EXTENTION=$(echo "${Pep_file}" | awk -F. '{print $NF}')

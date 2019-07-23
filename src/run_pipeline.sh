@@ -36,24 +36,24 @@ fi
 Set_corect_parameter ()
 {
     # Sets the correct parameter files to be used with the corect program
-    PID=$(echo ${file} | awk -F. '{print $1}' | awk -F_ '{print $1}' | awk -F/ '{print $NF}')
+    DSS=$(echo ${file} | awk -F. '{print $1}' | awk -F_ '{print $1}' | awk -F/ '{print $NF}')
     VAL=$(echo ${file} | awk -F. '{print $1}' | awk -F_ '{print $2}')
 
-#    PIDparam="-p "
+#    DSSparam="-p "
 #    VALparam="-v "
     ANAparam="-a "
 
-    if [[ $PID == "comet" ]]; then
-        PIDparam="-p $comet"
+    if [[ $DSS == "comet" ]]; then
+        DSSparam="-p $comet"
     fi
-    if [[ $PID == "Tandem" ]]; then
-        PIDparam="-p $tandem"
+    if [[ $DSS == "Tandem" ]]; then
+        DSSparam="-p $tandem"
     fi
-    if [[ $PID == "MSGFPlus" ]]; then
-        PIDparam="-p $msgfplus"
+    if [[ $DSS == "MSGFPlus" ]]; then
+        DSSparam="-p $msgfplus"
     fi
-    if [[ $PID == "MSFragger" ]]; then
-        PIDparam="-p $msfragger"
+    if [[ $DSS == "MSFragger" ]]; then
+        DSSparam="-p $msfragger"
     fi
     if [[ $VAL == "PeptideProphet" ]]; then
         VALparam="-v $peptideprophet"
@@ -90,7 +90,7 @@ Local_Run ()
     do
         Set_corect_parameter
     #   Run the pipeline for each combination of programs
-        ${file} $PIDparam $VALparam $input $output $logfile $location $ANAparam $Extra_parameters
+        ${file} $DSSparam $VALparam $input $output $logfile $location $ANAparam $Extra_parameters
     done
 }
 
@@ -99,7 +99,7 @@ Shark_Run ()
     for file in $Scripts_to_Run
     do
         Set_corect_parameter
-        $submit_command $SHARKoptions ${file} $PIDparam $input $output $logfile $location $GPparams
+        $submit_command $SHARKoptions ${file} $DSSparam $input $output $logfile $location $GPparams
     done
 }
 
@@ -112,22 +112,22 @@ Repeat_Run_Shark ()
         Set_corect_parameter
 
         if [[ $Parallel_Run == "" ]]; then
-                Run_Script="$submit_command $SHARKoptions ${file} $PIDparam $input $output $logfile $location $GPparams"
-                PIDparam=$(echo $PIDparam | awk '{print $2}')
-            if [[ $PID == "comet" ]]; then
+                Run_Script="$submit_command $SHARKoptions ${file} $DSSparam $input $output $logfile $location $GPparams"
+                DSSparam=$(echo $DSSparam | awk '{print $2}')
+            if [[ $DSS == "comet" ]]; then
                 Rerun_Comet_Tollerance_Parameters
             fi
-            if [[ $PID == "Xtandem" ]]; then
+            if [[ $DSS == "Xtandem" ]]; then
                 Rerun_Tandem_Tollerance_Parameters
             fi
-            if [[ $PID == "MSGFPlus" ]]; then
+            if [[ $DSS == "MSGFPlus" ]]; then
                 Rerun_MSGFPlus_Tollerance_Parameters
             fi
 
         fi
         if [[ $Series_Run == "1" ]]; then
-            Run_Script="${file} $PIDparam $VALparam $input $output $logfile $location $GPparams"
-            $submit_command $SHARKoptions $LOC/src/series_run.sh $PrecursorMassToleranceRange $PrecursorMassToleranceIncrement $Run_Script $PID $LOC
+            Run_Script="${file} $DSSparam $VALparam $input $output $logfile $location $GPparams"
+            $submit_command $SHARKoptions $LOC/src/series_run.sh $PrecursorMassToleranceRange $PrecursorMassToleranceIncrement $Run_Script $DSS $LOC
         fi
     done
 
@@ -149,8 +149,8 @@ Repeat_Run_Local ()
     for file in $Scripts_to_Run
     do
         Set_corect_parameter
-        Run_Script="${file} $PIDparam $VALparam $input $output $logfile $location $GPparams"
-        $LOC/src/series_run.sh $PrecursorMassToleranceRange $PrecursorMassToleranceIncrement $Run_Script $PID $LOC
+        Run_Script="${file} $DSSparam $VALparam $input $output $logfile $location $GPparams"
+        $LOC/src/series_run.sh $PrecursorMassToleranceRange $PrecursorMassToleranceIncrement $Run_Script $DSS $LOC
     done
 
 }

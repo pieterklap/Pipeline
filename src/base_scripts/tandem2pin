@@ -12,16 +12,16 @@ if [[ $CONVprog == "" ]] || [ ! -f $CONVprog ]; then
     fi
 fi
 
-EXTENTION=$(echo $PIDoutput |awk -F\. '{print $NF}')
+EXTENTION=$(echo $DSSoutput |awk -F\. '{print $NF}')
 
 if [[ "$Separate_TD_search" == "yes" ]]; then
 
 #   create an extra parameter file with the decoy fasta
-    PIDparam_decoy=${PIDparam//.xml/_decoy.xml}
-    TAXON=$(grep "protein, taxon" $PIDparam | awk -F\> '{print $2}' | awk -F\< '{print $1}')
-    sed 's/taxon">$TAXON/taxon">$TAXON_decoy/' $PIDparam > $PIDparam_decoy
+    DSSparam_decoy=${DSSparam//.xml/_decoy.xml}
+    TAXON=$(grep "protein, taxon" $DSSparam | awk -F\> '{print $2}' | awk -F\< '{print $1}')
+    sed 's/taxon">$TAXON/taxon">$TAXON_decoy/' $DSSparam > $DSSparam_decoy
 
-    for input in $PIDinput
+    for input in $DSSinput
     do
     #   input.xml
     #   creates varable to be able t be used in sed
@@ -30,33 +30,33 @@ if [[ "$Separate_TD_search" == "yes" ]]; then
 
     #   Changes the paths in the input.xml file
     #   Sets the input path
-        sed -i "s/\"spectrum, path\">.*</\"spectrum, path\">$inputXT</" "$PIDparam_decoy"
+        sed -i "s/\"spectrum, path\">.*</\"spectrum, path\">$inputXT</" "$DSSparam_decoy"
     #   changes the extention of the input file and adds the output suffix to create the output file name
         NAME_input=$(echo ${input} | awk -F\/ '{print $NF}' | awk -F\. '{$NF="";print $0}' | tr " " "." | head -c-2)
         NAME_input="decoy_$NAME_input$output_suffix.t.xml"
     #   Sets the output path/name
-        sed -i "s/\"output, path\">.*</\"output, path\">$outputXT\/$NAME_input</" "$PIDparam_decoy"
+        sed -i "s/\"output, path\">.*</\"output, path\">$outputXT\/$NAME_input</" "$DSSparam_decoy"
 
     #   run Tandem
-        $PIDprog $PIDparam_decoy |& tee -a $datelog
+        $DSSprog $DSSparam_decoy |& tee -a $datelog
 
-        PIDoutput_decoy+="$Stand_output/$NAME_input "
+        DSSoutput_decoy+="$Stand_output/$NAME_input "
     done
 
-    for Pep_file in $PIDoutput
+    for Pep_file in $DSSoutput
     do
         CONVoutput=$(echo ${Pep_file} | sed "s/$EXTENTION/pin/")
-        Decoy_run=$(echo $PIDoutput_decoy | awk '{print $1}')
+        Decoy_run=$(echo $DSSoutput_decoy | awk '{print $1}')
 
         $CONVprog -o $CONVoutput ${Pep_file} $Decoy_run |& tee -a $datelog
 
-        PIDoutput_decoy=$(echo $PIDoutput_decoy | awk '{$1="";print $0}')
+        DSSoutput_decoy=$(echo $DSSoutput_decoy | awk '{$1="";print $0}')
 
         VALinput+="$CONVoutput "
     done
 else
 
-    for Pep_file in $PIDoutput
+    for Pep_file in $DSSoutput
     do
         CONVoutput=$(echo ${Pep_file} | sed "s/$EXTENTION/pin/")
 

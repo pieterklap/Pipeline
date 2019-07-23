@@ -1,29 +1,29 @@
 ##Start## "Xtandem"
 
 # Stes the location of tandem into a variable
-PIDprog=$(grep "Tandem " "$LOC"install_locations | awk '{print $2}')
+DSSprog=$(grep "Tandem " "$LOC"install_locations | awk '{print $2}')
 # if the given location isn't a file try to find tandem.
-if [[ $PIDprog == "" ]] || [ ! -f $PIDprog ]; then
+if [[ $DSSprog == "" ]] || [ ! -f $DSSprog ]; then
     echo -e "\e[93mWARNING:\e[0m The location of Xtandem is not given or does not exist"
-    PIDprog=$(command -v tandem.exe)
-    if [[ $PIDprog == "" ]]; then
-        PIDprog=$(command -v tandem)
+    DSSprog=$(command -v tandem.exe)
+    if [[ $DSSprog == "" ]]; then
+        DSSprog=$(command -v tandem)
     fi
-    if [[ $PIDprog == "" ]]; then
+    if [[ $DSSprog == "" ]]; then
         echo -e "\e[91mERROR:\e[0m Xtandem was not found. \nexiting"
         exit
     else
-        echo -e "\e[92mRunning:\e[0m $PIDprog"
+        echo -e "\e[92mRunning:\e[0m $DSSprog"
     fi
 fi
 
-cp $PIDparam ${PIDparam//.xml/_$NAME.xml}
-PIDparam=${PIDparam//.xml/_$NAME.xml}
+cp $DSSparam ${DSSparam//.xml/_$NAME.xml}
+DSSparam=${DSSparam//.xml/_$NAME.xml}
 if [[ $NAME == *"PeptideProphet"* ]]; then
-    sed -i "s/label=\"scoring, include reverse\">.*</label=\"scoring, include reverse\">no</" $PIDparam
+    sed -i "s/label=\"scoring, include reverse\">.*</label=\"scoring, include reverse\">no</" $DSSparam
 fi
 
-for input in $PIDinput
+for input in $DSSinput
 do
 #   input.xml
 #   creates varable to be able t be used in sed
@@ -32,36 +32,36 @@ do
 
 #   Changes the paths in the input.xml file
 #   Sets the input path
-    sed -i "s/\"spectrum, path\">.*</\"spectrum, path\">$inputXT</" "$PIDparam"
+    sed -i "s/\"spectrum, path\">.*</\"spectrum, path\">$inputXT</" "$DSSparam"
 #   changes the extention of the input file and adds the output suffix to create the output file name
     NAME_input=$(echo ${input} | awk -F\/ '{print $NF}' | awk -F\. '{$NF="";print $0}' | tr " " "." | head -c-2)
     NAME_input="$NAME_input$output_suffix.t.xml"
 #   Sets the output path/name
-    sed -i "s/\"output, path\">.*</\"output, path\">$outputXT\/$NAME_input</" "$PIDparam"
+    sed -i "s/\"output, path\">.*</\"output, path\">$outputXT\/$NAME_input</" "$DSSparam"
 
 #   run Xtandem
-    $PIDprog $PIDparam |& tee -a $datelog
+    $DSSprog $DSSparam |& tee -a $datelog
 
     Xtandemoutput+="$Stand_output/$NAME_input "
 
 done
 
-PIDoutput=$Xtandemoutput
+DSSoutput=$Xtandemoutput
 
-for output in $PIDoutput
+for output in $DSSoutput
 do
-# if the file is not found and/or empty it is removed from the $PIDoutput it exits if $PIDoutput is empty
+# if the file is not found and/or empty it is removed from the $DSSoutput it exits if $DSSoutput is empty
     if [ -f ${output} ]; then
         if [ ! -s ${output} ]; then
-            echo -e "\e[91mERROR:\e[0m ${output} is empty \nsomething went wrong running $PIDprog" | tee -a $datelog
-            PIDoutput=${PIDoutput//${output}/}
+            echo -e "\e[91mERROR:\e[0m ${output} is empty \nsomething went wrong running $DSSprog" | tee -a $datelog
+            DSSoutput=${DSSoutput//${output}/}
         fi
     else
-        echo -e "\e[91mERROR:\e[0m ${output} is not a file \nsomething went wrong running $PIDprog" | tee -a $datelog
-        PIDoutput=${PIDoutput//${output}/}
+        echo -e "\e[91mERROR:\e[0m ${output} is not a file \nsomething went wrong running $DSSprog" | tee -a $datelog
+        DSSoutput=${DSSoutput//${output}/}
     fi
 done
-if [[ $PIDoutput == "" ]]; then
+if [[ $DSSoutput == "" ]]; then
     echo -e "\e[91mERROR:\e[0m no output files found"
     exit
 fi

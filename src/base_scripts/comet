@@ -2,66 +2,66 @@
 
 
 # check where comet is installed
-PIDprog=$(grep "Comet " "$LOC"install_locations | awk '{print $2}')
+DSSprog=$(grep "Comet " "$LOC"install_locations | awk '{print $2}')
 # looks if comet.exe is a command if it is it runs it and if not it exits
-if [[ $PIDprog == "" ]] || [ ! -f $PIDprog ]; then
+if [[ $DSSprog == "" ]] || [ ! -f $DSSprog ]; then
     echo -e "\e[93mWARNING:\e[0m The location of comet is not given or does not exist"
-    PIDprog=$(command -v comet.exe)
-    if [[ $PIDprog == "" ]]; then
-        PIDprog=$(command -v comet)
+    DSSprog=$(command -v comet.exe)
+    if [[ $DSSprog == "" ]]; then
+        DSSprog=$(command -v comet)
     fi
-    if [[ $PIDprog == "" ]]; then
+    if [[ $DSSprog == "" ]]; then
         echo -e "\e[91mERROR:\e[0m comet was not found. \nexiting"
         exit
     else
-        echo -e "\e[92mRunning:\e[0m $PIDprog"
+        echo -e "\e[92mRunning:\e[0m $DSSprog"
     fi
 fi
 #   if the output_suffix is entered in the command line change it in the parameterfile
 if [[ $output_suffix != "" ]]; then
-    sed -i "s/output_suffix = .*/output_suffix = $output_suffix/" $PIDparam
+    sed -i "s/output_suffix = .*/output_suffix = $output_suffix/" $DSSparam
 fi
 
 # run comet
-"$PIDprog" -P"$PIDparam" $PIDinput |& tee -a $datelog
+"$DSSprog" -P"$DSSparam" $DSSinput |& tee -a $datelog
 
 #   COMEToutput should only be empty if no statistical validator had been used
 if [[ $COMEToutput == "" ]]; then
-    EXTENTION=$(echo "$PIDinput" |awk -F. '{print $NF}')
-    COMEToutput+=$(echo "$PIDinput" | sed "s/\.$EXTENTION/$output_suffix\.pin /g")
-    COMEToutput+=$(echo "$PIDinput" | sed "s/\.$EXTENTION/$output_suffix\.pep.xml /g")
+    EXTENTION=$(echo "$DSSinput" |awk -F. '{print $NF}')
+    COMEToutput+=$(echo "$DSSinput" | sed "s/\.$EXTENTION/$output_suffix\.pin /g")
+    COMEToutput+=$(echo "$DSSinput" | sed "s/\.$EXTENTION/$output_suffix\.pep.xml /g")
 fi
 
 for name in $COMEToutput
 do
     NAME_Cometoutput=$(echo ${name} | awk -F/ '{print $NF}')
-    mv "${name}" "$PIDoutput"
-    COMEToutput_Locations+="$PIDoutput/$NAME_Cometoutput "
+    mv "${name}" "$DSSoutput"
+    COMEToutput_Locations+="$DSSoutput/$NAME_Cometoutput "
 done
 
-PIDoutput="$COMEToutput_Locations"
+DSSoutput="$COMEToutput_Locations"
 
-for output in $PIDoutput
+for output in $DSSoutput
 do
-# if the file is not found and/or empty it is removed from the $PIDoutput it exits if $PIDoutput is empty
+# if the file is not found and/or empty it is removed from the $DSSoutput it exits if $DSSoutput is empty
     if [ -f ${output} ]; then
         if [ ! -s ${output} ]; then
-            echo -e "\e[91mERROR:\e[0m ${output} is empty \nsomething went wrong running $PIDprog" | tee -a $datelog
-            PIDoutput=${PIDoutput//${output}/}
+            echo -e "\e[91mERROR:\e[0m ${output} is empty \nsomething went wrong running $DSSprog" | tee -a $datelog
+            DSSoutput=${DSSoutput//${output}/}
         fi
     else
-        echo -e "\e[91mERROR:\e[0m ${output} is not a file \nsomething went wrong running $PIDprog" | tee -a $datelog
-        PIDoutput=${PIDoutput//${output}/}
+        echo -e "\e[91mERROR:\e[0m ${output} is not a file \nsomething went wrong running $DSSprog" | tee -a $datelog
+        DSSoutput=${DSSoutput//${output}/}
     fi
 done
-if [[ $PIDoutput == "" ]]; then
+if [[ $DSSoutput == "" ]]; then
     echo -e "\e[91mERROR:\e[0m no output files found"
     exit
 fi
 
-VALinput="$PIDoutput "
+VALinput="$DSSoutput "
 
-decoy_prefix=$(grep "^decoy_prefix" $PIDparam | awk -F\= '{print $2}' | sed 's/#.*//g' | sed 's/ //g')
+decoy_prefix=$(grep "^decoy_prefix" $DSSparam | awk -F\= '{print $2}' | sed 's/#.*//g' | sed 's/ //g')
 if [[ $decoy_prefix == "" ]]; then
     decoy_prefix="DECOY_"
 else
