@@ -20,7 +20,7 @@ The PPG currently uses two types of software: database search software, and stat
  * [Reactome](https://reactome.org/)  
    
 ### Converters
- * [Tandem2Xml](https://sourceforge.net/projects/sashimi/files/Trans-Proteomic%20Pipeline%20%28TPP%29/) (not avalible outside of the TPP)   
+ * [Tandem2XML](https://sourceforge.net/projects/sashimi/files/Trans-Proteomic%20Pipeline%20%28TPP%29/) (not avalible outside of the TPP)   
  * [idconvert](http://proteowizard.sourceforge.net/download.html)   
  * [tandem2pin & msgf2pin](https://github.com/percolator/percolator/wiki)   
 
