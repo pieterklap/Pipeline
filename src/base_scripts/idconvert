@@ -55,12 +55,6 @@ if [[ $NAME == *"all"* ]] || [[ $NAME == *"PeptideProphet"* ]]; then
         VALparameters=$(echo $VALparameters | awk '{$1="";print $0}')
     fi
     if [[ $VALparam != *"DECOY="* ]]; then
-        decoy_prefix=$(grep "^DecoyPrefix -decoy" $PIDparam | awk '{print $3}')
-        if [[ $decoy_prefix == "" ]]; then
-            decoy_prefix="XXX"
-        else
-            decoy_prefix=$(printf '%q\n' "$decoy_prefix")
-        fi
         VALparam="$VALparam DECOY=$decoy_prefix"
     fi
     if [[ $VALparam != *"NONPARAM"* ]]; then

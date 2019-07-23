@@ -33,13 +33,6 @@ do
     EXTENTION=$(echo "${Pep_file}" |awk -F. '{print $NF}')
     CONVoutput=$(echo "${Pep_file}" | sed "s/\.$EXTENTION/\.pin/")
 
-    decoy_prefix=$(grep "^DecoyPrefix -decoy" $PIDparam | awk '{print $3}')
-    if [[ $decoy_prefix == "" ]]; then
-        decoy_prefix="XXX"
-    else
-        decoy_prefix=$(printf '%q\n' "$decoy_prefix")
-    fi
-
     if [[ "$Separate_TD_search" != "yes" ]]; then
         $CONVprog -o $CONVoutput -P $decoy_prefix ${Pep_file} |& tee -a $datelog
     else

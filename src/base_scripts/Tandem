@@ -19,7 +19,8 @@ fi
 
 cp $PIDparam ${PIDparam//.xml/_$NAME.xml}
 PIDparam=${PIDparam//.xml/_$NAME.xml}
-if [[ $NAME == *"PeptideProphet"* ]]; then
+NONPARAM_test=$(grep "^[A-Z]" $VALparameters | awk -F: '{print $NF}' | tr "\n" " ")
+if [[ $NAME == *"PeptideProphet"* ]] && [[ $NONPARAM_test != *"NONPARM"* ]]; then
     sed -i "s/label=\"scoring, include reverse\">.*</label=\"scoring, include reverse\">no</" $PIDparam
 fi
 
@@ -65,5 +66,11 @@ if [[ $PIDoutput == "" ]]; then
     echo -e "\e[91mERROR:\e[0m no output files found"
     exit
 fi
+
+decoy_prefix=$(grep "Decoy_prefix" $PIDparam | awk -F\< '{$NF="";print $0}' | awk -F= '{print $NF}' | sed 's/ //g')
+if [[ $decoy_prefix == '' ]]; then
+    decoy_prefix=":reversed"
+fi
+decoy_prefix=$(printf '%q\n' "$decoy_prefix")
 
 ##End## "Tandem"

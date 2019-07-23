@@ -21,6 +21,11 @@ if [[ $VALparameters != "" ]] && [[ $MSGF_param_change != "1" ]]; then
     VALparam=$(echo $VALparameters | awk '{print $1}')
     VALparam=$(grep -v "^#" $VALparam | grep "[A-Z]" | tr "\n" " ")
     VALparameters=$(echo $VALparameters | awk '{$1="";print $0}')
+
+    if [[ $VALparam == *"NONPARAM"* ]] && [[ $VALparam != *"DECOY="* ]]; then
+        VALparam="$VALparam DECOY=$decoy_prefix "
+    fi
+
 fi
 
 for Pep_file in $VALinput

@@ -56,12 +56,6 @@ if [[ "$Separate_TD_search" == "yes" ]]; then
     done
 else
 
-    decoy_prefix=$(grep "Decoy_prefix" $PIDparam | awk -F\< '{$NF="";print $0}' | awk -F= '{print $NF}' | sed 's/ //g')
-    if [[ $decoy_prefix == '' ]]; then
-        decoy_prefix=":reversed"
-    fi
-    decoy_prefix=$(printf '%q\n' "$decoy_prefix")
-
     for Pep_file in $PIDoutput
     do
         CONVoutput=$(echo ${Pep_file} | sed "s/$EXTENTION/pin/")

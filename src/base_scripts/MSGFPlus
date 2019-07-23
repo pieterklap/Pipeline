@@ -58,4 +58,11 @@ if [[ $PIDoutput == "" ]]; then
     exit
 fi
 
+decoy_prefix=$(grep "^DecoyPrefix -decoy" $PIDparam | awk '{print $3}')
+if [[ $decoy_prefix == "" ]]; then
+    decoy_prefix="XXX"
+else
+    decoy_prefix=$(printf '%q\n' "$decoy_prefix")
+fi
+
 ##End## "MSGFPlus"

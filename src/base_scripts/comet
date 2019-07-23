@@ -60,4 +60,12 @@ if [[ $PIDoutput == "" ]]; then
 fi
 
 VALinput="$PIDoutput "
+
+decoy_prefix=$(grep "^decoy_prefix" $PIDparam | awk -F\= '{print $2}' | sed 's/#.*//g' | sed 's/ //g')
+if [[ $decoy_prefix == "" ]]; then
+    decoy_prefix="DECOY_"
+else
+    decoy_prefix=$(printf '%q\n' "$decoy_prefix")
+fi
+
 ##End## "comet"
