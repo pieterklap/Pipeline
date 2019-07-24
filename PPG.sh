@@ -141,7 +141,7 @@ while [ "$1" != "" ]; do
                                 shift
                             done
                             ;;
-        --auto-run )        RUN="y"
+        --autorun )         RUN="y"
                             ;;
         -h | --help )       if [ -f "$LOC"README.md ]; then
                                 cat "$LOC"README.md

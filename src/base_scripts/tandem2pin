@@ -60,12 +60,6 @@ else
     do
         CONVoutput=$(echo ${Pep_file} | sed "s/$EXTENTION/pin/")
 
-        if [[ $decoy_prefix == ":reversed" ]]; then
-        #   Puts the comment in the xml file indicating a reversed sequence and makes it a prefix so tandem2pin can detect it.
-            Tandem_decoy_fix="$(awk -F\> '{if($2~/:reversed/) $2=":reversed"$2;OFS=FS;print $0}' ${Pep_file})"
-            echo "$Tandem_decoy_fix" > ${Pep_file} 
-        fi
-
         $CONVprog -o $CONVoutput -P $decoy_prefix ${Pep_file} |& tee -a $datelog
 
     #   Check VALinput for decoy sequences

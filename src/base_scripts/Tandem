@@ -20,9 +20,9 @@ fi
 cp $DSSparam ${DSSparam//.xml/_$NAME.xml}
 DSSparam=${DSSparam//.xml/_$NAME.xml}
 NONPARAM_test=$(grep "^[A-Z]" $VALparameters | awk -F: '{print $NF}' | tr "\n" " ")
-if [[ $NAME == *"PeptideProphet"* ]] && [[ $NONPARAM_test != *"NONPARM"* ]]; then
-    sed -i "s/label=\"scoring, include reverse\">.*</label=\"scoring, include reverse\">no</" $DSSparam
-fi
+#if [[ $NAME == *"PeptideProphet"* ]] && [[ $NONPARAM_test != *"NONPARM"* ]]; then
+#    sed -i "s/label=\"scoring, include reverse\">.*</label=\"scoring, include reverse\">no</" $DSSparam
+#fi
 
 for input in $DSSinput
 do
@@ -72,5 +72,15 @@ if [[ $decoy_prefix == '' ]]; then
     decoy_prefix=":reversed"
 fi
 decoy_prefix=$(printf '%q\n' "$decoy_prefix")
+
+if [[ $decoy_prefix == ":reversed" ]] && [[ "$Separate_TD_search" != "yes" ]]; then
+    echo "making sure the correct prefix is used"
+    for Pep_file in $DSSoutput
+    do
+        #   Puts the comment in the xml file indicating a reversed sequence and makes it a prefix so tandem2pin can detect it.
+        Tandem_decoy_fix="$(awk -F\> '{if($2~/:reversed/) $2=":reversed"$2;OFS=FS;print $0}' ${Pep_file})"
+        echo "$Tandem_decoy_fix" > ${Pep_file} 
+    done
+fi
 
 ##End## "Tandem"
