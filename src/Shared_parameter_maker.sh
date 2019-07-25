@@ -43,7 +43,11 @@ Default_check ()
         local param_name=$(echo ${param} | awk -F\= '{print $1}')
         local param_value=$(echo ${param} | awk -F\= '{print $2}')
     #   Set the parameter value in a variable with the parameter name
-        declare local "$param_name"="$param_value"
+        if [[ $(declare | grep "^$param_name=") == "" ]]; then
+            declare local "$param_name"="$param_value"
+        else
+            echo "$param_name already contains a value"
+        fi
     #   Exit if any of the file locations are not valid
         if [[ $(echo $param_name | awk -F_ '{print $NF}') == "file" ]]; then
             if [ ! -f $param_value ]; then
@@ -128,7 +132,11 @@ Comet ()
             local param_name=$(echo ${param} | awk -F\= '{print $1}')
             local param_value=$(echo ${param} | awk -F\= '{print $2}')
         #   Set the parameter value in a variable with the parameter name
-            declare local "$param_name"="$param_value"
+            if [[ $(declare | grep "^$param_name=") == "" ]]; then
+                declare local "$param_name"="$param_value"
+            else
+                echo "$param_name already contains a value"
+            fi
         fi
     done
 #   set the parammeter to use the correct notation
@@ -320,8 +328,12 @@ MSGFPlus ()
                     echo "MS-GF+: The amount of memory availible to java has been adjusted to $Mem_Use from $param_value"
                 fi
             else
-                declare local "$param_name"="$param_value"
-            fi
+                if [[ $(declare | grep "^$param_name=") == "" ]]; then
+                    declare local "$param_name"="$param_value"
+                else
+                    echo "$param_name already contains a value"
+                fi
+             fi
         fi
     done
 
@@ -405,7 +417,11 @@ Tandem ()
             local param_name=$(echo ${param} | awk -F\= '{print $1}')
             local param_value=$(echo ${param} | awk -F\= '{print $2}')
         #   Set the parameter value in a variable with the parameter name
-            declare local "$param_name"="$param_value"
+            if [[ $(declare | grep "^$param_name=") == "" ]]; then
+                declare local "$param_name"="$param_value"
+            else
+                echo "$param_name already contains a value"
+            fi
         fi
     done
     if [[ $Decoy_Database == "0" ]]; then
@@ -525,10 +541,12 @@ Tandem ()
     do
         yes_no=$(echo $value | awk '{print $1}')
         value=$(echo $value | awk '{$1="";print $0}')
-        if [[ $yes_no == "1" ]]; then
-            local declare ${ion}="yes"
-        else
-            local declare ${ion}="no"
+        if [[ $(declare | grep "^${ion}=") == "" ]]; then
+            if [[ $yes_no == "1" ]]; then
+                local declare ${ion}="yes"
+            else
+                local declare ${ion}="no"
+            fi
         fi
     done
 
@@ -575,7 +593,11 @@ MSFragger ()
                     echo "MSFragger: The amount of memory availible to java has been adjusted to $Mem_Use from $param_value"
                 fi
             else
-                declare local "$param_name"="$param_value"
+                if [[ $(declare | grep "^$param_name=") == "" ]]; then
+                    declare local "$param_name"="$param_value"
+                else
+                    echo "$param_name already contains a value"
+                fi
             fi
         fi
     done

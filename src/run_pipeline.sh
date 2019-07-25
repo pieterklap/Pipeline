@@ -99,7 +99,7 @@ Shark_Run ()
     for file in $Scripts_to_Run
     do
         Set_corect_parameter
-        $submit_command $SHARKoptions ${file} $DSSparam $input $output $logfile $location $GPparams
+        $submit_command $SHARKoptions ${file} $DSSparam $VALparam $input $output $logfile $location $GPparams
     done
 }
 
@@ -112,7 +112,7 @@ Repeat_Run_Shark ()
         Set_corect_parameter
 
         if [[ $Parallel_Run == "" ]]; then
-                Run_Script="$submit_command $SHARKoptions ${file} $DSSparam $input $output $logfile $location $GPparams"
+                Run_Script="$submit_command $SHARKoptions ${file} $DSSparam $VALparam $input $output $logfile $location $GPparams"
                 DSSparam=$(echo $DSSparam | awk '{print $2}')
             if [[ $DSS == "comet" ]]; then
                 Rerun_Comet_Tollerance_Parameters
