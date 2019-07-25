@@ -110,10 +110,14 @@ Tandem_mods ()
     do
         Seperate
 
-    #   Checks if the modification is on the N/C terminal
-        if [[ $mod06 == "-1" ]]; then
+    #   Checks if the modification is on the N/C terminal TODO: needs to add the peptide n/c terminal residues and change them to [/]
+        if [[ $mod06 == "-1" || $mod06 != "-1" && $mod05 == 2 || $mod06 != "-1" && $mod05 == 3 ]]; then
         #   Puts the fixed modifications in the variable fix and the variable modifications in the variable opt
-
+            if [[ $mod03 == *"n"* ]]; then
+                mod03=$(echo $mod03 | sed 's/n/[/g')
+            elif [[ $mod_03 == *"c"* ]]; then
+                mod03=$(echo $mod03 | sed 's/c/]/g')
+            fi
             residue_amount=$(echo $mod03 | wc -c)
         #   if the amount of residues is greater than 1 split them ( wc -c returns 1 + the amount of characters)
             if (( $residue_amount > 2 )); then
@@ -163,13 +167,13 @@ Tandem_mods ()
 
         sed -i "s/modification mass\">.*<\/note>/modification mass\"><\/note>/" $tandemparam
 
-        sed -i "s/residue, modification mass\">/&$fix/" $tandemparam
+        sed -i "s/residue, modification mass\">.*</residue, modification mass\">$fix</" $tandemparam
 
-        sed -i "s/residue, potential modification mass\">/&$opt/" $tandemparam
+        sed -i "s/residue, potential modification mass\">.*</residue, potential modification mass\">$opt</" $tandemparam
 
-        sed -i "s/N-terminal residue modification mass\">/&$ProtNterm/" $tandemparam
+        sed -i "s/N-terminal residue modification mass\">.*</N-terminal residue modification mass\">$ProtNterm</" $tandemparam
 
-        sed -i "s/C-terminal residue modification mass\">/&$ProtCterm/" $tandemparam
+        sed -i "s/C-terminal residue modification mass\">.*</C-terminal residue modification mass\">$ProtCterm</" $tandemparam
 
     #   TODO:  find out where the peptide N/C term modifications should go
 }

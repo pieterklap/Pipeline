@@ -677,7 +677,7 @@ if [[ $Run_PPG_with_sharedparam == "yes" ]]; then
         reactome="$ReactomeParam"       #
         NUMparam=$[$NUMparam+1]
     fi
-
+    Parameter_generation_errors
 #   if the number of parameter files is equal to the amount of programs run this
     elif (($NUMparam==$NUMprog)); then
 #   use the parameter files the user entered

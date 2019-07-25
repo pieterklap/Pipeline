@@ -46,7 +46,7 @@ Default_check ()
         if [[ $(declare | grep "^$param_name=") == "" ]]; then
             declare local "$param_name"="$param_value"
         else
-            echo "$param_name already contains a value"
+            param_names_with_values+="$param_name "
         fi
     #   Exit if any of the file locations are not valid
         if [[ $(echo $param_name | awk -F_ '{print $NF}') == "file" ]]; then
@@ -135,7 +135,7 @@ Comet ()
             if [[ $(declare | grep "^$param_name=") == "" ]]; then
                 declare local "$param_name"="$param_value"
             else
-                echo "$param_name already contains a value"
+                param_names_with_values+="$param_name "
             fi
         fi
     done
@@ -331,7 +331,7 @@ MSGFPlus ()
                 if [[ $(declare | grep "^$param_name=") == "" ]]; then
                     declare local "$param_name"="$param_value"
                 else
-                    echo "$param_name already contains a value"
+                    param_names_with_values+="$param_name "
                 fi
              fi
         fi
@@ -420,7 +420,7 @@ Tandem ()
             if [[ $(declare | grep "^$param_name=") == "" ]]; then
                 declare local "$param_name"="$param_value"
             else
-                echo "$param_name already contains a value"
+                param_names_with_values+="$param_name "
             fi
         fi
     done
@@ -596,7 +596,7 @@ MSFragger ()
                 if [[ $(declare | grep "^$param_name=") == "" ]]; then
                     declare local "$param_name"="$param_value"
                 else
-                    echo "$param_name already contains a value"
+                    param_names_with_values+="$param_name "
                 fi
             fi
         fi
@@ -748,4 +748,18 @@ ReactomeParam=$(grep "^Reactome_parameter" $LOC_Shared_param_file | awk '{print 
 if [[ $ReactomeParam == "" ]]; then
     ReactomeParam="/empty"
 fi
+}
+
+Parameter_generation_errors ()
+{
+    param_names_with_values=$(echo "$param_names_with_values" | tr " " "\n" | sort -u)
+    for param_name in $param_names_with_values
+    do
+        local NUM_params=$(grep "${param_name}" $LOC_Shared_param_file | wc -l)
+        if (($NUM_params>=2)); then
+            echo -e "\e[93mWARNING:\e[0m the parameter file contains $NUM_params instances of ${param_name}"
+        else
+            echo -e "\e[93mWARNING:\e[0m can not assign a value to ${param_name} it is already in use"
+        fi
+    done
 }
