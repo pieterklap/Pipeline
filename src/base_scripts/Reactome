@@ -26,18 +26,59 @@ fi
 
 for Pep_file in $VALoutput
 do
+    PROTEIN=""
     EXTENTION=$(echo ${Pep_file} | awk -F\. '{print $(NF-1)"."$NF}')
-    NAMEfile=${Pep_file//.$EXTENTION/_Reactome_${EXTENTION//./_}}
-#   checks the extention so it knows where the protein names are located and prints all the proteins in a sring
+    NAMEfile=${Pep_file//.$EXTENTION/_gprofiler_${EXTENTION//./_}}
+    i=0
     if [[ $EXTENTION == pep.xml ]]; then
-    #   takes the protein names out of the pep.xml file (peptideprophet)
-        PROTEIN=$(cat ${Pep_file} | grep "<search_hit" | awk -F\| '{print $2 }')
+        # takes the protein names out of the pep.xml file (peptideprophet)
+        Protein_info=$(grep "^<search_hit hit_rank=\"1\" peptide=" "${Pep_file}" | awk -F\| '{print $2}')
+        peptide_prophet_score=$(grep "^<peptideprophet_result" "${Pep_file}" | awk '{print $2}' | awk -F= '{print $2}' | sed 's/\"//g')
+        NUM_Peptides=$(echo $Protein_info | wc -w)
+
+        if (($(echo $Protein_info | wc -w)!=$(echo $peptide_prophet_score | wc -w))); then
+            sed -n '/^<search_result>/,/^<peptideprophet_result probability/p' "${Pep_file}" > "$LOC".TEMP.pep.xml
+            pepxml_file="$LOC"".TEMP.pep.xml"
+            Protein_info=$(grep "^<search_hit hit_rank=\"1\" peptide=" "${Pep_file}" | awk -F\| '{print $2}')
+            peptide_prophet_score=$(grep "^<peptideprophet_result" "${Pep_file}" | awk '{print $2}' | awk -F= '{print $2}' | sed 's/\"//g')
+            NUM_Peptides=$(echo $Protein_info | wc -w)
+        fi
+        for protein in $Protein_info
+        do
+            Score=${peptide_prophet_score:0:6}
+            if [[ ${Score:0:1} == 1 ]] ; then
+                PROTEIN+=$(echo -ne "\"${protein}\",")
+            elif [[ ${Score:2:1} == 0 ]]; then
+                echo -ne ""
+            elif ((${Score:2:4}>=9900)); then
+                PROTEIN+=$(echo -ne "\"${protein}\",")
+            fi
+            peptide_prophet_score=${peptide_prophet_score:7}
+            if (( ((i % 100)) == 0 )); then
+                echo -ne "\r$i/$NUM_Peptides"
+            fi
+            i=$[$i+1]
+        done
+        echo -ne "\r$i/$NUM_Peptides"
+        echo -e "\nfound $(echo $PROTEIN | sed 's/,/ /g' | wc -w) proteins"
+
+        if [ -f .TEMP.pep.xml ]; then
+            rm .TEMP.pep.xml
+        fi
+#        awk -F\" '{print $2}' $output | sort -u  > "$output"
+
+    elif [[ $EXTENTION == put.xml ]]; then
+        #   takes the protein names out of the put.xml file (percolator)
+        #   takes all proteins with a q_vlaue less than 1*10^2 since put.xml orders based on q-value
+        Protein_info=$(sed -n '/^  <psms>/,/e-02<\/q_value>/p' "${Pep_file}" | grep "<protein_id>" | awk -F\| '{print $2}' | sort -u)
+
+        for protein in $Protein_info
+        do
+            PROTEIN+="${protein} "
+        done
+        echo -e "\nfound $(echo $PROTEIN | sed 's/,/ /g' | wc -w) proteins"
     fi
-    if [[ $EXTENTION == put.xml ]]; then
-        #takes the protein names out of the put.xml file (percolator)
-        PROTEIN=$(cat ${Pep_file} | grep "<protein_id>" | awk -F\| '{print $2 }')
-    fi
-    PROTEIN=$(echo $PROTEIN | tr " " "\n" | sort -u | tr "\n" " ")
+
 #   saves the protein list
     echo $PROTEIN > $NAMEfile.prot
     Datainput="\"$PROTEIN\""
