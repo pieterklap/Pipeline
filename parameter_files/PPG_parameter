@@ -147,7 +147,7 @@ Max_Missed_cleavage = 50 [tandem]
 MinPepLength = 6 [MSGFPlus,MSFragger]
 #   Default: 6
 #	(Minimum peptide length to consider)
-MinPepMass = 600.0 [comet,MSFragger]
+MinPepMass = 600.0 [comet,Tandem,MSFragger]
 #   Default: 600.0
 #   (Minimum peptide mass to consider)
 
