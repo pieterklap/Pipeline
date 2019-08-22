@@ -48,7 +48,7 @@ The PPG is issued with multiple variables some are required.
  `-n || --norun` causes the scripts to not run   
  `-g || --genparam` only generates the parameter files   
 `--autorun` automaticaly run the pipeline when running localy.   
- `-S || --noScripts` Don't generate new scripts you can give the location of the scripts you want to run after the -S. 
+ `-S || --noScripts` Don't generate new scripts you can give the location of the scripts you want to run after the -S.  
  `-f` creates one script for each database search program with all the statistical validators.  
  `--autorun` won't ask you if you want to run locally  
  `-h` Display this file  
