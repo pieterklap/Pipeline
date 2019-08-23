@@ -109,17 +109,11 @@ while [ "$1" != "" ]; do
                             fi
                             ;;
         -r | --repeatrun )  shift
-                            if [[ ${1,,} == "pmt" ]]; then
-                                RepeatRun_PMT="yes"
-                                shift
-                                PrecursorMassToleranceIncrement="$1"
-                                PrecursorMassToleranceRange="$2 $3"
-                                shift
-                                shift
-                            fi
-                            if [[ ${1,,} == "parameter" ]]; then
-                                RepeatRun_parameter_files="yes"
-                            fi
+                            RepeatRun_PMT="yes"
+                            PrecursorMassToleranceIncrement="$1"
+                            PrecursorMassToleranceRange="$2 $3"
+                            shift
+                            shift
                             ;;
         -n | --norun )      RUNscripts="n"
                             ;;

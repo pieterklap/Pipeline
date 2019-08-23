@@ -58,7 +58,7 @@ Default_check ()
     #   if the parameter is left empty add the default value to it
         if [[ $param_value == "["*"]" ]] || [[ $param_value == "" ]]; then
         #   The line where the Default value is stored
-            LOC_Default=$(grep -n "^$param_name" $LOC_Shared_param_file | tail -n1 | awk -F\: '{print ($1+1)}')
+            LOC_Default=$(grep -n "^$param_name" $LOC_Shared_param_file | head -n1 | awk -F\: '{print ($1+1)}')
 
         #   Checks if the default value is there. echos a warning if the default was empty/missing, but only if the program was used in a script.
             if [[ $(head -n"$LOC_Default" $LOC_Shared_param_file | tail -n1 | awk '{print $2}') != "Default:" ]]; then
@@ -75,7 +75,7 @@ Default_check ()
             else
         #   sets the parameter to the default value in the shared parameter file
                 default_value=$(head -n"$LOC_Default" $LOC_Shared_param_file | tail -n1 | awk '{print $3}')
-                duplicate_value_check=$(grep "^$param_name" $LOC_Shared_param_file | tail -n1 | awk -F\= '{print $2}' | sed 's/ //g')
+                duplicate_value_check=$(grep "^$param_name" $LOC_Shared_param_file | head -n1 | awk -F\= '{print $2}' | sed 's/ //g')
                 #   Checks if it is empty otherwise it will keep adding spaces to the parameters
                 if [[ $default_value != "" ]]; then
                     if [[ $duplicate_value_check == "["*"]" ]] || [[ $duplicate_value_check == "" ]]; then
@@ -757,9 +757,13 @@ Parameter_generation_errors ()
     do
         local NUM_params=$(grep "${param_name}" $LOC_Shared_param_file | wc -l)
         if (($NUM_params>=2)); then
-            echo -e "\e[93mWARNING:\e[0m the parameter file contains $NUM_params instances of ${param_name}"
+            echo -e "\e[93mWARNING:\e[0m the parameter file contains $NUM_params instances of the parameter: ${param_name}"
         else
             echo -e "\e[93mWARNING:\e[0m can not assign a value to ${param_name} it is already in use"
         fi
     done
+    if [[ $param_names_with_values != "" ]]; then
+        echo -e "\e[93mWARNING:\e[0m the first instance of the parameter has been used to create the parameter files. \n"\
+                            "        To ensure that the correct parameter has been used only enter each parameter once."
+    fi
 }

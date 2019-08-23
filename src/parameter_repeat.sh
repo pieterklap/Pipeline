@@ -118,7 +118,7 @@ Rerun_Comet_Tollerance_Parameters ()
         sed  "s/peptide_mass_tolerance = .*/peptide_mass_tolerance = $PrecursorMassTolerence1.$PrecursorMassTolerence2/" $DSSparam > $DSSparam_Repeat
     #   changes the name of the output to inculde the ppm/daltons
         sed -i "s/output_suffix =.*/output_suffix = _$PrecursorMassTolerence1\_$PrecursorMassTolerence2$MassUnit/" $DSSparam_Repeat
-
+        sed -i 's/#output_suffix/output_suffix/g' $DSSparam_Repeat
 #   Done editing the parameter files
 
         Run_Repeated_pipeline
