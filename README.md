@@ -52,5 +52,5 @@ The PPG is issued with multiple variables some are required.
  `-f` creates one script for each database search program with all the statistical validators.  
  `--autorun` won't ask you if you want to run locally  
  `-h` Display this file  
- `-r [incrementing value] [start point] [end point]` the start point has to be greater than 0 and the incrementing value and only one decimal   
+ `-r [incrementing value] [start point] [end point]` the start point has to be greater than 0 and the incrementing value can only have one decimal value   
  
